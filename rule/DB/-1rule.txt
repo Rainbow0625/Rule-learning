@@ -1,0 +1,37 @@
+Embedding time:9733.445466279984
+
+
+Algorithm total time:  9733.44552230835
+2 : 42 : 13.44552230834961
+
+
+ '<dbo:author>'
+num: 0
+
+ '<dbo:publisher>'
+num: 0
+
+ '<dbo:previousWork>'
+num: 0
+
+ '<dbo:subsequentWork>'
+num: 0
+
+ '<dbo:region>'
+num: 0
+
+ '<dbo:era>'
+num: 0
+
+ '<dbo:philosophicalSchool>'
+num: 0
+
+ '<dbo:mainInterest>'
+num: 0
+
+ '<dbo:notableIdea>'
+num: 0
+
+ '<dbo:influencedBy>'
+num: 0
+

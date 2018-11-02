@@ -1,0 +1,59 @@
+_member_of_domain_topic
+num: 0
+
+_member_meronym
+num: 0
+
+_derivationally_related_form
+num: 0
+
+_member_of_domain_region
+num: 0
+
+_similar_to
+num: 0
+
+_hypernym
+num: 0
+
+_member_holonym
+num: 0
+
+_instance_hypernym
+num: 0
+
+_member_of_domain_usage
+num: 0
+
+_synset_domain_topic_of
+num: 0
+
+_hyponym
+num: 0
+
+_instance_hyponym
+num: 0
+
+_synset_domain_usage_of
+num: 0
+
+_has_part
+num: 0
+
+_verb_group
+num: 0
+
+_part_of
+num: 0
+
+_synset_domain_region_of
+num: 0
+
+_also_see
+num: 0
+
+minSC: 0.01
+minHC: 0.01
+syn: 4
+coocc: 4
+Total number of rules: 0
