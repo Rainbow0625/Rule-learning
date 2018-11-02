@@ -1,7 +1,7 @@
 #coding:utf-8
 import numpy as np
 import tensorflow as tf
-from .Model import Model
+from models import Model
 
 class TransE(Model):
 	r'''

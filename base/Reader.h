@@ -122,7 +122,7 @@ void importTrainFiles() {
 
 Triple *testList;
 Triple *validList;
-Triple *tripleList
+Triple *tripleList;
 
 extern "C"
 void importTestFiles() {

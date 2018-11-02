@@ -6,8 +6,8 @@ import time
 import pickle
 
 # 1: "DB"  "Wiki"  "Yago"
-# 0: "FB15K"  "WN18"  "FB15K-237"
-BENCHMARK = "FB15K-237"
+# 0: "FB15K"  "WN18"  "FB15K237"
+BENCHMARK = "FB15K237"
 work_threads = 4
 train_times = 100
 nbatches = 100
@@ -20,18 +20,16 @@ times_coocc = 5
 begin = time.time()
 print("\nThe benchmark is " + BENCHMARK + ".\n")
 
-
-# FB15K-237: first sampling, then embedding.
-with open('./benchmarks/' + BENCHMARK + '/Relation', 'rb') as relationfile:
-    # list: eg: [3, '/location/location/contains']
-    predicateName = pickle.load(relationfile)
-    predicateName = [relation[1] for relation in predicateName]
-    predicateSize = len(predicateName)
-    print(predicateName)
+# FB15K237: first sampling, then embedding.
+with open('./benchmarks/' + BENCHMARK + '/relation2id.txt', 'r') as f:
+    # list: eg: "/location/country/form_of_government	0"
+    predicateSize = int(f.readline())
+    predicateName = [relation.split("	")[0] for relation in f.readlines()]
+    # print(predicateName)
     print("Total predicates:" + str(predicateSize))
 num_rule = 0
 total_time = 0
-for Pt in range(int(predicateSize)):
+for Pt in range(predicateSize):
     Pt_0 = time.time()
     nowPredicate = s.sample0(BENCHMARK, Pt, predicateName)
     entity, relation = te.trainModel(1, BENCHMARK, work_threads, train_times, nbatches, dimension)
@@ -54,8 +52,8 @@ f.close()
 
 
 '''
-# FB15K-237: first embedding, then sampling.
-with open('./benchmarks/' + BENCHMARK + '/Relation', 'rb') as relationfile:
+# FB15K237: first embedding, then sampling.
+with open('./benchmarks/' + BENCHMARK + '/relation2id', 'r') as relationfile:
     # list: eg: [3, '/location/location/contains']
     predicateName = pickle.load(relationfile)
     predicateName = [relation[1] for relation in predicateName]
