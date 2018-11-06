@@ -31,7 +31,7 @@ def readData0(BENCHMARK):  # index from 0
         print("Total facts:" + factSize)
         facts = np.array([line.strip('\n').split(' ') for line in file.readlines()], dtype='int32')
         # print(facts)
-    with open('./benchmarks/' + BENCHMARK + '/Entity.txt', 'r') as entityfile:
+    with open('./benchmarks/' + BENCHMARK + '/entity2id.txt', 'r') as entityfile:
         entitysize = entityfile.readline()
         print("Total entities:" + str(entitysize))
     return facts, entitysize
@@ -107,7 +107,7 @@ def sample1(BENCHMARK, Pt, predicateName):
 
     # entity
     Entity = np.array(list(EofPt))
-    f = open('./sampled/' + BENCHMARK + '/Entity.txt', 'w')
+    f = open('./sampled/' + BENCHMARK + '/entity2id.txt', 'w')
     entSizeOfPt = len(EofPt)
     f.write(str(entSizeOfPt) + "\n")  # after sampling
     print("EntityOfPt size: " + str(entSizeOfPt))
@@ -116,7 +116,7 @@ def sample1(BENCHMARK, Pt, predicateName):
     f.close()
 
     # predicate
-    f = open('./sampled/' + BENCHMARK + '/Relation.txt', 'w')
+    f = open('./sampled/' + BENCHMARK + '/relation2id.txt', 'w')
     predSampledli = list(predSampled)
     predSize = len(predSampled)
     nowPredicate = []
@@ -228,7 +228,7 @@ def sample0(BENCHMARK, Pt, predicateName):
 
     # entity
     Entity = np.array(list(EofPt))
-    f = open('./sampled/' + BENCHMARK + '/Entity.txt', 'w')
+    f = open('./sampled/' + BENCHMARK + '/entity2id.txt', 'w')
     entSizeOfPt = len(EofPt)
     f.write(str(entSizeOfPt) + "\n")  # after sampling
     print("EntityOfPt size: " + str(entSizeOfPt))
@@ -237,7 +237,7 @@ def sample0(BENCHMARK, Pt, predicateName):
     f.close()
 
     # predicate
-    f = open('./sampled/' + BENCHMARK + '/Relation.txt', 'w')
+    f = open('./sampled/' + BENCHMARK + '/relation2id.txt', 'w')
     predSampledli = list(predSampled)
     predSize = len(predSampled)
     nowPredicate = []

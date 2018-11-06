@@ -36,7 +36,7 @@ void importTrainFiles() {
 	printf("The total of entities is %ld.\n", entityTotal);
 	fclose(fin);
 
-	fin = fopen((inPath + "train2id.txt").c_str(), "r");
+	fin = fopen((inPath + "Fact.txt").c_str(), "r");
 	tmp = fscanf(fin, "%ld", &trainTotal);
 	trainList = (Triple *)calloc(trainTotal, sizeof(Triple));
 	trainHead = (Triple *)calloc(trainTotal, sizeof(Triple));
@@ -118,6 +118,7 @@ void importTrainFiles() {
 		left_mean[i] = freqRel[i] / left_mean[i];
 		right_mean[i] = freqRel[i] / right_mean[i];
 	}
+
 }
 
 Triple *testList;
@@ -138,12 +139,12 @@ void importTestFiles() {
     fclose(fin);
 
     FILE* f_kb1 = fopen((inPath + "test2id.txt").c_str(), "r");
-    FILE* f_kb2 = fopen((inPath + "train2id.txt").c_str(), "r");
-    FILE* f_kb3 = fopen((inPath + "valid2id.txt").c_str(), "r");
+    FILE* f_kb2 = fopen((inPath + "valid2id.txt").c_str(), "r");
+    FILE* f_kb3 = fopen((inPath + "Fact.txt").c_str(), "r");
     tmp = fscanf(f_kb1, "%ld", &testTotal);
-    tmp = fscanf(f_kb2, "%ld", &trainTotal);
-    tmp = fscanf(f_kb3, "%ld", &validTotal);
-    tripleTotal = testTotal + trainTotal + validTotal;
+    tmp = fscanf(f_kb2, "%ld", &validTotal);
+    tmp = fscanf(f_kb3, "%ld", &tripleTotal);
+
     testList = (Triple *)calloc(testTotal, sizeof(Triple));
     validList = (Triple *)calloc(validTotal, sizeof(Triple));
     tripleList = (Triple *)calloc(tripleTotal, sizeof(Triple));
@@ -151,19 +152,18 @@ void importTestFiles() {
         tmp = fscanf(f_kb1, "%ld", &testList[i].h);
         tmp = fscanf(f_kb1, "%ld", &testList[i].t);
         tmp = fscanf(f_kb1, "%ld", &testList[i].r);
-        tripleList[i] = testList[i];
-    }
-    for (INT i = 0; i < trainTotal; i++) {
-        tmp = fscanf(f_kb2, "%ld", &tripleList[i + testTotal].h);
-        tmp = fscanf(f_kb2, "%ld", &tripleList[i + testTotal].t);
-        tmp = fscanf(f_kb2, "%ld", &tripleList[i + testTotal].r);
     }
     for (INT i = 0; i < validTotal; i++) {
-        tmp = fscanf(f_kb3, "%ld", &tripleList[i + testTotal + trainTotal].h);
-        tmp = fscanf(f_kb3, "%ld", &tripleList[i + testTotal + trainTotal].t);
-        tmp = fscanf(f_kb3, "%ld", &tripleList[i + testTotal + trainTotal].r);
-        validList[i] = tripleList[i + testTotal + trainTotal];
+        tmp = fscanf(f_kb2, "%ld", &validList[i].h);
+        tmp = fscanf(f_kb2, "%ld", &validList[i].t);
+        tmp = fscanf(f_kb2, "%ld", &validList[i].r);
     }
+    for (INT i = 0; i < tripleTotal; i++) {
+        tmp = fscanf(f_kb3, "%ld", &tripleList[i].h);
+        tmp = fscanf(f_kb3, "%ld", &tripleList[i].t);
+        tmp = fscanf(f_kb3, "%ld", &tripleList[i].r);
+    }
+
     fclose(f_kb1);
     fclose(f_kb2);
     fclose(f_kb3);
@@ -200,6 +200,7 @@ void importTestFiles() {
 	}
 	validLef[validList[0].r] = 0;
 	validRig[validList[validTotal - 1].r] = validTotal - 1;
+
 }
 
 INT* head_lef;
@@ -264,6 +265,5 @@ void importTypeFiles() {
     }
     fclose(f_type);
 }
-
 
 #endif

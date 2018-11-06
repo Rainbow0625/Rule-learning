@@ -91,8 +91,8 @@ void testHead(REAL *con) {
 
     lastHead++;
 
-    printf("l_filter_s: %ld\n", l_filter_s);
-    printf("%f %f %f %f \n", l_tot / lastHead, l_filter_tot / lastHead, l_rank / lastHead, l_filter_rank / lastHead);
+    //printf("l_filter_s: %ld\n", l_filter_s);
+    //printf("%f %f %f %f \n", l_tot / lastHead, l_filter_tot / lastHead, l_rank / lastHead, l_filter_rank / lastHead);
 }
 
 extern "C"
@@ -152,8 +152,8 @@ void testTail(REAL *con) {
     r_reci_rank_constrain += 1.0/(1+r_s_constrain);
 
     lastTail++;
-    printf("r_filter_s: %ld\n", r_filter_s);
-    printf("%f %f %f %f\n", r_tot /lastTail, r_filter_tot /lastTail, r_rank /lastTail, r_filter_rank /lastTail);
+    //printf("r_filter_s: %ld\n", r_filter_s);
+    //printf("%f %f %f %f\n", r_tot /lastTail, r_filter_tot /lastTail, r_rank /lastTail, r_filter_rank /lastTail);
 }
 
 extern "C"
@@ -185,7 +185,7 @@ void test_link_prediction() {
     r3_filter_tot /= testTotal;
     r1_filter_tot /= testTotal;
 
-    printf("no type constraint results:\n");
+    printf("\n no type constraint results:\n");
     
     printf("metric:\t\t\t MRR \t\t MR \t\t hit@10 \t hit@3  \t hit@1 \n");
     printf("l(raw):\t\t\t %f \t %f \t %f \t %f \t %f \n", l_reci_rank, l_rank, l_tot, l3_tot, l1_tot);
@@ -226,7 +226,7 @@ void test_link_prediction() {
     r3_filter_tot_constrain /= testTotal;
     r1_filter_tot_constrain /= testTotal;
 
-    printf("type constraint results:\n");
+    printf("\n type constraint results:\n");
     
     printf("metric:\t\t\t MRR \t\t MR \t\t hit@10 \t hit@3  \t hit@1 \n");
     printf("l(raw):\t\t\t %f \t %f \t %f \t %f \t %f \n", l_reci_rank_constrain, l_rank_constrain, l_tot_constrain, l3_tot_constrain, l1_tot_constrain);
@@ -362,7 +362,7 @@ void test_triple_classification(REAL *relThresh, REAL *score_pos, REAL *score_ne
         aveTotal += total;
     }
     aveAcc = 1.0 * aveCorrect / aveTotal;
-    printf("triple classification accuracy is %lf\n", aveAcc);
+    printf("\n triple classification accuracy is %lf\n", aveAcc);
 }
 
 #endif

@@ -1,5 +1,5 @@
 import config.Config as conf
-import models
+from models import TransE, DistMult, HolE
 import os
 
 
@@ -29,6 +29,7 @@ def trainModel(flag, BENCHMARK, work_threads, train_times, nbatches, dimension):
     con.set_rel_neg_rate(0)
     con.set_opt_method("Adagrad")
 
+    con.get_test_file()
     con.set_test_link_prediction(True)
     con.set_test_triple_classification(True)
 
@@ -39,15 +40,17 @@ def trainModel(flag, BENCHMARK, work_threads, train_times, nbatches, dimension):
     # Initialize experimental settings.
     con.init()
     # Set the knowledge embedding model
-    con.set_model(models.TransE)  # DistMult
+    con.set_model(DistMult.DistMult)  # DistMult.DistMult   TransE.TransE
     # Train the model.
     con.run()
     print("\nTrain successfully!")
 
     # To test models after training needs "set_test_flag(True)".
     con.test()
-    con.show_link_prediction(2, 1)  # what does the para mean?
-    con.show_triple_classification(2, 1, 3)
+
+    # print("Test result??? ")  # nothing important
+    # con.show_link_prediction(2, 1)  # h, r
+    # con.show_triple_classification(2, 1, 3)  #h, t, r
 
     return con.get_parameters_by_name("ent_embeddings"), con.get_parameters_by_name("rel_embeddings")
 
