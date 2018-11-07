@@ -8,14 +8,22 @@ import pickle
 # 1: "DB"  "Wiki"  "Yago"
 # 0: "FB15K"  "WN18"  "FB15K237"
 BENCHMARK = "FB15K237"
-work_threads = 4
-train_times = 100
-nbatches = 100
-dimension = 100
 minSC = 0.01
 minHC = 0.001
 times_syn = 5
 times_coocc = 5
+
+# embedding parameters
+work_threads = 8
+nbatches = 100
+margin = 1.0  # the margin for the loss function
+
+train_times = 100
+dimension = 100
+alpha = 0.1  # learning rate
+lmbda = 0.001  # degree of the regularization on the parameters
+bern = 1  # set negative sampling algorithms, unif(0) or bern(1)
+
 
 begin = time.time()
 print("\nThe benchmark is " + BENCHMARK + ".\n")
@@ -32,7 +40,7 @@ total_time = 0
 for Pt in range(predicateSize):
     Pt_0 = time.time()
     nowPredicate = s.sample0(BENCHMARK, Pt, predicateName)
-    entity, relation = te.trainModel(1, BENCHMARK, work_threads, train_times, nbatches, dimension)
+    entity, relation = te.trainModel(1, BENCHMARK, work_threads, train_times, nbatches, dimension, alpha, lmbda, bern, margin)
     # entity, relation = rs.get_embedding(1, BENCHMARK)  
     n_rule = rs.searchAndEvaluate(BENCHMARK, nowPredicate, minSC, minHC, times_syn, times_coocc, entity, relation)
     num_rule = num_rule + n_rule
@@ -42,7 +50,14 @@ for Pt in range(predicateSize):
     total_time = total_time + Pt_time
     print("Average's time: " + str(total_time / (Pt + 1)) + "\n")
 f = open('./rule/' + BENCHMARK + '/ruleAfter.txt', 'a+')
-f.write("minSC: " + str(minSC) + "\n")
+f.write("embedding parameter:" + "\n")
+f.write("train_times" + str(train_times) + "\n")
+f.write("dimension" + str(dimension) + "\n")
+f.write("alpha" + str(alpha) + "\n")
+f.write("lmbda" + str(lmbda) + "\n")
+f.write("bern" + str(bern) + "\n")
+
+f.write("\n" + "minSC: " + str(minSC) + "\n")
 f.write("minHC: " + str(minHC) + "\n")
 f.write("syn: " + str(times_syn) + "\n")
 f.write("coocc: " + str(times_coocc) + "\n")
@@ -61,7 +76,7 @@ with open('./benchmarks/' + BENCHMARK + '/relation2id', 'r') as relationfile:
     print("Total predicates:" + str(predicateSize))
 num_rule = 0
 total_time = 0
-ent, rel = te.trainModel(0, BENCHMARK, work_threads, train_times, nbatches, dimension)
+ent, rel = te.trainModel(0, BENCHMARK, work_threads, train_times, nbatches, dimension, alpha, lmbda, bern, margin)
 # ent, rel = rs.get_embedding(0, BENCHMARK)
 time_embedding = time.time()-begin
 index_flag = 0
@@ -98,7 +113,7 @@ total_time = 0
 for Pt in range(predicateSize):
     Pt_0 = time.time()
     nowPredicate = s.sample1(BENCHMARK, Pt, predicateName)
-    entity, relation  = trainModel(1, BENCHMARK, work_threads, train_times, nbatches, dimension)
+    entity, relation  = trainModel(1, BENCHMARK, work_threads, train_times, nbatches, dimension, alpha, lmbda, bern, margin)
     # entity, relation = rs.get_embedding(1, BENCHMARK)
     n_rule = rs.searchAndEvaluate(BENCHMARK, nowPredicate, minSC, minHC, times_syn, times_coocc, entity, relation)
     num_rule = num_rule + n_rule
@@ -128,7 +143,7 @@ total_time = 0
 for Pt in range(int(predicateSize)):
     Pt_0 = time.time()
     nowPredicate = s.sample0(BENCHMARK, Pt, predicateName)
-    entity, relation = te.trainModel(1, BENCHMARK, work_threads, train_times, nbatches, dimension)
+    entity, relation = te.trainModel(1, BENCHMARK, work_threads, train_times, nbatches, dimension, alpha, lmbda, bern, margin)
     # entity, relation = rs.get_embedding(1, BENCHMARK)  
     n_rule = rs.searchAndEvaluate(BENCHMARK, nowPredicate, minSC, minHC, times_syn, times_coocc, entity, relation)
     num_rule = num_rule + n_rule
@@ -156,7 +171,7 @@ with open('./benchmarks/' + BENCHMARK + '/Relation.txt', 'r') as relationfile:
     predicateName = [line.strip('\n').split('\t')[0] for line in relationfile.readlines()]
 num_rule = 0
 total_time = 0
-ent, rel = te.trainModel(0, BENCHMARK, work_threads, train_times, nbatches, dimension)
+ent, rel = te.trainModel(0, BENCHMARK, work_threads, train_times, nbatches, dimension, alpha, lmbda, bern, margin)
 # ent, rel = rs.get_embedding(0, BENCHMARK)
 time_embedding = time.time()-begin
 index_flag = 0
@@ -190,7 +205,7 @@ with open('./benchmarks/' + BENCHMARK + '/Relation.txt', 'r') as relationfile:
     predicateName = [line.strip('\n').split('\t')[0] for line in relationfile.readlines()]
 num_rule = 0
 total_time = 0
-ent, rel = te.trainModel(0, BENCHMARK, work_threads, train_times, nbatches, dimension)
+ent, rel = te.trainModel(0, BENCHMARK, work_threads, train_times, nbatches, dimension, alpha, lmbda, bern, margin)
 # ent, rel = rs.get_embedding(0, BENCHMARK)
 time_embedding = time.time()-begin
 print("Embedding time:" + str(time_embedding)+"\n")

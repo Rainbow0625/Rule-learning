@@ -160,7 +160,7 @@ def searchAndEvaluate(BENCHMARK, nowPredicate, minSC, minHC, times_syn, times_co
         if evaluateAndFilter(nowPredicate[0], p, BENCHMARK, factdic, minSC, minHC, entsize):
             candidate.append(p)
 
-    with open("./sampled/" + BENCHMARK + "/Relation.txt") as f:
+    with open("./sampled/" + BENCHMARK + "/relation2id.txt") as f:
         preSize = f.readline()
         pre = [line.strip('\n').split(' ') for line in f.readlines()]
 

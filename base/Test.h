@@ -362,7 +362,7 @@ void test_triple_classification(REAL *relThresh, REAL *score_pos, REAL *score_ne
         aveTotal += total;
     }
     aveAcc = 1.0 * aveCorrect / aveTotal;
-    printf("\n triple classification accuracy is %lf\n", aveAcc);
+    printf("\n Triple classification accuracy is %lf\n", aveAcc);
 }
 
 #endif

@@ -310,13 +310,22 @@ class Config(object):
         _, loss = self.sess.run([self.train_op, self.trainModel.loss], feed_dict)
         return loss
 
+    # have some problems in looking up the embeddings!!!
+    # Eg: indices[0] = 2178868142770283784 is not in [0, 6137)
+    # Eg: indices[0] = 2178868142770283784 is not in [0, 6137)
     def test_step(self, test_h, test_t, test_r):
         feed_dict = {
             self.trainModel.predict_h: test_h,
             self.trainModel.predict_t: test_t,
             self.trainModel.predict_r: test_r,
         }
+        print("test_step 1")
+        # print(test_h)
+        # print(test_t)
+        # print(test_r)
         predict = self.sess.run(self.trainModel.predict, feed_dict)
+        print("test_step 2")
+        # print(predict)
         return predict
 
     def run(self):
@@ -347,16 +356,16 @@ class Config(object):
                     self.restore_tensorflow()
                 if self.test_link_prediction:
                     total = self.lib.getTestTotal()
+                    print(total)
                     for times in range(total):
                         self.lib.getHeadBatch(self.test_h_addr, self.test_t_addr, self.test_r_addr)
                         res = self.test_step(self.test_h, self.test_t, self.test_r)
                         self.lib.testHead(res.__array_interface__['data'][0])
-
                         self.lib.getTailBatch(self.test_h_addr, self.test_t_addr, self.test_r_addr)
                         res = self.test_step(self.test_h, self.test_t, self.test_r)
                         self.lib.testTail(res.__array_interface__['data'][0])
-                        # if self.log_on:
-                        #     print(times)
+                        if self.log_on:
+                            print(times)
                     self.lib.test_link_prediction()
                 if self.test_triple_classification:
                     self.lib.getValidBatch(self.valid_pos_h_addr, self.valid_pos_t_addr, self.valid_pos_r_addr,
@@ -373,6 +382,7 @@ class Config(object):
                     res_neg = self.test_step(self.test_neg_h, self.test_neg_t, self.test_neg_r)
                     self.lib.test_triple_classification(self.relThresh_addr, res_pos.__array_interface__['data'][0],
                                                         res_neg.__array_interface__['data'][0])
+
 
     def show_link_prediction(self, h, r):
         self.init_link_prediction()
