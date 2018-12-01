@@ -7,7 +7,7 @@ def as_embedding(dct):
     return np.array(dct['ent_embeddings']), np.array(dct['rel_embeddings'])
 
 
-# not in use!
+# not in use!   
 def get_embedding(flag, BENCHMARK):
     if flag == 1:
         file = "after"
@@ -28,7 +28,7 @@ def scorefunction1(syn, pt, relation):  # synonymy
         for j in range(i, relation.shape[0]):
             syn[i][j] = sim(curP + relation[j, :], relation[pt, :])
     # print("f1 matrix: ")
-    # print(syn)
+    print(syn)
 
 
 def scorefunction2(coocc, relsize, facts, entity, pt):  # co-occurrence
@@ -67,7 +67,7 @@ def scorefunction2(coocc, relsize, facts, entity, pt):  # co-occurrence
                           + sim(average_vector.get(i)[0], average_vector.get(pt)[0]) \
                           + sim(average_vector.get(j)[1], average_vector.get(pt)[1])
     # print("f2 matrix: ")
-    # print(coocc)
+    print(coocc)
     return factdic
 
 
@@ -82,20 +82,14 @@ def getmatrix(factdic, p, entitysize):
 
 
 def calSCandHC(pmatrix, ptmatrix):
-    entitysize = pmatrix.shape[0]
+    # entitysize = pmatrix.shape[0]
+    head = len(ptmatrix)
     supp = 0
-    head = 0
     body = 0
     for key in pmatrix.keys():
         body = body + 1
         if ptmatrix[key[0], key[1]] == 1:
             supp = supp + 1
-    for key in ptmatrix.keys():
-        head = head + 1
-    '''
-    if supp != 0:
-        print(supp)
-    '''
     if body == 0:
         SC = 0
     else:
@@ -107,7 +101,7 @@ def calSCandHC(pmatrix, ptmatrix):
     return SC, HC
 
 
-def evaluateAndFilter(pt, p, BENCHMARK, factdic, minSC, minHC, entitysize):
+def evaluateAndFilter(pt, p, factdic, minSC, minHC, entitysize):
     # evaluation certain rule
     p1 = p[0]
     p2 = p[1]
@@ -141,11 +135,12 @@ def searchAndEvaluate(BENCHMARK, nowPredicate, minSC, minHC, times_syn, times_co
         facts = np.array([line.strip('\n').split(' ') for line in f.readlines()], dtype='int32')
     # print(facts)
     # print(nowPredicate)
-    factdic = scorefunction2(coocc, relsize, facts, entity, nowPredicate[0])
+    fact_dic = scorefunction2(coocc, relsize, facts, entity, nowPredicate[0])
 
+    # How to choose this value?
     # get candidate rules
+    '''
     middle_syn = (np.max(syn) - np.min(syn)) / times_syn + np.min(syn)
-    # !!!!!!!!!!!!!!!!!!!!!! how to choose this value?
     rawrulelist = np.argwhere(syn > middle_syn)
     rulelist = []
     middle_coocc = (np.max(coocc) - np.min(syn)) / times_coocc + np.min(syn)
@@ -154,31 +149,26 @@ def searchAndEvaluate(BENCHMARK, nowPredicate, minSC, minHC, times_syn, times_co
             rulelist.append(index)
         if coocc[index[1], index[0]] > middle_coocc and index[1] != index[0]:
             rulelist.append([index[1], index[0]])
-    # print(rulelist)
+    print(rulelist)
+    '''
     candidate = []
-    for p in rulelist:
-        if evaluateAndFilter(nowPredicate[0], p, BENCHMARK, factdic, minSC, minHC, entsize):
-            candidate.append(p)
+    # matrics = syn + coocc
+    matrics = coocc
+    flag = 0
+    constant_flag = False
+    while flag != -1:
+        _max_index = np.where(matrics == np.max(matrics))
+        max_index = list(_max_index[0])
+        max_index.extend(list(_max_index[1]))
+        matrics[max_index[0]][max_index[1]] = -1
+        if evaluateAndFilter(nowPredicate[0], max_index, fact_dic, minSC, minHC, entsize):
+            candidate.append(max_index)
+            constant_flag = False
+        else:
+            flag = flag + 1
+            constant_flag = True
+        if flag == 10 and constant_flag == True:
+            flag = -1
+    print(candidate)
 
-    with open("./sampled/" + BENCHMARK + "/relation2id.txt") as f:
-        preSize = f.readline()
-        pre = [line.strip('\n').split(' ') for line in f.readlines()]
-
-    print("\nThe final rules are:")
-    i = 1
-    f = open('./rule/' + BENCHMARK + '/rule.txt', 'a+')
-    print(str(nowPredicate[1]) + "\n")
-    f.write(str(nowPredicate[1]) + "\n")
-    rule_of_Pt = len(candidate)
-    print(str(rule_of_Pt) + "\n")
-    f.write("num: " + str(rule_of_Pt) + "\n")
-    for rule in candidate:
-        print(rule[0])
-        print(rule[1])
-        line = "Rule " + str(i) + ": " + pre[rule[0]][1] + "  &&  " + pre[rule[1]][1] + "\n"
-        print(line)
-        f.write(line)
-        i = i + 1
-    f.write("\n")
-    f.close()
-    return rule_of_Pt
+    return candidate

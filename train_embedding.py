@@ -1,9 +1,8 @@
 import config.Config as conf
-from models import TransE, DistMult, HolE
 import os
 
 
-def trainModel(flag, BENCHMARK, work_threads, train_times, nbatches, dimension, alpha, lmbda, bern, margin):
+def trainModel(flag, BENCHMARK, work_threads, train_times, nbatches, dimension, alpha, lmbda, bern, margin, model):
     os.environ['CUDA_VISIBLE_DEVICES'] = '0'
     # warnings.filterwarnings("ignore")
     # print("\nThe benchmark is " + BENCHMARK + ".\n")
@@ -41,7 +40,7 @@ def trainModel(flag, BENCHMARK, work_threads, train_times, nbatches, dimension, 
     # Initialize experimental settings.
     con.init()
     # Set the knowledge embedding model
-    con.set_model(DistMult.DistMult)  # DistMult.DistMult   TransE.TransE
+    con.set_model(model)
     # Train the model.
     con.run()
     print("\nTrain successfully!")

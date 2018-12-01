@@ -319,12 +319,12 @@ class Config(object):
             self.trainModel.predict_t: test_t,
             self.trainModel.predict_r: test_r,
         }
-        print("test_step 1")
+        # print("test_step 1")
         # print(test_h)
         # print(test_t)
         # print(test_r)
         predict = self.sess.run(self.trainModel.predict, feed_dict)
-        print("test_step 2")
+        # print("test_step 2")
         # print(predict)
         return predict
 
