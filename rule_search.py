@@ -157,18 +157,24 @@ def searchAndEvaluate(BENCHMARK, nowPredicate, minSC, minHC, times_syn, times_co
     flag = 0
     constant_flag = False
     while flag != -1:
-        _max_index = np.where(matrics == np.max(matrics))
-        max_index = list(_max_index[0])
-        max_index.extend(list(_max_index[1]))
-        matrics[max_index[0]][max_index[1]] = -1
-        if evaluateAndFilter(nowPredicate[0], max_index, fact_dic, minSC, minHC, entsize):
-            candidate.append(max_index)
-            constant_flag = False
-        else:
-            flag = flag + 1
-            constant_flag = True
-        if flag == 10 and constant_flag == True:
-            flag = -1
+        _max_index = np.where(matrics == np.max(matrics))  # maybe return several pairs
+        print(_max_index)
+        fir_dim = list(_max_index[0])
+        print(fir_dim)
+        sec_dim = list(_max_index[1])
+        max_index = []
+        for i in range(len(fir_dim)):
+            max_index = [fir_dim[i], sec_dim[i]]
+            print(max_index)
+            matrics[max_index[0]][max_index[1]] = -1  # set it to the min
+            if evaluateAndFilter(nowPredicate[0], max_index, fact_dic, minSC, minHC, entsize):
+                candidate.append(max_index)
+                constant_flag = False
+            else:
+                flag = flag + 1
+                constant_flag = True
+            if flag == 10 and constant_flag == True:
+                flag = -1
     print(candidate)
 
     return candidate

@@ -8,7 +8,7 @@ import pickle
 
 # 1: "DB"  "Wiki"  "Yago"
 # 0: "FB15K"  "WN18"  "FB15K237"
-BENCHMARK = "FB15K237"
+BENCHMARK = "NELL"
 minSC = 0.01
 minHC = 0.001
 times_syn = 10
@@ -25,6 +25,9 @@ alpha = 0.01  # learning rate
 lmbda = 0.01  # degree of the regularization on the parameters
 bern = 1  # set negative sampling algorithms, unif(0) or bern(1)
 model = TransE.TransE  # DistMult.DistMult   TransE.TransE   HolE.HolE
+
+begin = time.time()
+print("\nThe benchmark is " + BENCHMARK + ".\n")
 
 
 def save_rules(BENCHMARK, candidate):
@@ -51,10 +54,6 @@ def save_rules(BENCHMARK, candidate):
     return rule_of_Pt
 
 
-begin = time.time()
-print("\nThe benchmark is " + BENCHMARK + ".\n")
-
-
 # FB15K237: first sampling, then embedding.
 with open('./benchmarks/' + BENCHMARK + '/relation2id.txt', 'r') as f:
     # list: eg: "/location/country/form_of_government	0"
@@ -77,7 +76,7 @@ for Pt in range(predicateSize):
     print("Predicate target's time: " + str(Pt_time) + "\n")
     total_time = total_time + Pt_time
     print("Average's time: " + str(total_time / (Pt + 1)) + "\n")
-    break
+
 
 f = open('./rule/' + BENCHMARK + '/rule_After_' + str(model)[15:21] + '.txt', 'a+')
 f.write("Embedding parameter:" + "\n")
