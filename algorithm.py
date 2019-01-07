@@ -14,7 +14,7 @@ minHC = 0.001
 times_syn = 10
 times_coocc = 10
 
-# embedding parameters
+# embedding model parameters
 work_threads = 8
 nbatches = 100
 margin = 1.0  # the margin for the loss function
@@ -54,7 +54,7 @@ def save_rules(BENCHMARK, candidate):
     return rule_of_Pt
 
 
-# FB15K237: first sampling, then embedding.
+# FB15K237  # NELL : first sampling, then embedding.
 with open('./benchmarks/' + BENCHMARK + '/relation2id.txt', 'r') as f:
     # list: eg: "/location/country/form_of_government	0"
     predicateSize = int(f.readline())

@@ -1,34 +1,21 @@
 import numpy as np
 from scipy import sparse
-import json
+import model_learn_weights as mlw
 
 
-# not in use!
-def as_embedding(dct):
-    return np.array(dct['ent_embeddings']), np.array(dct['rel_embeddings'])
+def sim(para1, para2):  # similarity of vector or matrix
+    return np.e ** (-np.linalg.norm(para1 - para2, ord=2))
 
 
-# not in use!   
-def get_embedding(flag, BENCHMARK):
-    if flag == 1:
-        file = "after"
-    elif flag == 0:
-        file = "before"
-    with open("./embedding/" + file + "/" + BENCHMARK + "/embedding.vec.json") as f:
-        return json.loads(f.read(), object_hook=as_embedding)
-        # in Python 3.0, the "loads()" function couldn't process the big data!
-
-
-def sim(para1, para2):  # similarity
-    return np.e ** (-np.linalg.norm(para1 - para2))
-
-
-def scorefunction1(syn, pt, relation):  # synonymy
+def scorefunction1(flag, syn, pt, relation):  # synonymy
     for i in range(relation.shape[0]):
-        curP = relation[i, :]
-        for j in range(i, relation.shape[0]):
-            syn[i][j] = sim(curP + relation[j, :], relation[pt, :])
-    # print("f1 matrix: ")
+        if flag == 0:
+            for j in range(relation.shape[0]):
+                syn[i][j] = sim(np.dot(relation[i], relation[j]), relation[pt])
+        else:
+            for j in range(i, relation.shape[0]):
+                syn[i][j] = sim(relation[i] + relation[j], relation[pt])
+    print("\nf1 matrix: ")
     print(syn)
 
 
@@ -67,7 +54,7 @@ def scorefunction2(coocc, relsize, facts, entity, pt):  # co-occurrence
             coocc[i][j] = sim(average_vector.get(i)[1], average_vector.get(j)[0]) \
                           + sim(average_vector.get(i)[0], average_vector.get(pt)[0]) \
                           + sim(average_vector.get(j)[1], average_vector.get(pt)[1])
-    # print("f2 matrix: ")
+    print("\nf2 matrix: ")
     print(coocc)
     return factdic
 
@@ -118,16 +105,59 @@ def evaluateAndFilter(pt, p, factdic, minSC, minHC, entitysize):
     return False
 
 
-def searchAndEvaluate(BENCHMARK, nowPredicate, minSC, minHC, times_syn, times_coocc, entity, relation):
+def learn_weights(fact_dic, candidate, entsize, pt):
+    # [[37, 0], [19, 0], [59, 0], [8, 0]]
+    rule_num = 4
+    rule_Length = 2
+    training_Iteration = 100
+    learning_Rate = 0.1
+
+    model = mlw.LearnModel()
+    model.__int__(rule_Length, training_Iteration, learning_Rate, fact_dic, entsize)
+    model.load_data(candidate, pt)
+    # model.train()
+    # model.getWeights()
+    return 0
+
+
+def save_rules(BENCHMARK, nowPredicate, candidate, model):
+    with open("./sampled/" + BENCHMARK + "/relation2id.txt") as f:
+        preSize = f.readline()
+        pre = [line.strip('\n').split(' ') for line in f.readlines()]
+    print("\nThe final rules are:")
+    i = 1
+    f = open('./rule/' + BENCHMARK + '/rule_After_' + str(model)[15:21] + '.txt', 'a+')
+    print(str(nowPredicate[1]) + "\n")
+    f.write(str(nowPredicate[1]) + "\n")
+    rule_of_Pt = len(candidate)
+    print(str(rule_of_Pt) + "\n")
+    f.write("num: " + str(rule_of_Pt) + "\n")
+    for rule in candidate:
+        print(rule[0])
+        print(rule[1])
+        line = "Rule " + str(i) + ": " + pre[rule[0]][1] + "  &&  " + pre[rule[1]][1] + "\n"
+        print(line)
+        f.write(line)
+        i = i + 1
+    f.write("\n")
+    f.close()
+    return rule_of_Pt
+
+
+def searchAndEvaluate(flag, BENCHMARK, nowPredicate, entity, relation, dimension, model):
     relsize = relation.shape[0]
     entsize = entity.shape[0]
+    if flag == 0:
+        relation = np.reshape(relation, [relsize, dimension, dimension])
+    # print(relation.shape)  # (-1, 100, 100) or (-1, 100)
+    # print(entity.shape)  # (-1, 100)
 
     # Score Function
     # calculate the f1
     print("\nBegin to calculate the f1")
-    syn = np.zeros(shape=(relsize, relsize))  # shang sanjiao matrix
+    syn = np.zeros(shape=(relsize, relsize))  # normal matrix, because matrix's multiply is not reversible
     # the array's shape is decided by the length of rule, now length = 2
-    scorefunction1(syn, nowPredicate[0], relation)
+    scorefunction1(flag, syn, nowPredicate[0], relation)
     # calculate the f2
     print("\nBegin to calculate the f2")
     coocc = np.zeros(shape=(relsize, relsize))  # normal matrix
@@ -135,39 +165,27 @@ def searchAndEvaluate(BENCHMARK, nowPredicate, minSC, minHC, times_syn, times_co
         factsSize = f.readline()
         facts = np.array([line.strip('\n').split(' ') for line in f.readlines()], dtype='int32')
     # print(facts)
-    # print(nowPredicate)
     fact_dic = scorefunction2(coocc, relsize, facts, entity, nowPredicate[0])
 
-    # How to choose this value?
-    # get candidate rules
-    '''
-    middle_syn = (np.max(syn) - np.min(syn)) / times_syn + np.min(syn)
-    rawrulelist = np.argwhere(syn > middle_syn)
-    rulelist = []
-    middle_coocc = (np.max(coocc) - np.min(syn)) / times_coocc + np.min(syn)
-    for index in rawrulelist:
-        if coocc[index[0], index[1]] > middle_coocc:
-            rulelist.append(index)
-        if coocc[index[1], index[0]] > middle_coocc and index[1] != index[0]:
-            rulelist.append([index[1], index[0]])
-    print(rulelist)
-    '''
+    # How to choose this value to get candidate rules?
     candidate = []
-    # matrics = syn + coocc
-    matrics = coocc
+    matrics = syn + coocc
+    # matrics = coocc  # will be changed!!!!!
     flag = 0
     constant_flag = False
     while flag != -1:
         _max_index = np.where(matrics == np.max(matrics))  # maybe return several pairs
-        print(_max_index)
+        # print(_max_index)
         fir_dim = list(_max_index[0])
-        print(fir_dim)
+        # print(fir_dim)
         sec_dim = list(_max_index[1])
         max_index = []
         for i in range(len(fir_dim)):
             max_index = [fir_dim[i], sec_dim[i]]
-            print(max_index)
+            # print(max_index)
             matrics[max_index[0]][max_index[1]] = -1  # set it to the min
+            minSC = 0.01
+            minHC = 0.01
             if evaluateAndFilter(nowPredicate[0], max_index, fact_dic, minSC, minHC, entsize):
                 candidate.append(max_index)
                 constant_flag = False
@@ -178,4 +196,7 @@ def searchAndEvaluate(BENCHMARK, nowPredicate, minSC, minHC, times_syn, times_co
                 flag = -1
     print(candidate)
 
-    return candidate
+    learn_weights(fact_dic, candidate, entsize, nowPredicate[0])
+
+    rule_of_Pt = save_rules(BENCHMARK, nowPredicate, candidate, model)
+    return rule_of_Pt

@@ -7,12 +7,17 @@ def trainModel(flag, BENCHMARK, work_threads, train_times, nbatches, dimension, 
     # warnings.filterwarnings("ignore")
     # print("\nThe benchmark is " + BENCHMARK + ".\n")
     con = conf.Config()  # create Class Config()
+    '''
     if flag == 0:
         file = "before"
         con.set_in_path("./benchmarks/"+BENCHMARK+"/")
     elif flag == 1:
         file = "after"
         con.set_in_path("./sampled/"+BENCHMARK+"/")
+    '''
+    file = "after"
+    con.set_in_path("./sampled/" + BENCHMARK + "/")
+
 
     # True: Input test files from the same folder.
     # con.set_test_flag(True)
@@ -51,5 +56,9 @@ def trainModel(flag, BENCHMARK, work_threads, train_times, nbatches, dimension, 
     # print("Test result??? ")  # nothing important
     # con.show_link_prediction(2, 1)  # h, r
     # con.show_triple_classification(2, 1, 3)  #h, t, r
-
-    return con.get_parameters_by_name("ent_embeddings"), con.get_parameters_by_name("rel_embeddings")
+    if flag == 1:
+        # relation: vector
+        return con.get_parameters_by_name("ent_embeddings"), con.get_parameters_by_name("rel_embeddings")
+    elif flag == 0:
+        # relation: matrix
+        return con.get_parameters_by_name("ent_embeddings"), con.get_parameters_by_name("rel_matrices")
