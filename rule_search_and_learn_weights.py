@@ -62,7 +62,6 @@ def scorefunction2(coocc, relsize, facts, entity, pt):  # co-occurrence
 def getmatrix(factdic, p, entitysize):
     # sparse matrix
     pfacts = factdic.get(p)
-    # print(pfacts)
     pmatrix = sparse.dok_matrix((entitysize, entitysize), dtype=np.int32)
     for f in pfacts:
         pmatrix[f[0], f[1]] = 1
@@ -107,16 +106,15 @@ def evaluateAndFilter(pt, p, factdic, minSC, minHC, entitysize):
 
 def learn_weights(fact_dic, candidate, entsize, pt):
     # [[37, 0], [19, 0], [59, 0], [8, 0]]
-    rule_num = 4
     rule_Length = 2
-    training_Iteration = 100
+    training_Iteration = 20
     learning_Rate = 0.1
 
     model = mlw.LearnModel()
     model.__int__(rule_Length, training_Iteration, learning_Rate, fact_dic, entsize)
     model.load_data(candidate, pt)
-    # model.train()
-    # model.getWeights()
+    model.train()
+    # model.get_weights()
     return 0
 
 

@@ -13,7 +13,7 @@ work_threads = 5
 nbatches = 100
 margin = 1.0  # the margin for the loss function
 
-train_times = 50  # 150
+train_times = 3  # 150
 dimension = 100
 alpha = 0.01  # learning rate
 lmbda = 0.01  # degree of the regularization on the parameters
@@ -37,6 +37,7 @@ for Pt in range(predicateSize):
     entity, relation = te.trainModel(0, BENCHMARK, work_threads, train_times, nbatches, dimension, alpha, lmbda, bern,
                                      margin, model)
     rule_of_Pt = rsalw.searchAndEvaluate(0, BENCHMARK, nowPredicate, entity, relation, dimension, model)
+    # save weights
 
 
 
