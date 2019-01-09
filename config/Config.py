@@ -9,9 +9,9 @@ import get_type as gt
 
 
 class Config(object):
-    '''
+    """
 	use ctypes to call C functions from python and set essential parameters.
-	'''
+	"""
 
     def __init__(self):
         base_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '../release/Base.so'))
@@ -383,7 +383,6 @@ class Config(object):
                     self.lib.test_triple_classification(self.relThresh_addr, res_pos.__array_interface__['data'][0],
                                                         res_neg.__array_interface__['data'][0])
 
-
     def show_link_prediction(self, h, r):
         self.init_link_prediction()
         if self.importName != None:
@@ -416,9 +415,9 @@ class Config(object):
         with open(self.in_path + 'Fact.txt', 'r') as f:
             total = int(f.readline())
             data_total = [line.strip('\n').split(" ") for line in f.readlines()]
-            test_num = int(total*0.1)
-            valid_num = int(total*0.1)
-            sample_list = random.sample(range(0, total), test_num+valid_num)
+            test_num = int(total * 0.1)
+            valid_num = int(total * 0.1)
+            sample_list = random.sample(range(0, total), test_num + valid_num)
 
             # create test file
             file = open(self.in_path + 'test2id.txt', 'w')
@@ -433,9 +432,9 @@ class Config(object):
             file = open(self.in_path + 'valid2id.txt', 'w')
             file.write(str(valid_num) + '\n')
             for index in range(valid_num):
-                file.write((data_total[sample_list[index+test_num]][0]) + ' ' +
-                           (data_total[sample_list[index+test_num]][1]) + ' ' +
-                           (data_total[sample_list[index+test_num]][2]) + "\n")
+                file.write((data_total[sample_list[index + test_num]][0]) + ' ' +
+                           (data_total[sample_list[index + test_num]][1]) + ' ' +
+                           (data_total[sample_list[index + test_num]][2]) + "\n")
             file.close()
 
             f.close()

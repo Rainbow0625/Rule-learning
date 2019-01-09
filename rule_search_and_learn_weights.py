@@ -107,14 +107,14 @@ def evaluateAndFilter(pt, p, factdic, minSC, minHC, entitysize):
 def learn_weights(fact_dic, candidate, entsize, pt):
     # [[37, 0], [19, 0], [59, 0], [8, 0]]
     rule_Length = 2
-    training_Iteration = 20
+    training_Iteration = 10
     learning_Rate = 0.1
+    regularization_rate = 0.01
 
     model = mlw.LearnModel()
-    model.__int__(rule_Length, training_Iteration, learning_Rate, fact_dic, entsize)
+    model.__int__(rule_Length, training_Iteration, learning_Rate, regularization_rate, fact_dic, entsize)
     model.load_data(candidate, pt)
     model.train()
-    # model.get_weights()
     return 0
 
 
@@ -190,11 +190,9 @@ def searchAndEvaluate(flag, BENCHMARK, nowPredicate, entity, relation, dimension
             else:
                 flag = flag + 1
                 constant_flag = True
-            if flag == 10 and constant_flag == True:
+            if flag == 20 and constant_flag is True:
                 flag = -1
     print(candidate)
-
     learn_weights(fact_dic, candidate, entsize, nowPredicate[0])
-
     rule_of_Pt = save_rules(BENCHMARK, nowPredicate, candidate, model)
     return rule_of_Pt

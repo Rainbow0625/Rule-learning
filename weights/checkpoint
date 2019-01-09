@@ -1,0 +1,2 @@
+model_checkpoint_path: "pt=0_model:learnModel_trainIter=20_lr=0.050000.temp"
+all_model_checkpoint_paths: "pt=0_model:learnModel_trainIter=20_lr=0.050000.temp"

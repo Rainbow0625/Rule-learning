@@ -115,31 +115,38 @@ def sample1(BENCHMARK, Pt, predicateName):
         f.write(str(x) + "\n")
     f.close()
 
+    # In this part, after sampling, we should get the reverse predicates and its facts!!!
     # predicate
     f = open('./sampled/' + BENCHMARK + '/relation2id.txt', 'w')
     predSampledli = list(predSampled)
     predSize = len(predSampled)
     nowPredicate = []
-    f.write(str(predSize) + "\n")  # after sampling
-    print("Predicated size: " + str(predSize))
+    f.write(str(predSize*2) + "\n")  # The number of all relations becomes two times!
+    print("Predicated size: " + str(predSize*2))
 
     #  name ok!
     for i in range(predSize):
         name = predicateName[predSampledli[i]-1]
-        f.write(str(i) + " " + name + "\n")
+        f.write(str(2*i) + " " + name + "\n")
+        f.write(str(2*i+1) + " " + name + "^-1\n")
         if curPredicate[1] == name:
-            nowPredicate = [i, name]
-    Predicate = np.array(list(predSampled))
+            nowPredicate = [2*i, name]
+    Predicate = np.array(predSampledli)
+    # print(predSampled)
+    # print(predSampledli)
+    # print(Predicate)
     f.close()
 
     # fact
     Fact = []
     for f in F0ofPt:
         Fact.append([int(np.argwhere(Entity == f[0])), int(np.argwhere(Entity == f[1])),
-                     int(np.argwhere(Predicate == f[2]))])
+                     int(np.argwhere(Predicate == f[2]))*2])
+        Fact.append([int(np.argwhere(Entity == f[0])), int(np.argwhere(Entity == f[1])),
+                     int(np.argwhere(Predicate == f[2]))*2+1])
     f = open('./sampled/' + BENCHMARK + '/Fact.txt', 'w')
     factsSizeOfPt = len(Fact)
-    f.write(str(factsSizeOfPt) + "\n")
+    f.write(str(factsSizeOfPt) + "\n")  # The number of all facts becomes two times!
     print("FactsOfPt size: " + str(factsSizeOfPt))
     for line in Fact:
         f.write(" ".join(str(letter) for letter in line) + "\n")
@@ -241,23 +248,29 @@ def sample0(BENCHMARK, Pt, predicateName):
     predSampledli = list(predSampled)
     predSize = len(predSampled)
     nowPredicate = []
-    f.write(str(predSize) + "\n")  # after sampling
-    print("Predicated size: " + str(predSize))
+    f.write(str(predSize*2) + "\n")  # after sampling
+    print("Predicated size: " + str(predSize*2))
 
     #  name ok!
     for i in range(predSize):
         name = predicateName[predSampledli[i]]
-        f.write(str(i) + " " + str(name) + "\n")
+        f.write(str(2*i) + " " + str(name) + "\n")
+        f.write(str(2*i+1) + " " + str(name) + "^-1\n")
         if curPredicate[1] == name:
             nowPredicate = [i, name]
-    Predicate = np.array(list(predSampled))
+    Predicate = np.array(predSampledli)
+    # print(predSampled)
+    # print(predSampledli)
+    # print(Predicate)
     f.close()
 
     # fact
     Fact = []
     for f in F0ofPt:
         Fact.append([int(np.argwhere(Entity == f[0])), int(np.argwhere(Entity == f[1])),
-                     int(np.argwhere(Predicate == f[2]))])
+                     int(np.argwhere(Predicate == f[2]))*2])
+        Fact.append([int(np.argwhere(Entity == f[0])), int(np.argwhere(Entity == f[1])),
+                     int(np.argwhere(Predicate == f[2]))*2+1])
     f = open('./sampled/' + BENCHMARK + '/Fact.txt', 'w')
     factsSizeOfPt = len(Fact)
     f.write(str(factsSizeOfPt) + "\n")
