@@ -85,6 +85,20 @@ def calSCandHC(pmatrix, ptmatrix):
         HC = 0
     else:
         HC = supp / head
+
+    '''
+    # calculate New SC
+    supp_score = 0
+    body_score = 0
+    for key in pmatrix.keys():
+        body_score = body_score + pmatrix[key[0], key[1]]
+        if ptmatrix[key[0], key[1]] == 1:
+            supp_score = supp_score + pmatrix[key[0], key[1]]
+    if body_score == 0:
+        New_SC = 0
+    else:
+        New_SC = supp_score / body_score
+    '''
     return SC, HC
 
 
@@ -107,9 +121,9 @@ def evaluateAndFilter(pt, p, factdic, minSC, minHC, entitysize):
 def learn_weights(fact_dic, candidate, entsize, pt):
     # [[37, 0], [19, 0], [59, 0], [8, 0]]
     rule_Length = 2
-    training_Iteration = 10
+    training_Iteration = 50
     learning_Rate = 0.1
-    regularization_rate = 0.01
+    regularization_rate = 0.1
 
     model = mlw.LearnModel()
     model.__int__(rule_Length, training_Iteration, learning_Rate, regularization_rate, fact_dic, entsize)
@@ -142,10 +156,10 @@ def save_rules(BENCHMARK, nowPredicate, candidate, model):
     return rule_of_Pt
 
 
-def searchAndEvaluate(flag, BENCHMARK, nowPredicate, entity, relation, dimension, model):
+def searchAndEvaluate(f, BENCHMARK, nowPredicate, entity, relation, dimension, model):
     relsize = relation.shape[0]
     entsize = entity.shape[0]
-    if flag == 0:
+    if f == 0:
         relation = np.reshape(relation, [relsize, dimension, dimension])
     # print(relation.shape)  # (-1, 100, 100) or (-1, 100)
     # print(entity.shape)  # (-1, 100)
@@ -155,7 +169,7 @@ def searchAndEvaluate(flag, BENCHMARK, nowPredicate, entity, relation, dimension
     print("\nBegin to calculate the f1")
     syn = np.zeros(shape=(relsize, relsize))  # normal matrix, because matrix's multiply is not reversible
     # the array's shape is decided by the length of rule, now length = 2
-    scorefunction1(flag, syn, nowPredicate[0], relation)
+    scorefunction1(f, syn, nowPredicate[0], relation)
     # calculate the f2
     print("\nBegin to calculate the f2")
     coocc = np.zeros(shape=(relsize, relsize))  # normal matrix
@@ -165,10 +179,13 @@ def searchAndEvaluate(flag, BENCHMARK, nowPredicate, entity, relation, dimension
     # print(facts)
     fact_dic = scorefunction2(coocc, relsize, facts, entity, nowPredicate[0])
 
-    # How to choose this value to get candidate rules?
+    # How to choose this value to get candidate rules? Important!
     candidate = []
-    matrics = syn + coocc
-    # matrics = coocc  # will be changed!!!!!
+    print("Begin to get candidate rules.")
+    # Method 1: Top ones until it reaches the 100th.
+    '''
+    # matrics = syn + coocc
+    matrics = coocc  # will be changed!!!!!
     flag = 0
     constant_flag = False
     while flag != -1:
@@ -183,15 +200,38 @@ def searchAndEvaluate(flag, BENCHMARK, nowPredicate, entity, relation, dimension
             # print(max_index)
             matrics[max_index[0]][max_index[1]] = -1  # set it to the min
             minSC = 0.01
-            minHC = 0.01
+            minHC = 0.001
             if evaluateAndFilter(nowPredicate[0], max_index, fact_dic, minSC, minHC, entsize):
                 candidate.append(max_index)
                 constant_flag = False
             else:
                 flag = flag + 1
                 constant_flag = True
-            if flag == 20 and constant_flag is True:
+            if flag == 100 and constant_flag is True:
                 flag = -1
+    '''
+    # Method 2: Use two matrices to catch rules.
+    minSC = 0.01
+    minHC = 0.001
+    mark_Matrix = np.zeros(shape=(relsize, relsize))
+    middle_syn = (np.max(syn) - np.min(syn)) / 10 * 8 + np.min(syn)
+    rawrulelist = np.argwhere(syn > middle_syn)
+    print(len(rawrulelist))
+    print(" Begin to use syn.")
+    for index in rawrulelist:
+        if evaluateAndFilter(nowPredicate[0], index, fact_dic, minSC, minHC, entsize):
+            candidate.append(index)
+            mark_Matrix[index[0], index[1]] = 1
+    middle_coocc = (np.max(coocc) - np.min(syn)) / 10 * 8 + np.min(syn)
+    rawrulelist = np.argwhere(coocc > middle_coocc)
+    print(" Begin to use coocc.")
+    for index in rawrulelist:
+        if evaluateAndFilter(nowPredicate[0], index, fact_dic, minSC, minHC, entsize) \
+                and mark_Matrix[index[0], index[1]] == 0:
+            candidate.append(index)
+
+    # Evaluation is still a cue method!
+
     print(candidate)
     learn_weights(fact_dic, candidate, entsize, nowPredicate[0])
     rule_of_Pt = save_rules(BENCHMARK, nowPredicate, candidate, model)

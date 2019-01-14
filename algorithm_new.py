@@ -11,14 +11,14 @@ minHC = 0.001  # ?
 # embedding model parameters    should be modify!!!!!!!!!
 work_threads = 5
 nbatches = 100
-margin = 1.0  # the margin for the loss function
+margin = 1  # the margin for the loss function
 
-train_times = 100  # 150
-dimension = 100
+train_times = 1000  # 150
+dimension = 50
 alpha = 0.01  # learning rate
 lmbda = 0.01  # degree of the regularization on the parameters
 bern = 1  # set negative sampling algorithms, unif(0) or bern(1)
-model = RESCAL.RESCAL  # DistMult.DistMult   TransE.TransE   HolE.HolE
+model = TransE.TransE  # DistMult.DistMult   TransE.TransE   HolE.HolE  RESCAL.RESCAL
 
 begin = time.time()
 print("\nThe benchmark is " + BENCHMARK + ".\n")
@@ -30,17 +30,16 @@ with open('./benchmarks/' + BENCHMARK + '/relation2id.txt', 'r') as f:
     print("Total predicates:" + str(predicateSize))
 num_rule = 0
 total_time = 0
+# 0:matrix 1:vector
 for Pt in range(predicateSize):
     Pt_0 = time.time()
     nowPredicate = s.sample0(BENCHMARK, Pt, predicateName)
-    # The parameter of RESCAL should be adjust to the best parameters!!!!!!
-    entity, relation = te.trainModel(0, BENCHMARK, work_threads, train_times, nbatches, dimension, alpha, lmbda, bern,
+    # The parameter of model should be adjust to the best parameters!!!!!!
+    entity, relation = te.trainModel(1, BENCHMARK, work_threads, train_times, nbatches, dimension, alpha, lmbda, bern,
                                      margin, model)
-    rule_of_Pt = rsalw.searchAndEvaluate(0, BENCHMARK, nowPredicate, entity, relation, dimension, model)
+    rule_of_Pt = rsalw.searchAndEvaluate(1, BENCHMARK, nowPredicate, entity, relation, dimension, model)
     # save weights
 
-
-    rule_of_Pt = 0
     num_rule = num_rule + rule_of_Pt
     Pt_1 = time.time()
     Pt_time = Pt_1 - Pt_0

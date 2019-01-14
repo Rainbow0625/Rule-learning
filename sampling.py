@@ -142,7 +142,7 @@ def sample1(BENCHMARK, Pt, predicateName):
     for f in F0ofPt:
         Fact.append([int(np.argwhere(Entity == f[0])), int(np.argwhere(Entity == f[1])),
                      int(np.argwhere(Predicate == f[2]))*2])
-        Fact.append([int(np.argwhere(Entity == f[0])), int(np.argwhere(Entity == f[1])),
+        Fact.append([int(np.argwhere(Entity == f[1])), int(np.argwhere(Entity == f[0])),
                      int(np.argwhere(Predicate == f[2]))*2+1])
     f = open('./sampled/' + BENCHMARK + '/Fact.txt', 'w')
     factsSizeOfPt = len(Fact)
@@ -269,7 +269,7 @@ def sample0(BENCHMARK, Pt, predicateName):
     for f in F0ofPt:
         Fact.append([int(np.argwhere(Entity == f[0])), int(np.argwhere(Entity == f[1])),
                      int(np.argwhere(Predicate == f[2]))*2])
-        Fact.append([int(np.argwhere(Entity == f[0])), int(np.argwhere(Entity == f[1])),
+        Fact.append([int(np.argwhere(Entity == f[1])), int(np.argwhere(Entity == f[0])),
                      int(np.argwhere(Predicate == f[2]))*2+1])
     f = open('./sampled/' + BENCHMARK + '/Fact.txt', 'w')
     factsSizeOfPt = len(Fact)
