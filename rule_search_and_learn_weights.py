@@ -1,3 +1,4 @@
+import time
 import numpy as np
 from scipy import sparse
 import model_learn_weights as mlw
@@ -73,10 +74,15 @@ def calSCandHC(pmatrix, ptmatrix):
     head = len(ptmatrix)
     supp = 0
     body = 0
+    # calculate New SC
+    supp_score = 0
+    body_score = 0
     for key in pmatrix.keys():
         body = body + 1
+        body_score = body_score + pmatrix[key[0], key[1]]
         if ptmatrix[key[0], key[1]] == 1:
             supp = supp + 1
+            supp_score = supp_score + pmatrix[key[0], key[1]]
     if body == 0:
         SC = 0
     else:
@@ -85,21 +91,11 @@ def calSCandHC(pmatrix, ptmatrix):
         HC = 0
     else:
         HC = supp / head
-
-    '''
-    # calculate New SC
-    supp_score = 0
-    body_score = 0
-    for key in pmatrix.keys():
-        body_score = body_score + pmatrix[key[0], key[1]]
-        if ptmatrix[key[0], key[1]] == 1:
-            supp_score = supp_score + pmatrix[key[0], key[1]]
     if body_score == 0:
         New_SC = 0
     else:
         New_SC = supp_score / body_score
-    '''
-    return SC, HC
+    return New_SC, SC, HC
 
 
 def evaluateAndFilter(pt, p, factdic, minSC, minHC, entitysize):
@@ -109,11 +105,12 @@ def evaluateAndFilter(pt, p, factdic, minSC, minHC, entitysize):
     pmatrix = sparse.dok_matrix(np.dot(getmatrix(factdic, p1, entitysize), getmatrix(factdic, p2, entitysize)))
     ptmatrix = getmatrix(factdic, pt, entitysize)
     # calculate the SC and HC
-    SC, HC = calSCandHC(pmatrix, ptmatrix)
+    NSC, SC, HC = calSCandHC(pmatrix, ptmatrix)
     if SC > minSC and HC > minHC:
         print("\nThis is " + str(p))
-        print("The Standard Confidence of this rule is " + str(SC))
         print("The Head Coverage of this rule is " + str(HC))
+        print("The Standard Confidence of this rule is " + str(SC))
+        print("The NEW Standard Confidence of this rule is " + str(NSC))
         return True
     return False
 
@@ -132,10 +129,7 @@ def learn_weights(fact_dic, candidate, entsize, pt):
     return 0
 
 
-def save_rules(BENCHMARK, nowPredicate, candidate, model):
-    with open("./sampled/" + BENCHMARK + "/relation2id.txt") as f:
-        preSize = f.readline()
-        pre = [line.strip('\n').split(' ') for line in f.readlines()]
+def save_rules(BENCHMARK, nowPredicate, candidate, model, pre):
     print("\nThe final rules are:")
     i = 1
     f = open('./rule/' + BENCHMARK + '/rule_After_' + str(model)[15:21] + '.txt', 'a+')
@@ -147,7 +141,8 @@ def save_rules(BENCHMARK, nowPredicate, candidate, model):
     for rule in candidate:
         print(rule[0])
         print(rule[1])
-        line = "Rule " + str(i) + ": " + pre[rule[0]][1] + "  &&  " + pre[rule[1]][1] + "\n"
+        line = "Rule " + str(i) + ": " + str(rule[0]) + " " + pre[rule[0]][1] + "  &&  " \
+               + str(rule[1]) + " " + pre[rule[1]][1] + "\n"
         print(line)
         f.write(line)
         i = i + 1
@@ -156,11 +151,47 @@ def save_rules(BENCHMARK, nowPredicate, candidate, model):
     return rule_of_Pt
 
 
-def searchAndEvaluate(f, BENCHMARK, nowPredicate, entity, relation, dimension, model):
-    relsize = relation.shape[0]
-    entsize = entity.shape[0]
+def get_facts(BENCHMARK, filename):
+    with open(filename + BENCHMARK + "/Fact.txt") as f:
+        factsSize = f.readline()
+        facts = np.array([line.strip('\n').split(' ') for line in f.readlines()], dtype='int32')
+    return int(factsSize), facts
+
+
+# Generally, get predicates after sampled.
+def get_pre(BENCHMARK):
+    with open("./sampled/" + BENCHMARK + "/relation2id.txt") as f:
+        preSize = f.readline()
+        pre = [line.strip('\n').split(' ') for line in f.readlines()]
+    return int(preSize), pre
+
+
+def get_fact_dic(pre_sample, facts_all):
+    fact_dic = {}
+    f = len(facts_all)
+    p = int(len(pre_sample) / 2)
+    for i in range(f):
+        for j in range(p):
+            if facts_all[i, 2] == int(pre_sample[2*j][2]):
+                if int(pre_sample[2*j][0]) in fact_dic.keys():
+                    temp_list1 = fact_dic.get(int(pre_sample[2*j][0]))
+                    temp_list2 = fact_dic.get(int(pre_sample[2*j+1][0]))
+                else:
+                    temp_list1 = []
+                    temp_list2 = []
+                temp_list1.append([facts_all[i, 0], facts_all[i, 1]])
+                temp_list2.append([facts_all[i, 1], facts_all[i, 0]])
+                fact_dic[int(pre_sample[2*j][0])] = temp_list1
+                fact_dic[int(pre_sample[2*j+1][0])] = temp_list2
+    # print(fact_dic.keys())
+    return fact_dic
+
+
+def searchAndEvaluate(f, BENCHMARK, nowPredicate, ent_emb, rel_emb, dimension, model, ent_size_all):
+    # entsize = ent_emb.shape[0]
+    relsize, pre = get_pre(BENCHMARK)
     if f == 0:
-        relation = np.reshape(relation, [relsize, dimension, dimension])
+        relation = np.reshape(rel_emb, [relsize, dimension, dimension])
     # print(relation.shape)  # (-1, 100, 100) or (-1, 100)
     # print(entity.shape)  # (-1, 100)
 
@@ -169,15 +200,20 @@ def searchAndEvaluate(f, BENCHMARK, nowPredicate, entity, relation, dimension, m
     print("\nBegin to calculate the f1")
     syn = np.zeros(shape=(relsize, relsize))  # normal matrix, because matrix's multiply is not reversible
     # the array's shape is decided by the length of rule, now length = 2
-    scorefunction1(f, syn, nowPredicate[0], relation)
+    scorefunction1(f, syn, nowPredicate[0], rel_emb)
     # calculate the f2
     print("\nBegin to calculate the f2")
     coocc = np.zeros(shape=(relsize, relsize))  # normal matrix
-    with open("./sampled/" + BENCHMARK + "/Fact.txt") as f:
-        factsSize = f.readline()
-        facts = np.array([line.strip('\n').split(' ') for line in f.readlines()], dtype='int32')
+    factsSize, facts = get_facts(BENCHMARK, filename="./sampled/")
     # print(facts)
-    fact_dic = scorefunction2(coocc, relsize, facts, entity, nowPredicate[0])
+    _fact_dic = scorefunction2(coocc, relsize, facts, ent_emb, nowPredicate[0])
+
+    # get ALL FACTS dictionary!
+    fact_size, facts_all = get_facts(BENCHMARK, filename="./benchmarks/")
+    t = time.time()
+    print("\nGet ALL FACTS dictionary!")
+    fact_dic = get_fact_dic(pre, facts_all)
+    print("Time: %s \n" % str(time.time()-t))
 
     # How to choose this value to get candidate rules? Important!
     candidate = []
@@ -214,25 +250,32 @@ def searchAndEvaluate(f, BENCHMARK, nowPredicate, entity, relation, dimension, m
     minSC = 0.01
     minHC = 0.001
     mark_Matrix = np.zeros(shape=(relsize, relsize))
-    middle_syn = (np.max(syn) - np.min(syn)) / 10 * 8 + np.min(syn)
+    print(" Begin to use syn.")
+    middle_syn = (np.max(syn) - np.min(syn)) * 0.58 + np.min(syn)
     rawrulelist = np.argwhere(syn > middle_syn)
     print(len(rawrulelist))
-    print(" Begin to use syn.")
+    # print(rawrulelist)
     for index in rawrulelist:
-        if evaluateAndFilter(nowPredicate[0], index, fact_dic, minSC, minHC, entsize):
+        if evaluateAndFilter(nowPredicate[0], index, fact_dic, minSC, minHC, ent_size_all):
             candidate.append(index)
             mark_Matrix[index[0], index[1]] = 1
-    middle_coocc = (np.max(coocc) - np.min(syn)) / 10 * 8 + np.min(syn)
-    rawrulelist = np.argwhere(coocc > middle_coocc)
+        if evaluateAndFilter(nowPredicate[0], [index[1], index[0]], fact_dic, minSC, minHC, ent_size_all):
+            candidate.append(index)
+            mark_Matrix[index[0], index[1]] = 1
+
     print(" Begin to use coocc.")
+    middle_coocc = (np.max(coocc) - np.min(syn)) * 0.83 + np.min(syn)
+    rawrulelist = np.argwhere(coocc > middle_coocc)
+    print(len(rawrulelist))
+    # print(rawrulelist)
     for index in rawrulelist:
-        if evaluateAndFilter(nowPredicate[0], index, fact_dic, minSC, minHC, entsize) \
-                and mark_Matrix[index[0], index[1]] == 0:
+        if mark_Matrix[index[0], index[1]] == 0 and \
+                evaluateAndFilter(nowPredicate[0], index, fact_dic, minSC, minHC, ent_size_all):
             candidate.append(index)
 
     # Evaluation is still a cue method!
 
-    print(candidate)
-    learn_weights(fact_dic, candidate, entsize, nowPredicate[0])
-    rule_of_Pt = save_rules(BENCHMARK, nowPredicate, candidate, model)
+    print("\n*^_^* Yeah, there are %d rules. *^_^*\n" % len(candidate))
+    # learn_weights(fact_dic, candidate, entsize, nowPredicate[0])  #ent_size_all??? or entsize.
+    rule_of_Pt = save_rules(BENCHMARK, nowPredicate, candidate, model, pre)
     return rule_of_Pt

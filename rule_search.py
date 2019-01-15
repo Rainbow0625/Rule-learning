@@ -136,7 +136,11 @@ def searchAndEvaluate(BENCHMARK, nowPredicate, minSC, minHC, times_syn, times_co
         facts = np.array([line.strip('\n').split(' ') for line in f.readlines()], dtype='int32')
     # print(facts)
     # print(nowPredicate)
-    fact_dic = scorefunction2(coocc, relsize, facts, entity, nowPredicate[0])
+    _fact_dic = scorefunction2(coocc, relsize, facts, entity, nowPredicate[0])
+
+    # get ALL FACTS dictionary!
+    fact_dic = {}
+
 
     # How to choose this value?
     # get candidate rules

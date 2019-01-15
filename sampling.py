@@ -34,9 +34,10 @@ def readData0(BENCHMARK):  # index from 0
     with open('./benchmarks/' + BENCHMARK + '/entity2id.txt', 'r') as entityfile:
         entitysize = entityfile.readline()
         print("Total entities:" + str(entitysize))
-    return facts, entitysize
+    return facts, int(entitysize)
 
-
+'''
+# all data sets begin at 0 index!
 def sample1(BENCHMARK, Pt, predicateName):
     time_start = time.time()
     facts, entitysize = readData1(BENCHMARK)
@@ -127,8 +128,8 @@ def sample1(BENCHMARK, Pt, predicateName):
     #  name ok!
     for i in range(predSize):
         name = predicateName[predSampledli[i]-1]
-        f.write(str(2*i) + " " + name + "\n")
-        f.write(str(2*i+1) + " " + name + "^-1\n")
+        f.write(str(2*i) + " " + name + " " + str(predSampledli[i]) + "\n")
+        f.write(str(2*i+1) + " " + name + "^-1 " + str(predSampledli[i]) + "\n")
         if curPredicate[1] == name:
             nowPredicate = [2*i, name]
     Predicate = np.array(predSampledli)
@@ -162,7 +163,7 @@ def sample1(BENCHMARK, Pt, predicateName):
     print("Pt: ")
     print(nowPredicate)
     return nowPredicate
-
+'''
 
 def sample0(BENCHMARK, Pt, predicateName):
     time_start = time.time()
@@ -254,8 +255,9 @@ def sample0(BENCHMARK, Pt, predicateName):
     #  name ok!
     for i in range(predSize):
         name = predicateName[predSampledli[i]]
-        f.write(str(2*i) + " " + str(name) + "\n")
-        f.write(str(2*i+1) + " " + str(name) + "^-1\n")
+        # predSampledli[i] is the old index!
+        f.write(str(2*i) + " " + str(name) + " " + str(predSampledli[i]) + "\n")
+        f.write(str(2*i+1) + " " + str(name) + "^-1 " + str(predSampledli[i]) + "\n")
         if curPredicate[1] == name:
             nowPredicate = [i, name]
     Predicate = np.array(predSampledli)
@@ -286,4 +288,4 @@ def sample0(BENCHMARK, Pt, predicateName):
     print('\nTotally cost time:', time_end - time_start)
     print("Pt: ")
     print(nowPredicate)
-    return nowPredicate
+    return entitysize, nowPredicate

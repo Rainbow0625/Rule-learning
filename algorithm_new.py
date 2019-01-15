@@ -33,11 +33,11 @@ total_time = 0
 # 0:matrix 1:vector
 for Pt in range(predicateSize):
     Pt_0 = time.time()
-    nowPredicate = s.sample0(BENCHMARK, Pt, predicateName)
+    ent_size_all, nowPredicate = s.sample0(BENCHMARK, Pt, predicateName)
     # The parameter of model should be adjust to the best parameters!!!!!!
-    entity, relation = te.trainModel(1, BENCHMARK, work_threads, train_times, nbatches, dimension, alpha, lmbda, bern,
+    ent_emb, rel_emb = te.trainModel(1, BENCHMARK, work_threads, train_times, nbatches, dimension, alpha, lmbda, bern,
                                      margin, model)
-    rule_of_Pt = rsalw.searchAndEvaluate(1, BENCHMARK, nowPredicate, entity, relation, dimension, model)
+    rule_of_Pt = rsalw.searchAndEvaluate(1, BENCHMARK, nowPredicate, ent_emb, rel_emb, dimension, model, ent_size_all)
     # save weights
 
     num_rule = num_rule + rule_of_Pt
