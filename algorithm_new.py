@@ -1,6 +1,6 @@
 import time
 import sampling as s
-from models import TransE, RESCAL
+from models import TransE, TransD, TransH, TransR, RESCAL
 import train_embedding as te
 import rule_search_and_learn_weights as rsalw
 
@@ -10,15 +10,19 @@ minHC = 0.001  # ?
 
 # embedding model parameters    should be modify!!!!!!!!!
 work_threads = 5
-nbatches = 100
+nbatches = 150
 margin = 1  # the margin for the loss function
 
-train_times = 1000  # 150
-dimension = 50
+train_times = 500  # 150
+dimension = 100
 alpha = 0.01  # learning rate
-lmbda = 0.01  # degree of the regularization on the parameters
+lmbda = 0.1  # degree of the regularization on the parameters
 bern = 1  # set negative sampling algorithms, unif(0) or bern(1)
-model = TransE.TransE  # DistMult.DistMult   TransE.TransE   HolE.HolE  RESCAL.RESCAL
+model = RESCAL.RESCAL
+# Vetor:DistMult.DistMult HolE.HolE
+#       TransE.TransE
+# Unknown: TransD.TransD TransH.TransH TransR.TransR
+# Matrix: RESCAL.RESCAL
 
 begin = time.time()
 print("\nThe benchmark is " + BENCHMARK + ".\n")
@@ -35,9 +39,9 @@ for Pt in range(predicateSize):
     Pt_0 = time.time()
     ent_size_all, nowPredicate = s.sample0(BENCHMARK, Pt, predicateName)
     # The parameter of model should be adjust to the best parameters!!!!!!
-    ent_emb, rel_emb = te.trainModel(1, BENCHMARK, work_threads, train_times, nbatches, dimension, alpha, lmbda, bern,
+    ent_emb, rel_emb = te.trainModel(0, BENCHMARK, work_threads, train_times, nbatches, dimension, alpha, lmbda, bern,
                                      margin, model)
-    rule_of_Pt = rsalw.searchAndEvaluate(1, BENCHMARK, nowPredicate, ent_emb, rel_emb, dimension, model, ent_size_all)
+    rule_of_Pt = rsalw.searchAndEvaluate(0, BENCHMARK, nowPredicate, ent_emb, rel_emb, dimension, model, ent_size_all)
     # save weights
 
     num_rule = num_rule + rule_of_Pt

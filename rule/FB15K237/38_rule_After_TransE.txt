@@ -1,0 +1,54 @@
+/location/country/form_of_government
+num: 38
+Rule 1: 0 /location/country/form_of_government  &&  7 /base/biblioness/bibs_location/country^-1
+Rule 2: 0 /location/country/form_of_government  &&  8 /location/administrative_division/country
+Rule 3: 0 /location/country/form_of_government  &&  9 /location/administrative_division/country^-1
+Rule 4: 0 /location/country/form_of_government  &&  16 /location/location/contains
+Rule 5: 0 /location/country/form_of_government  &&  38 /military/military_combatant/military_conflicts./military/military_combatant_group/combatants
+Rule 6: 0 /location/country/form_of_government  &&  39 /military/military_combatant/military_conflicts./military/military_combatant_group/combatants^-1
+Rule 7: 0 /location/country/form_of_government  &&  57 /time/event/locations^-1
+Rule 8: 0 /location/country/form_of_government  &&  70 /location/country/capital
+Rule 9: 0 /location/country/form_of_government  &&  74 /location/location/adjoin_s./location/adjoining_relationship/adjoins
+Rule 10: 0 /location/country/form_of_government  &&  75 /location/location/adjoin_s./location/adjoining_relationship/adjoins^-1
+Rule 11: 0 /location/country/form_of_government  &&  78 /base/aareas/schema/administrative_area/administrative_parent
+Rule 12: 0 /location/country/form_of_government  &&  79 /base/aareas/schema/administrative_area/administrative_parent^-1
+Rule 13: 0 /location/country/form_of_government  &&  104 /location/administrative_division/first_level_division_of
+Rule 14: 0 /location/country/form_of_government  &&  105 /location/administrative_division/first_level_division_of^-1
+Rule 15: 0 /location/country/form_of_government  &&  114 /location/country/second_level_divisions
+Rule 16: 0 /location/country/form_of_government  &&  118 /location/statistical_region/places_exported_to./location/imports_and_exports/exported_to
+Rule 17: 0 /location/country/form_of_government  &&  119 /location/statistical_region/places_exported_to./location/imports_and_exports/exported_to^-1
+Rule 18: 0 /location/country/form_of_government  &&  134 /dataworld/gardening_hint/split_to
+Rule 19: 0 /location/country/form_of_government  &&  135 /dataworld/gardening_hint/split_to^-1
+Rule 20: 7 /base/biblioness/bibs_location/country^-1  &&  0 /location/country/form_of_government
+Rule 21: 8 /location/administrative_division/country  &&  0 /location/country/form_of_government
+Rule 22: 9 /location/administrative_division/country^-1  &&  0 /location/country/form_of_government
+Rule 23: 16 /location/location/contains  &&  0 /location/country/form_of_government
+Rule 24: 38 /military/military_combatant/military_conflicts./military/military_combatant_group/combatants  &&  0 /location/country/form_of_government
+Rule 25: 39 /military/military_combatant/military_conflicts./military/military_combatant_group/combatants^-1  &&  0 /location/country/form_of_government
+Rule 26: 57 /time/event/locations^-1  &&  0 /location/country/form_of_government
+Rule 27: 70 /location/country/capital  &&  0 /location/country/form_of_government
+Rule 28: 74 /location/location/adjoin_s./location/adjoining_relationship/adjoins  &&  0 /location/country/form_of_government
+Rule 29: 75 /location/location/adjoin_s./location/adjoining_relationship/adjoins^-1  &&  0 /location/country/form_of_government
+Rule 30: 78 /base/aareas/schema/administrative_area/administrative_parent  &&  0 /location/country/form_of_government
+Rule 31: 79 /base/aareas/schema/administrative_area/administrative_parent^-1  &&  0 /location/country/form_of_government
+Rule 32: 104 /location/administrative_division/first_level_division_of  &&  0 /location/country/form_of_government
+Rule 33: 105 /location/administrative_division/first_level_division_of^-1  &&  0 /location/country/form_of_government
+Rule 34: 114 /location/country/second_level_divisions  &&  0 /location/country/form_of_government
+Rule 35: 118 /location/statistical_region/places_exported_to./location/imports_and_exports/exported_to  &&  0 /location/country/form_of_government
+Rule 36: 119 /location/statistical_region/places_exported_to./location/imports_and_exports/exported_to^-1  &&  0 /location/country/form_of_government
+Rule 37: 134 /dataworld/gardening_hint/split_to  &&  0 /location/country/form_of_government
+Rule 38: 135 /dataworld/gardening_hint/split_to^-1  &&  0 /location/country/form_of_government
+
+Embedding parameter:
+model: <class 'models.TransE.TransE'>
+train_times: 1000
+dimension: 50
+alpha: 0.01
+lmbda: 0.01
+bern: 1
+
+minSC: 0.01
+minHC: 0.001
+Total number of rules: 38
+Average time:8.51421809699465
+

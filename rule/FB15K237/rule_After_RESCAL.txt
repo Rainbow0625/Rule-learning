@@ -1,0 +1,57 @@
+/location/country/form_of_government
+num: 13
+Rule 1: 16 /location/location/contains  &&  0 /location/country/form_of_government
+Rule 2: 38 /military/military_combatant/military_conflicts./military/military_combatant_group/combatants  &&  0 /location/country/form_of_government
+Rule 3: 39 /military/military_combatant/military_conflicts./military/military_combatant_group/combatants^-1  &&  0 /location/country/form_of_government
+Rule 4: 57 /time/event/locations^-1  &&  0 /location/country/form_of_government
+Rule 5: 70 /location/country/capital  &&  0 /location/country/form_of_government
+Rule 6: 74 /location/location/adjoin_s./location/adjoining_relationship/adjoins  &&  0 /location/country/form_of_government
+Rule 7: 75 /location/location/adjoin_s./location/adjoining_relationship/adjoins^-1  &&  0 /location/country/form_of_government
+Rule 8: 78 /base/aareas/schema/administrative_area/administrative_parent  &&  0 /location/country/form_of_government
+Rule 9: 79 /base/aareas/schema/administrative_area/administrative_parent^-1  &&  0 /location/country/form_of_government
+Rule 10: 118 /location/statistical_region/places_exported_to./location/imports_and_exports/exported_to  &&  0 /location/country/form_of_government
+Rule 11: 119 /location/statistical_region/places_exported_to./location/imports_and_exports/exported_to^-1  &&  0 /location/country/form_of_government
+Rule 12: 134 /dataworld/gardening_hint/split_to  &&  0 /location/country/form_of_government
+Rule 13: 135 /dataworld/gardening_hint/split_to^-1  &&  0 /location/country/form_of_government
+
+Embedding parameter:
+model: <class 'models.RESCAL.RESCAL'>
+train_times: 500
+dimension: 100
+alpha: 0.01
+lmbda: 0.1
+bern: 1
+
+minSC: 0.01
+minHC: 0.001
+Total number of rules: 13
+Average time:13.778964422926117
+
+/location/country/form_of_government
+num: 12
+Rule 1: 16 /location/location/contains  &&  0 /location/country/form_of_government
+Rule 2: 38 /military/military_combatant/military_conflicts./military/military_combatant_group/combatants  &&  0 /location/country/form_of_government
+Rule 3: 39 /military/military_combatant/military_conflicts./military/military_combatant_group/combatants^-1  &&  0 /location/country/form_of_government
+Rule 4: 70 /location/country/capital  &&  0 /location/country/form_of_government
+Rule 5: 74 /location/location/adjoin_s./location/adjoining_relationship/adjoins  &&  0 /location/country/form_of_government
+Rule 6: 75 /location/location/adjoin_s./location/adjoining_relationship/adjoins^-1  &&  0 /location/country/form_of_government
+Rule 7: 78 /base/aareas/schema/administrative_area/administrative_parent  &&  0 /location/country/form_of_government
+Rule 8: 79 /base/aareas/schema/administrative_area/administrative_parent^-1  &&  0 /location/country/form_of_government
+Rule 9: 118 /location/statistical_region/places_exported_to./location/imports_and_exports/exported_to  &&  0 /location/country/form_of_government
+Rule 10: 119 /location/statistical_region/places_exported_to./location/imports_and_exports/exported_to^-1  &&  0 /location/country/form_of_government
+Rule 11: 134 /dataworld/gardening_hint/split_to  &&  0 /location/country/form_of_government
+Rule 12: 135 /dataworld/gardening_hint/split_to^-1  &&  0 /location/country/form_of_government
+
+Embedding parameter:
+model: <class 'models.RESCAL.RESCAL'>
+train_times: 500
+dimension: 100
+alpha: 0.01
+lmbda: 0.1
+bern: 1
+
+minSC: 0.01
+minHC: 0.001
+Total number of rules: 12
+Average time:14.35761556142493
+

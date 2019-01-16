@@ -136,11 +136,8 @@ def save_rules(BENCHMARK, nowPredicate, candidate, model, pre):
     print(str(nowPredicate[1]) + "\n")
     f.write(str(nowPredicate[1]) + "\n")
     rule_of_Pt = len(candidate)
-    print(str(rule_of_Pt) + "\n")
     f.write("num: " + str(rule_of_Pt) + "\n")
     for rule in candidate:
-        print(rule[0])
-        print(rule[1])
         line = "Rule " + str(i) + ": " + str(rule[0]) + " " + pre[rule[0]][1] + "  &&  " \
                + str(rule[1]) + " " + pre[rule[1]][1] + "\n"
         print(line)
@@ -251,7 +248,7 @@ def searchAndEvaluate(f, BENCHMARK, nowPredicate, ent_emb, rel_emb, dimension, m
     minHC = 0.001
     mark_Matrix = np.zeros(shape=(relsize, relsize))
     print(" Begin to use syn.")
-    middle_syn = (np.max(syn) - np.min(syn)) * 0.58 + np.min(syn)
+    middle_syn = (np.max(syn) - np.min(syn)) * 0.55 + np.min(syn)
     rawrulelist = np.argwhere(syn > middle_syn)
     print(len(rawrulelist))
     # print(rawrulelist)
@@ -264,14 +261,14 @@ def searchAndEvaluate(f, BENCHMARK, nowPredicate, ent_emb, rel_emb, dimension, m
             mark_Matrix[index[0], index[1]] = 1
 
     print(" Begin to use coocc.")
-    middle_coocc = (np.max(coocc) - np.min(syn)) * 0.83 + np.min(syn)
+    middle_coocc = (np.max(coocc) - np.min(syn)) * 0.8 + np.min(syn)
     rawrulelist = np.argwhere(coocc > middle_coocc)
     print(len(rawrulelist))
     # print(rawrulelist)
     for index in rawrulelist:
-        if mark_Matrix[index[0], index[1]] == 0 and \
-                evaluateAndFilter(nowPredicate[0], index, fact_dic, minSC, minHC, ent_size_all):
-            candidate.append(index)
+        if mark_Matrix[index[0], index[1]] == 0:
+            if evaluateAndFilter(nowPredicate[0], index, fact_dic, minSC, minHC, ent_size_all):
+                candidate.append(index)
 
     # Evaluation is still a cue method!
 
