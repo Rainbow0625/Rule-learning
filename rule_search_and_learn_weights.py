@@ -98,7 +98,7 @@ def calSCandHC(pmatrix, ptmatrix):
     return New_SC, SC, HC
 
 
-def evaluateAndFilter(pt, p, factdic, minSC, minHC, entitysize):
+def evaluateAndFilter(pt, p, factdic, DEGREE, entitysize):
     # evaluation certain rule
     p1 = p[0]
     p2 = p[1]
@@ -106,13 +106,18 @@ def evaluateAndFilter(pt, p, factdic, minSC, minHC, entitysize):
     ptmatrix = getmatrix(factdic, pt, entitysize)
     # calculate the SC and HC
     NSC, SC, HC = calSCandHC(pmatrix, ptmatrix)
-    if SC > minSC and HC > minHC:
+    # 1: quality rule
+    # 2: high quality rule
+    if SC >= DEGREE[0] and HC >= DEGREE[1]:
         print("\nThis is " + str(p))
         print("The Head Coverage of this rule is " + str(HC))
         print("The Standard Confidence of this rule is " + str(SC))
         print("The NEW Standard Confidence of this rule is " + str(NSC))
-        return True
-    return False
+        if SC >= DEGREE[2] and HC >= DEGREE[3]:
+            print("WOW, a high quality rule!")
+            return 2
+        return 1
+    return 0
 
 
 def learn_weights(fact_dic, candidate, entsize, pt):
@@ -127,25 +132,6 @@ def learn_weights(fact_dic, candidate, entsize, pt):
     model.load_data(candidate, pt)
     model.train()
     return 0
-
-
-def save_rules(BENCHMARK, nowPredicate, candidate, model, pre):
-    print("\nThe final rules are:")
-    i = 1
-    f = open('./rule/' + BENCHMARK + '/rule_After_' + str(model)[15:21] + '.txt', 'a+')
-    print(str(nowPredicate[1]) + "\n")
-    f.write(str(nowPredicate[1]) + "\n")
-    rule_of_Pt = len(candidate)
-    f.write("num: " + str(rule_of_Pt) + "\n")
-    for rule in candidate:
-        line = "Rule " + str(i) + ": " + str(rule[0]) + " " + pre[rule[0]][1] + "  &&  " \
-               + str(rule[1]) + " " + pre[rule[1]][1] + "\n"
-        print(line)
-        f.write(line)
-        i = i + 1
-    f.write("\n")
-    f.close()
-    return rule_of_Pt
 
 
 def get_facts(BENCHMARK, filename):
@@ -184,11 +170,11 @@ def get_fact_dic(pre_sample, facts_all):
     return fact_dic
 
 
-def searchAndEvaluate(f, BENCHMARK, nowPredicate, ent_emb, rel_emb, dimension, model, ent_size_all):
+def searchAndEvaluate(f, BENCHMARK, nowPredicate, ent_emb, rel_emb, dimension, ent_size_all, pre, DEGREE):
     # entsize = ent_emb.shape[0]
-    relsize, pre = get_pre(BENCHMARK)
+    relsize = rel_emb.shape[0]
     if f == 0:
-        relation = np.reshape(rel_emb, [relsize, dimension, dimension])
+        rel_emb = np.reshape(rel_emb, [relsize, dimension, dimension])
     # print(relation.shape)  # (-1, 100, 100) or (-1, 100)
     # print(entity.shape)  # (-1, 100)
 
@@ -244,35 +230,32 @@ def searchAndEvaluate(f, BENCHMARK, nowPredicate, ent_emb, rel_emb, dimension, m
                 flag = -1
     '''
     # Method 2: Use two matrices to catch rules.
-    minSC = 0.01
-    minHC = 0.001
     mark_Matrix = np.zeros(shape=(relsize, relsize))
     print(" Begin to use syn.")
     middle_syn = (np.max(syn) - np.min(syn)) * 0.55 + np.min(syn)
     rawrulelist = np.argwhere(syn > middle_syn)
     print(len(rawrulelist))
-    # print(rawrulelist)
     for index in rawrulelist:
-        if evaluateAndFilter(nowPredicate[0], index, fact_dic, minSC, minHC, ent_size_all):
-            candidate.append(index)
+        result = evaluateAndFilter(nowPredicate[0], index, fact_dic, DEGREE, ent_size_all)
+        if result != 0:
+            candidate.append([index, result])
             mark_Matrix[index[0], index[1]] = 1
-        if evaluateAndFilter(nowPredicate[0], [index[1], index[0]], fact_dic, minSC, minHC, ent_size_all):
-            candidate.append(index)
-            mark_Matrix[index[0], index[1]] = 1
-
+        result = evaluateAndFilter(nowPredicate[0], [index[1], index[0]], fact_dic, DEGREE, ent_size_all)
+        if result != 0:
+            candidate.append([[index[1], index[0]], result])
+            mark_Matrix[index[1], index[0]] = 1
     print(" Begin to use coocc.")
     middle_coocc = (np.max(coocc) - np.min(syn)) * 0.8 + np.min(syn)
     rawrulelist = np.argwhere(coocc > middle_coocc)
     print(len(rawrulelist))
-    # print(rawrulelist)
     for index in rawrulelist:
         if mark_Matrix[index[0], index[1]] == 0:
-            if evaluateAndFilter(nowPredicate[0], index, fact_dic, minSC, minHC, ent_size_all):
-                candidate.append(index)
+            result = evaluateAndFilter(nowPredicate[0], index, fact_dic, DEGREE, ent_size_all)
+            if result != 0:
+                candidate.append([index, result])
 
     # Evaluation is still a cue method!
 
     print("\n*^_^* Yeah, there are %d rules. *^_^*\n" % len(candidate))
     # learn_weights(fact_dic, candidate, entsize, nowPredicate[0])  #ent_size_all??? or entsize.
-    rule_of_Pt = save_rules(BENCHMARK, nowPredicate, candidate, model, pre)
-    return rule_of_Pt
+    return candidate
