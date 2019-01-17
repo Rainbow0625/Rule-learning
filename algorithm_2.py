@@ -1,3 +1,8 @@
+"""
+    This version can run the "FB15K237" and so on whose indexes begin at 0.
+    A complete version to run fix rule length.
+    ——by wh
+"""
 import time
 import sampling as s
 from models import TransE, TransD, TransH, TransR, RESCAL
