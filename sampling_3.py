@@ -16,6 +16,35 @@ def readData(BENCHMARK):  # index from 0
     return facts, int(entitysize)
 
 
+def first_sample_by_Pt(BENCHMARK, Pt, predicateName):
+    print("\nFirst sample by Pt to get E_0:")
+    time_start = time.time()
+    facts, entitysize = readData(BENCHMARK)
+    E_0 = set()
+    P_0 = [Pt]
+    F_0 = []
+    F_rest = []
+    curPredicate = []
+    curPredicate.append(Pt)  # Note that its index will change after sample.
+    curPredicate.append(predicateName[Pt])
+    print("Pt's original index: %d : %s" % (curPredicate[0], curPredicate[1]))
+    for f in facts:
+        fact = f.tolist()
+        if f[2] == Pt:
+            F_0.append(fact)
+            if f[0] not in E_0:
+                E_0.add(f[0])
+            if f[1] not in E_0:
+                E_0.add(f[1])
+        else:
+            F_rest.append(fact)
+    print("F_0 size: %d" % len(F_0))  
+    print("E_0 size: " % len(E_0)) 
+    time_end = time.time()
+    print('Step 1 cost time:', time_end-time_start)
+    return E_0, P_0, F_0, F_rest
+
+
 def sample(BENCHMARK, Pt, predicateName):
     time_start = time.time()
 

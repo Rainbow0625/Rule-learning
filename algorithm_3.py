@@ -1,8 +1,14 @@
 import time
-import sampling as s
+import sampling_3 as s
 from models import TransE, TransD, TransH, TransR, RESCAL
 import train_embedding as te
 import rule_search_and_learn_weights as rsalw
+
+'''
+import sys
+sys.stdout.write("")
+sys.flush()
+'''
 
 BENCHMARK = "FB15K237"
 R_minSC = 0.01
@@ -68,9 +74,13 @@ if __name__ == '__main__':
     for Pt in range(predicateSize):
         # 对于每个规则长度进行循环!
         Pt_0 = time.time()
+        print("##Begin to sample##")
+        s.first_sample_by_Pt(BENCHMARK, Pt, predicateName)
+        # after sample by Pt, return the E_i and F_i.
+        # return E_new 
         for i in range(Max_rule_length):
-
-            ent_size_all, nowPredicate = s.sample0(BENCHMARK, Pt, predicateName)
+            
+            ent_size_all, nowPredicate = s.sample(BENCHMARK, Pt, predicateName)
             # The parameter of model should be adjust to the best parameters!!!!!!
             ent_emb, rel_emb = te.trainModel(1, BENCHMARK, work_threads, train_times, nbatches, dimension, alpha, lmbda, bern,
                                              margin, model)
@@ -79,6 +89,7 @@ if __name__ == '__main__':
                                                 dimension, ent_size_all, pre, DEGREE)
             save_rules(nowPredicate, candidate, pre)
             num_rule = num_rule + len(candidate)
+        
         Pt_1 = time.time()
         Pt_time = Pt_1 - Pt_0
         print("Predicate target's time: " + str(Pt_time) + "\n")
