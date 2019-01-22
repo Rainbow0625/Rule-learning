@@ -193,8 +193,8 @@ def sample0(BENCHMARK, Pt, predicateName):
                 E0ofPt.add(f[1])
     factsSizeOfPt = len(F0ofPt)
     entSizeOfPt = len(E0ofPt)
-    print("FactsPt 0 size: " + str(factsSizeOfPt))  # 35088
-    print("E0ofPt size: " + str(entSizeOfPt))  # 45709
+    print("FactsPt 0 size: " + str(factsSizeOfPt))
+    print("E0ofPt size: " + str(entSizeOfPt))
 
     time_1 = time.time()
     print(curPredicate)

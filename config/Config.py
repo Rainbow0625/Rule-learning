@@ -6,6 +6,7 @@ import ctypes
 import json
 import random
 import get_type as gt
+import sys
 
 
 class Config(object):
@@ -340,8 +341,8 @@ class Config(object):
                         self.sampling()
                         res += self.train_step(self.batch_h, self.batch_t, self.batch_r, self.batch_y)
                     if self.log_on:
-                        print(times)
-                        print(res)
+                        sys.stdout.write('\r' + str(times) + ' : ' + str(res))
+                        sys.stdout.flush()
                     if self.exportName != None and (self.export_steps != 0 and times % self.export_steps == 0):
                         self.save_tensorflow()
                 if self.exportName != None:
