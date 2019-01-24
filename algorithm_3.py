@@ -1,8 +1,9 @@
+# -*- coding: utf-8 -*
 import time
 import sampling_3 as s
 from models import TransE, TransD, TransH, TransR, RESCAL
 import train_embedding as te
-import rule_search_and_learn_weights as rsalw
+import rule_search_and_learn_weights_2 as r
 
 '''
 import sys
@@ -44,19 +45,23 @@ def save_rules(rule_length, nowPredicate, candidate, pre):
     R_num = 0
     QR_num = 0
     for rule in candidate:
-        title = ""
-        if rule[1] == 1:
+        index = rule[0]
+        flag = rule[1]
+        line = ""
+        if flag == 1:
             R_num = R_num + 1
-            title = "Rule "
-        elif rule[1] == 2:
+            line = "Rule " + str(i) + ": "
+        elif flag == 2:
             QR_num = QR_num + 1
-            title = "Qualify Rule "
-        line = title + str(i) + ": " + str(rule[0][0]) + " " + pre[rule[0][0]][1] + "  &&  " \
-               + str(rule[0][1]) + " " + pre[rule[0][1]][1] + "\n"
+            line = "Qualify Rule " + str(i) + ": "
+        # output should be modified!
+        for j in range(rule_length):
+            line = line + str(index[j]) + " " + pre[index[j]][1] + "; "
+        line = line + "\n"
         print(line)
         f.write(line)
         i = i + 1
-    f.write("Rules number: %d\n" % R_num)
+    f.write("\nRules number: %d\n" % R_num)
     f.write("Qualify Rules number: %d\n" % QR_num)
     f.close()
 
@@ -68,6 +73,16 @@ if __name__ == '__main__':
         predicateSize = int(f.readline())
         predicateName = [relation.split("	")[0] for relation in f.readlines()]
         print("Total predicates:%d" % predicateSize)
+
+    # get ALL FACTS dictionary!
+    rsalw = r.RSALW()
+    fact_size, facts_all = rsalw.get_facts(BENCHMARK, filename="./benchmarks/")
+    t = time.time()
+    print("\nGet ALL FACTS dictionary!")
+    _p, pre = rsalw.get_pre(BENCHMARK)
+    fact_dic = rsalw.get_fact_dic(pre, facts_all)
+    print("Time: %s \n" % str(time.time() - t))
+
     # 0:matrix 1:vector
     total_num_rule = 0
     total_time = 0
@@ -106,15 +121,16 @@ if __name__ == '__main__':
             print("\n##End to train embedding##\n")
 
             print("\n##Begin to search and evaluate##\n")
-            _p, pre = rsalw.get_pre(BENCHMARK)
-            candidate = rsalw.searchAndEvaluate(1, BENCHMARK, nowPredicate, ent_emb, rel_emb,
-                                                dimension, ent_size_all, pre, DEGREE)
+            # this part should be modified!!!!!
+
+            candidate = rsalw.search_and_evaluate(1, length+1, BENCHMARK, nowPredicate, ent_emb, rel_emb,
+                                                dimension, ent_size_all, fact_dic, DEGREE)
             print("\n##End to search and evaluate##\n")
 
             save_rules(length+1, nowPredicate, candidate, pre)  # i+1:rule length.
             num_rule = num_rule + len(candidate)
             Pt_i = time.time()
-            print("Length = %d, Time = %f" % (length, (Pt_i-Pt_i_1)))
+            print("Length = %d, Time = %f" % (length+1, (Pt_i-Pt_i_1)))
             Pt_i_1 = Pt_i
         total_num_rule = total_num_rule + num_rule
         Pt_end = time.time()
