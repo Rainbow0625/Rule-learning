@@ -12,6 +12,7 @@ sys.stdout.flush()
 '''
 
 BENCHMARK = "FB15K237"
+IsUncertain = False
 R_minSC = 0.01
 R_minHC = 0.001
 QR_minSC = 0.5
@@ -23,10 +24,10 @@ Max_rule_length = 3  # not include head atom
 work_threads = 5
 nbatches = 150
 margin = 1  # the margin for the loss function
-train_times = 100  # 1000
+train_times = 500  # 1000
 dimension = 50  # 50
 alpha = 0.01  # learning rate
-lmbda = 0.1  # degree of the regularization on the parameters
+lmbda = 0.01  # degree of the regularization on the parameters
 bern = 1  # set negative sampling algorithms, unif(0) or bern(1)
 model = TransE.TransE
 # Vetor:DistMult.DistMult HolE.HolE

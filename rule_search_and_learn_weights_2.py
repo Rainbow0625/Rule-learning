@@ -13,7 +13,6 @@ class RSALW(object):
     def sim(self, para1, para2):  # similarity of vector or matrix
         return np.e ** (-np.linalg.norm(para1 - para2, ord=2))
 
-
     def index_convert(self, n, relzise, length):
         a = []
         while True:
@@ -30,13 +29,11 @@ class RSALW(object):
         a.reverse()
         return a
 
-
     def is_repeated(self, length, M_index):
         for i in range(1, length):
             if M_index[i] < M_index[0]:
                 return True
         return False
-
 
     def scorefunction1(self, flag, syn, pt, relation, length):  # synonymy!
         relsize = relation.shape[0]
@@ -148,7 +145,7 @@ class RSALW(object):
 
     def evaluate_and_filter(self, pt, index, DEGREE):
         # Evaluation certain rule.
-        M = [self.getmatrix(i) for i in index]
+        M = [self.getmatrix(i).toarray() for i in index]
         pmatrix = sparse.dok_matrix(np.linalg.multi_dot(M))
         ptmatrix = self.getmatrix(pt)
         # calculate the SC and HC
@@ -254,9 +251,11 @@ class RSALW(object):
         print(" Begin to use syn to filter: %d" % len(rawrulelist))
         for index in rawrulelist:
             if f == 0:  # matrix
+                # 对result进行判断！！！
                 result = self.evaluate_and_filter(nowPredicate[0], index, DEGREE)
-                candidate.append([index, result])
-                mark_Matrix[index.reshape(length, 1).tolist()] = 1
+                if result != 0:
+                    candidate.append([index, result])
+                    mark_Matrix[index.reshape(length, 1).tolist()] = 1
             elif f == 1:  # vector
                 # It needs to evaluate for all arranges of index.
                 for i in itertools.permutations(index.tolist(), length):
@@ -265,12 +264,13 @@ class RSALW(object):
                         continue
                     _index = np.array(i)
                     result = self.evaluate_and_filter(nowPredicate[0], _index, DEGREE)
-                    candidate.append([_index, result])
-                    mark_Matrix[np.array(i).reshape(length, 1).tolist()] = 1
+                    if result != 0:
+                        candidate.append([_index, result])
+                        mark_Matrix[np.array(i).reshape(length, 1).tolist()] = 1
 
-        middle_coocc = (np.max(coocc) - np.min(coocc)) * 0.82 + np.min(coocc)
+        middle_coocc = (np.max(coocc) - np.min(coocc)) * 0.7 + np.min(coocc)
         rawrulelist = np.argwhere(coocc > middle_coocc)
-        print(" Begin to use coocc to filter: %d" % len(rawrulelist))
+        print("\n Begin to use coocc to filter: %d" % len(rawrulelist))
         for index in rawrulelist:
             if mark_Matrix[index.reshape(length, 1).tolist()] == 0:
                 result = self.evaluate_and_filter(nowPredicate[0], index, DEGREE)
