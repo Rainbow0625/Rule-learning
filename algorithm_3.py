@@ -24,7 +24,7 @@ Max_rule_length = 3  # not include head atom
 work_threads = 5
 nbatches = 150
 margin = 1  # the margin for the loss function
-train_times = 500  # 1000
+train_times = 5  # 1000
 dimension = 50  # 50
 alpha = 0.01  # learning rate
 lmbda = 0.01  # degree of the regularization on the parameters
@@ -81,7 +81,7 @@ if __name__ == '__main__':
     t = time.time()
     print("\nGet ALL FACTS dictionary!")
     _p, pre = rsalw.get_pre(BENCHMARK)
-    fact_dic = rsalw.get_fact_dic(pre, facts_all)
+    fact_dic = rsalw.get_fact_dic(pre, facts_all, IsUncertain)
     print("Time: %s \n" % str(time.time() - t))
 
     # 0:matrix 1:vector
@@ -125,7 +125,7 @@ if __name__ == '__main__':
             # this part should be modified!!!!!
 
             candidate = rsalw.search_and_evaluate(1, length+1, BENCHMARK, nowPredicate, ent_emb, rel_emb,
-                                                dimension, ent_size_all, fact_dic, DEGREE)
+                                                  dimension, ent_size_all, fact_dic, DEGREE, IsUncertain)
             print("\n##End to search and evaluate##\n")
 
             save_rules(length+1, nowPredicate, candidate, pre)  # i+1:rule length.

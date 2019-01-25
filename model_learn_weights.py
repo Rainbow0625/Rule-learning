@@ -5,7 +5,8 @@ import json
 
 
 class LearnModel(object):
-    def __int__(self, rule_length, training_iteration, learning_rate, regularization_rate, fact_dic, entity_size):
+    def __int__(self, rule_length, training_iteration, learning_rate, regularization_rate,
+                fact_dic, entity_size, candidate, pt, isUncertain):
         self.rule_length = rule_length
         self.training_iteration = training_iteration
         self.learning_rate = learning_rate
@@ -14,28 +15,27 @@ class LearnModel(object):
         self.model_name = 'learnModel_trainIter=%d_lr=%f' % (training_iteration, learning_rate)
         self.fact_dic = fact_dic
         self.entity_size = entity_size
-        self.rule_num = -1
-        self.train_body = None
-        self.train_head = -1
-        self.para_w = None
-
-    def load_data(self, candidate, pt):
         self.rule_num = len(candidate)
-        self.train_body = np.array(candidate)
+        self.train_body = np.array([item[0] for item in candidate])
         self.train_head = pt
-        print("\nself.traindata:")
-        print(self.train_body)
+        self.para_w = None
+        self.isUncertain = isUncertain
 
     def get_matrix(self, p):
         # sparse matrix
         pfacts = self.fact_dic.get(p)
         pmatrix = sparse.dok_matrix((self.entity_size, self.entity_size), dtype=np.int32)
-        for f in pfacts:
-            pmatrix[f[0], f[1]] = 1
+        if self.isUncertain is True:
+            for f in pfacts:
+                pmatrix[f[0], f[1]] = f[2]
+        else:
+            for f in pfacts:
+                pmatrix[f[0], f[1]] = 1
         return pmatrix
 
     def train(self):
-
+        print("\nself.traindata:")
+        print(self.train_body)
         loss_history = []
         # batch training: the minimize the overall loss.
         with tf.Graph().as_default(), tf.Session() as sess:
@@ -49,6 +49,7 @@ class LearnModel(object):
                                           initializer=tf.random_normal_initializer,
                                           regularizer=tf.contrib.layers.l2_regularizer(self.regularization_rate))
 
+            # sparse matrix
             # get matrix operation
             M_R = None
             norm2_loss = 0.0
@@ -60,15 +61,16 @@ class LearnModel(object):
                         index = 0
                         M_R = self.get_matrix(x_body[i][j])
                     else:
-                        M_R = sparse.dok_matrix(np.dot(M_R, self.get_matrix(x_body[i][j])))
+                        M_R = M_R.dot(self.get_matrix(x_body[i][j]))
+                M_R = M_R.todok()
                 # define loss and train_step
                 _loss = 0.0
                 for key in M_R.keys():
-                    _loss = _loss + np.square(tf.slice(self.para_w, [i], [1]) * M_R[key[0], key[1]] - M_R_t[key[0], key[1]])
-                    M_R_t[key[0], key[1]] = -999
+                    _loss = _loss + np.square(tf.slice(self.para_w, [i], [1]) * M_R[key] - M_R_t[key])
+                    M_R_t[key] = -999
                 for key in M_R_t.keys():
-                    if M_R_t[key[0], key[1]] != -999:
-                        _loss = _loss + np.square(tf.slice(self.para_w, [i], [1]) * M_R[key[0], key[1]] - M_R_t[key[0], key[1]])
+                    if M_R_t[key] != -999:
+                        _loss = _loss + np.square(tf.slice(self.para_w, [i], [1]) * M_R[key] - M_R_t[key])
                 norm2_loss = norm2_loss + tf.sqrt(_loss)
             loss = norm2_loss + tf.nn.l2_loss(self.para_w)*self.regularization_rate
             # AdagradOptimizer GradientDescentOptimizer

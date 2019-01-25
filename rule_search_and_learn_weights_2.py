@@ -9,11 +9,14 @@ class RSALW(object):
     def __int__(self):
         self.fact_dic_all = {}
         self.entity_size_all = 0
+        self.length = 0
+        self.isUncertian = False
 
-    def sim(self, para1, para2):  # similarity of vector or matrix
+    @staticmethod
+    def sim(para1, para2):  # similarity of vector or matrix
         return np.e ** (-np.linalg.norm(para1 - para2, ord=2))
 
-    def index_convert(self, n, relzise, length):
+    def index_convert(self, n, relzise):
         a = []
         while True:
             s = n // relzise
@@ -22,24 +25,24 @@ class RSALW(object):
             if s == 0:
                 break
             n = s
-        le = length - len(a)
+        le = self.length - len(a)
         if le != 0:
             for _ in range(le):
                 a.append(0)
         a.reverse()
         return a
 
-    def is_repeated(self, length, M_index):
-        for i in range(1, length):
+    def is_repeated(self, M_index):
+        for i in range(1, self.length):
             if M_index[i] < M_index[0]:
                 return True
         return False
 
-    def scorefunction1(self, flag, syn, pt, relation, length):  # synonymy!
+    def scorefunction1(self, flag, syn, relation):  # synonymy!
         relsize = relation.shape[0]
         index_list = []
-        for i in range(pow(relsize, length)):
-            temp = self.index_convert(i, relsize, length)
+        for i in range(pow(relsize, self.length)):
+            temp = self.index_convert(i, relsize)
             index_list.append(temp)
         # print(index_list)
         for index in index_list:
@@ -48,19 +51,20 @@ class RSALW(object):
             # print(M)
             # print(M_index)
             if flag == 0:  # matrix
+                # array
                 result = np.linalg.multi_dot(M)
             else:  # vector
-                if self.is_repeated(length, M_index):
+                if self.is_repeated(M_index):
                     continue
                 else:
                     result = sum(M)
             # print(syn[M_index])
-            syn[M_index] = self.sim(result, relation[pt])
+            syn[tuple(M_index)] = self.sim(result, relation[self.pt])
             # print(syn[M_index])
         print("\nf1 matrix: ")
         print(syn)
 
-    def scorefunction2(self, coocc, relsize, facts, entity, pt, length):  # co-occurrence
+    def scorefunction2(self, coocc, relsize, facts, entity):  # co-occurrence
         # get the different object and subject for every predicate
         objdic = {}  # key:predicate value: set
         subdic = {}  # key:predicate value: set
@@ -90,18 +94,20 @@ class RSALW(object):
         # print("\n the dic's size is equal to the predicates' number! ")
         # print(len(average_vector))
         index_list = []
-        for i in range(pow(relsize, length)):
-            temp = self.index_convert(i, relsize, length)
+        for i in range(pow(relsize, self.length)):
+            temp = self.index_convert(i, relsize)
             index_list.append(temp)
         # print(index_list)
         for index in index_list:
             M_index = [[i] for i in index]
             # print(coocc[M_index])
             para_sum = 0.0
-            for i in range(length - 1):
+            for i in range(self.length - 1):
                 para_sum = para_sum + self.sim(average_vector.get(index[i])[1], average_vector.get(index[i + 1])[0])
-            coocc[M_index] = para_sum + self.sim(average_vector.get(index[0])[0], average_vector.get(pt)[0]) \
-                             + self.sim(average_vector.get(index[length - 1])[1], average_vector.get(pt)[1])
+            coocc[tuple(M_index)] = para_sum + self.sim(average_vector.get(index[0])[0],
+                                                        average_vector.get(self.pt)[0]) \
+                                    + self.sim(average_vector.get(index[self.length - 1])[1],
+                                               average_vector.get(self.pt)[1])
             # print(coocc[M_index])
         print("\nf2 matrix: ")
         print(coocc)
@@ -121,14 +127,14 @@ class RSALW(object):
         supp = 0
         body = 0
         # calculate New SC
-        supp_score = 0
-        body_score = 0
+        supp_score = 0.0
+        body_score = 0.0
         for key in pmatrix.keys():
             body = body + 1
-            body_score = body_score + pmatrix[key[0], key[1]]
-            if ptmatrix[key[0], key[1]] == 1:
+            body_score = body_score + pmatrix[key]
+            if ptmatrix[key] == 1:
                 supp = supp + 1
-                supp_score = supp_score + pmatrix[key[0], key[1]]
+                supp_score = supp_score + pmatrix[key]
         if body == 0:
             SC = 0
         else:
@@ -137,17 +143,20 @@ class RSALW(object):
             HC = 0
         else:
             HC = supp / head
-        if body_score == 0:
+        if body_score == 0.0:
             New_SC = 0
         else:
             New_SC = supp_score / body_score
         return New_SC, SC, HC
 
-    def evaluate_and_filter(self, pt, index, DEGREE):
+    def evaluate_and_filter(self, index, DEGREE):
         # Evaluation certain rule.
-        M = [self.getmatrix(i).toarray() for i in index]
-        pmatrix = sparse.dok_matrix(np.linalg.multi_dot(M))
-        ptmatrix = self.getmatrix(pt)
+        # sparse matrix
+        pmatrix = self.getmatrix(index[0])
+        for i in range(1, self.length):
+            pmatrix = pmatrix.dot(self.getmatrix(index[i]))
+        pmatrix = pmatrix.todok()
+        ptmatrix = self.getmatrix(self.pt)
         # calculate the SC and HC
         NSC, SC, HC = self.calSCandHC(pmatrix, ptmatrix)
         # 1: quality rule
@@ -163,18 +172,16 @@ class RSALW(object):
             return 1
         return 0
 
-    def learn_weights(self, fact_dic, candidate, entsize, pt):
-        # [[37, 0], [19, 0], [59, 0], [8, 0]]
-        rule_Length = 2
-        training_Iteration = 50
+    def learn_weights(self, candidate):
+        # In the whole data set to learn the weights.
+        training_Iteration = 100
         learning_Rate = 0.1
         regularization_rate = 0.1
 
         model = mlw.LearnModel()
-        model.__int__(rule_Length, training_Iteration, learning_Rate, regularization_rate, fact_dic, entsize)
-        model.load_data(candidate, pt)
+        model.__int__(self.length, training_Iteration, learning_Rate, regularization_rate,
+                      self.fact_dic_all, self.entity_size_all, candidate, self.pt, self.isUncertian)
         model.train()
-        return 0
 
     @staticmethod
     def get_facts(BENCHMARK, filename):
@@ -192,7 +199,7 @@ class RSALW(object):
         return int(preSize), pre
 
     @staticmethod
-    def get_fact_dic(pre_sample, facts_all):
+    def get_fact_dic(pre_sample, facts_all, isUncertian):
         fact_dic = {}
         f = len(facts_all)
         p = int(len(pre_sample) / 2)
@@ -205,16 +212,24 @@ class RSALW(object):
                     else:
                         temp_list1 = []
                         temp_list2 = []
-                    temp_list1.append([facts_all[i, 0], facts_all[i, 1]])
-                    temp_list2.append([facts_all[i, 1], facts_all[i, 0]])
+                    if isUncertian is True:
+                        temp_list1.append([facts_all[i, 0], facts_all[i, 1], facts_all[i, 3]])
+                        temp_list2.append([facts_all[i, 1], facts_all[i, 0], facts_all[i, 3]])
+                    else:
+                        temp_list1.append([facts_all[i, 0], facts_all[i, 1]])
+                        temp_list2.append([facts_all[i, 1], facts_all[i, 0]])
                     fact_dic[int(pre_sample[2 * j][0])] = temp_list1
                     fact_dic[int(pre_sample[2 * j + 1][0])] = temp_list2
-        # print(fact_dic.keys())
         return fact_dic
 
-    def search_and_evaluate(self, f, length, BENCHMARK, nowPredicate, ent_emb, rel_emb, dimension, ent_size_all, fact_dic, DEGREE):
+    def search_and_evaluate(self, f, length, BENCHMARK, nowPredicate, ent_emb, rel_emb,
+                            dimension, ent_size_all, fact_dic, DEGREE, isUncertain):
+        self.pt = nowPredicate[0]
         self.fact_dic_all = fact_dic
         self.entity_size_all = ent_size_all
+        self.length = length
+        self.isUncertian = isUncertain
+        print(str(self.length))
         relsize = rel_emb.shape[0]
         if f == 0:
             rel_emb = np.reshape(rel_emb, [relsize, dimension, dimension])
@@ -224,7 +239,7 @@ class RSALW(object):
         # Score Function
         # The array's shape is decided by the length of rule.
         shape = []
-        for i in range(length):
+        for i in range(self.length):
             shape.append(relsize)
         print("The shape of Matrix is %s." % str(shape))
         syn = np.zeros(shape=shape)
@@ -233,12 +248,12 @@ class RSALW(object):
 
         # calculate the f1
         print("\nBegin to calculate the f1: synonymy")
-        self.scorefunction1(f, syn, nowPredicate[0], rel_emb, length)
+        self.scorefunction1(f, syn, rel_emb)
         # calculate the f2
         print("\nBegin to calculate the f2: Co-occurrence")
         factsSize, facts = self.get_facts(BENCHMARK, filename="./sampled/")
         # print(facts)
-        _fact_dic = self.scorefunction2(coocc, relsize, facts, ent_emb, nowPredicate[0], length)
+        _fact_dic = self.scorefunction2(coocc, relsize, facts, ent_emb)
 
         # How to choose this value to get candidate rules? Important!
         candidate = []
@@ -252,33 +267,32 @@ class RSALW(object):
         for index in rawrulelist:
             if f == 0:  # matrix
                 # 对result进行判断！！！
-                result = self.evaluate_and_filter(nowPredicate[0], index, DEGREE)
+                result = self.evaluate_and_filter(index, DEGREE)
                 if result != 0:
                     candidate.append([index, result])
-                    mark_Matrix[index.reshape(length, 1).tolist()] = 1
+                    mark_Matrix[tuple(index.reshape(self.length, 1))] = 1
             elif f == 1:  # vector
                 # It needs to evaluate for all arranges of index.
-                for i in itertools.permutations(index.tolist(), length):
+                for i in itertools.permutations(index.tolist(), self.length):
                     # Deduplicate.
-                    if mark_Matrix[np.array(i).reshape(length, 1).tolist()] == 1:
+                    if mark_Matrix[tuple(np.array(i).reshape(self.length, 1))] == 1:
                         continue
                     _index = np.array(i)
-                    result = self.evaluate_and_filter(nowPredicate[0], _index, DEGREE)
+                    result = self.evaluate_and_filter(_index, DEGREE)
                     if result != 0:
                         candidate.append([_index, result])
-                        mark_Matrix[np.array(i).reshape(length, 1).tolist()] = 1
+                        mark_Matrix[tuple(np.array(i).reshape(self.length, 1))] = 1
 
         middle_coocc = (np.max(coocc) - np.min(coocc)) * 0.7 + np.min(coocc)
         rawrulelist = np.argwhere(coocc > middle_coocc)
         print("\n Begin to use coocc to filter: %d" % len(rawrulelist))
         for index in rawrulelist:
-            if mark_Matrix[index.reshape(length, 1).tolist()] == 0:
-                result = self.evaluate_and_filter(nowPredicate[0], index, DEGREE)
+            if mark_Matrix[tuple(index.reshape(self.length, 1))] == 0:
+                result = self.evaluate_and_filter(index, DEGREE)
                 if result != 0:
                     candidate.append([index, result])
 
         # Evaluation is still a cue method!
-
         print("\n*^_^* Yeah, there are %d rules. *^_^*\n" % len(candidate))
-        # learn_weights(fact_dic, candidate, entsize, nowPredicate[0])  #ent_size_all??? or entsize.
+        # learn_weights(candidate)
         return candidate
