@@ -39,10 +39,10 @@ model = TransE.TransE
 
 
 def save_rules(rule_length, nowPredicate, candidate, pre):
-    print("\nThe final rules are:")
+    print("The final rules :")
     i = 1
     f = open('./rule/' + BENCHMARK + '/rule_' + str(model)[15:21] + '.txt', 'a+')
-    print(str(nowPredicate[1]) + "\n")
+    # print(str(nowPredicate[1]) + "\n")
     f.write(str(nowPredicate[1]) + "\n")
     f.write("length: %d, num: %d\n" % (rule_length, len(candidate)))
     R_num = 0
@@ -50,20 +50,22 @@ def save_rules(rule_length, nowPredicate, candidate, pre):
     for rule in candidate:
         index = rule[0]
         flag = rule[1]
-        line = ""
+        degree = str(rule[2])
         if flag == 1:
             R_num = R_num + 1
-            line = "Rule " + str(i) + ": "
-        elif flag == 2:
+            title = "Rule " + str(i) + ": "
+        else:
             QR_num = QR_num + 1
-            line = "Qualify Rule " + str(i) + ": "
-        # output should be modified!
+            title = "Qualify Rule " + str(i) + ": "
+        line = title + " " + str(index) + " :[NSC, SC, HC] " + degree + " "
         for j in range(rule_length):
             line = line + str(index[j]) + " " + pre[index[j]][1] + "; "
         line = line + "\n"
-        print(line)
+        # print(line)
         f.write(line)
         i = i + 1
+    print("\nRules number: %d\n" % R_num)
+    print("Qualify Rules number: %d\n" % QR_num)
     f.write("\nRules number: %d\n" % R_num)
     f.write("Qualify Rules number: %d\n" % QR_num)
     f.close()
@@ -125,8 +127,6 @@ if __name__ == '__main__':
             print("\n##End to train embedding##\n")
 
             print("\n##Begin to search and evaluate##\n")
-            # this part should be modified!!!!!
-
             candidate = rsalw.search_and_evaluate(1, length+1, BENCHMARK, nowPredicate, ent_emb, rel_emb, dimension,
                                                   ent_size_all, fact_dic, DEGREE, IsUncertain, _syn, _coocc)
             print("\n##End to search and evaluate##\n")
@@ -144,8 +144,8 @@ if __name__ == '__main__':
         print("Until now, all %d predicates' average time: %f\n" % (Pt, total_time/(Pt+1)))
         break
     with open('./rule/'+BENCHMARK+'/rule_' + str(model)[15:21]+'.txt', 'a+') as f:
-        f.write("Embedding parameter:\n")
-        f.write("model: %s\n" + str(model))
+        f.write("\nEmbedding parameter:\n")
+        f.write("model: %s\n" % str(model))
         f.write("train_times: %d\n" % train_times)
         f.write("dimension: %d\n" % dimension)
         f.write("alpha: %f\n" % alpha)

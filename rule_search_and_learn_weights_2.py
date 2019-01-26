@@ -159,6 +159,7 @@ class RSALW(object):
         ptmatrix = self.getmatrix(self.pt)
         # calculate the SC and HC
         NSC, SC, HC = self.calSCandHC(pmatrix, ptmatrix)
+        degree = [NSC, SC, HC]
         # 1: quality rule
         # 2: high quality rule
         if SC >= DEGREE[0] and HC >= DEGREE[1]:
@@ -168,9 +169,9 @@ class RSALW(object):
             print("The NEW Standard Confidence of this rule is " + str(NSC))
             if SC >= DEGREE[2] and HC >= DEGREE[3]:
                 print("WOW, a high quality rule!")
-                return 2
-            return 1
-        return 0
+                return 2, degree
+            return 1, degree
+        return 0, None
 
     def learn_weights(self, candidate):
         # In the whole data set to learn the weights.
@@ -272,10 +273,9 @@ class RSALW(object):
         print(" Begin to use syn to filter: %d" % len(rawrulelist))
         for index in rawrulelist:
             if f == 0:  # matrix
-                # 对result进行判断！！！
-                result = self.evaluate_and_filter(index, DEGREE)
+                result, degree = self.evaluate_and_filter(index, DEGREE)
                 if result != 0:
-                    candidate.append([index, result])
+                    candidate.append([index, result, degree])
                     mark_Matrix[tuple(index.reshape(self.length, 1))] = 1
             elif f == 1:  # vector
                 # It needs to evaluate for all arranges of index.
@@ -284,9 +284,9 @@ class RSALW(object):
                     if mark_Matrix[tuple(np.array(i).reshape(self.length, 1))] == 1:
                         continue
                     _index = np.array(i)
-                    result = self.evaluate_and_filter(_index, DEGREE)
+                    result, degree = self.evaluate_and_filter(_index, DEGREE)
                     if result != 0:
-                        candidate.append([_index, result])
+                        candidate.append([_index, result, degree])
                         mark_Matrix[tuple(np.array(i).reshape(self.length, 1))] = 1
 
         middle_coocc = (np.max(coocc) - np.min(coocc)) * self._coocc + np.min(coocc)
@@ -294,9 +294,9 @@ class RSALW(object):
         print("\n Begin to use coocc to filter: %d" % len(rawrulelist))
         for index in rawrulelist:
             if mark_Matrix[tuple(index.reshape(self.length, 1))] == 0:
-                result = self.evaluate_and_filter(index, DEGREE)
+                result, degree = self.evaluate_and_filter(index, DEGREE)
                 if result != 0:
-                    candidate.append([index, result])
+                    candidate.append([index, result, degree])
 
         # Evaluation is still a cue method!
         print("\n*^_^* Yeah, there are %d rules. *^_^*\n" % len(candidate))
