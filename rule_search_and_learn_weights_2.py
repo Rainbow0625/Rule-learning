@@ -192,11 +192,12 @@ class RSALW(object):
 
     # Generally, get predicates after sampled.
     @staticmethod
-    def get_pre(BENCHMARK):
-        with open("./sampled/" + BENCHMARK + "/relation2id.txt") as f:
+    def get_pre(BENCHMARK, filename):
+        with open(filename + BENCHMARK + "/relation2id.txt") as f:
             preSize = f.readline()
-            pre = [line.strip('\n').split(' ') for line in f.readlines()]
-        return int(preSize), pre
+            pre = [line.strip('\n').split("	") for line in f.readlines()]
+            predicateName = [relation.split("	")[0] for relation in f.readlines()]
+        return predicateName, pre
 
     @staticmethod
     def get_fact_dic(pre_sample, facts_all, isUncertian):
