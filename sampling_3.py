@@ -97,8 +97,8 @@ def save_and_reindex(length, save_path, E, P, F, Pt, predicate_name):
         for i in range(pre_size):
             name = predicate_name[pre_sampled_list[i]]
             # Note that pre_sampled_list[i] is the old index!
-            f.write(str(2 * i) + " " + str(name) + " " + str(pre_sampled_list[i]) + "\n")
-            f.write(str(2 * i + 1) + " " + str(name) + "^-1 " + str(pre_sampled_list[i]) + "\n")
+            f.write(str(2 * i) + "	" + str(name) + "	" + str(pre_sampled_list[i]) + "\n")
+            f.write(str(2 * i + 1) + "	" + str(name) + "^-1	" + str(pre_sampled_list[i]) + "\n")
             if pre_sampled_list[i] == curPredicate[0]:
                 nowPredicate = [i, name]
 

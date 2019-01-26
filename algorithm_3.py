@@ -24,7 +24,7 @@ Max_rule_length = 3  # not include head atom
 work_threads = 5
 nbatches = 150
 margin = 1  # the margin for the loss function
-train_times = 5  # 1000
+train_times = 1000  # 1000
 dimension = 50  # 50
 alpha = 0.01  # learning rate
 lmbda = 0.01  # degree of the regularization on the parameters
@@ -69,20 +69,13 @@ def save_rules(rule_length, nowPredicate, candidate, pre):
 
 if __name__ == '__main__':
     begin = time.time()
-    print("\nThe benchmark is " + BENCHMARK + ".")
-    with open('./benchmarks/' + BENCHMARK + '/relation2id.txt', 'r') as f:
-        predicateSize = int(f.readline())
-        predicateName = [relation.split("	")[0] for relation in f.readlines()]
-        print("Total predicates:%d" % predicateSize)
-
-    # get ALL FACTS dictionary!
     rsalw = r.RSALW()
+    print("\nThe benchmark is " + BENCHMARK + ".")
+    predicateName, _ = rsalw.get_pre(BENCHMARK, filename='./benchmarks/')
+    predicateSize = len(_)
+    print("Total predicates:%d" % predicateSize)
+    # get ALL FACTS!
     fact_size, facts_all = rsalw.get_facts(BENCHMARK, filename="./benchmarks/")
-    t = time.time()
-    print("\nGet ALL FACTS dictionary!")
-    _p, pre = rsalw.get_pre(BENCHMARK)
-    fact_dic = rsalw.get_fact_dic(pre, facts_all, IsUncertain)
-    print("Time: %s \n" % str(time.time() - t))
 
     # 0:matrix 1:vector
     total_num_rule = 0
@@ -114,6 +107,14 @@ if __name__ == '__main__':
                 F.extend(F_i_new)
             nowPredicate = s.save_and_reindex(length+1, save_path, E, P, F, Pt, predicateName)
             print("\n##End to sample##\n")
+
+            t = time.time()
+            print("\nGet ALL FACTS dictionary!")
+            _, pre = rsalw.get_pre(BENCHMARK, "./sampled/")
+            fact_dic = rsalw.get_fact_dic(pre, facts_all, IsUncertain)
+            print(len(pre))
+            print(len(fact_dic))
+            print("Time: %s \n" % str(time.time() - t))
 
             print("\n##Begin to train embedding##\n")
             # The parameter of model should be adjust to the best parameters!!!!!!
