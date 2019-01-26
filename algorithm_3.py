@@ -19,6 +19,8 @@ QR_minSC = 0.5
 QR_minHC = 0.001
 DEGREE = [R_minSC, R_minHC, QR_minSC, QR_minHC]
 Max_rule_length = 3  # not include head atom
+_syn = 0.7
+_coocc = 0.7
 
 # embedding model parameters
 work_threads = 5
@@ -125,8 +127,8 @@ if __name__ == '__main__':
             print("\n##Begin to search and evaluate##\n")
             # this part should be modified!!!!!
 
-            candidate = rsalw.search_and_evaluate(1, length+1, BENCHMARK, nowPredicate, ent_emb, rel_emb,
-                                                  dimension, ent_size_all, fact_dic, DEGREE, IsUncertain)
+            candidate = rsalw.search_and_evaluate(1, length+1, BENCHMARK, nowPredicate, ent_emb, rel_emb, dimension,
+                                                  ent_size_all, fact_dic, DEGREE, IsUncertain, _syn, _coocc)
             print("\n##End to search and evaluate##\n")
 
             save_rules(length+1, nowPredicate, candidate, pre)  # i+1:rule length.
@@ -151,6 +153,8 @@ if __name__ == '__main__':
         f.write("bern: %f\n" % bern)
         f.write("\nR_minSC:%f, R_minHC:%f\n" % (R_minSC, R_minHC))
         f.write("QR_minSC:%f, QR_minHC:%f\n" % (QR_minSC, QR_minHC))
+        f.write("_syn: %f\n" % _syn)
+        f.write("_coocc: %f\n" % _coocc)
         f.write("Total number of rules: %d\n" % total_num_rule)
         f.write("Average time:%s\n" % str(total_time/int(predicateSize)))  # unless it runs to end.
         f.close()

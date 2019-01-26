@@ -195,8 +195,11 @@ class RSALW(object):
     def get_pre(BENCHMARK, filename):
         with open(filename + BENCHMARK + "/relation2id.txt") as f:
             preSize = f.readline()
-            pre = [line.strip('\n').split("	") for line in f.readlines()]
-            predicateName = [relation.split("	")[0] for relation in f.readlines()]
+            pre = []
+            predicateName = []
+            for line in f.readlines():
+                pre.append(line.strip('\n').split("	"))
+                predicateName.append(line.split("	")[0])
         return predicateName, pre
 
     @staticmethod
@@ -223,13 +226,15 @@ class RSALW(object):
                     fact_dic[int(pre_sample[2 * j + 1][0])] = temp_list2
         return fact_dic
 
-    def search_and_evaluate(self, f, length, BENCHMARK, nowPredicate, ent_emb, rel_emb,
-                            dimension, ent_size_all, fact_dic, DEGREE, isUncertain):
+    def search_and_evaluate(self, f, length, BENCHMARK, nowPredicate, ent_emb, rel_emb, dimension,
+                            ent_size_all, fact_dic, DEGREE, isUncertain, _syn, _coocc):
         self.pt = nowPredicate[0]
         self.fact_dic_all = fact_dic
         self.entity_size_all = ent_size_all
         self.length = length
         self.isUncertian = isUncertain
+        self._syn = _syn
+        self._coocc = _coocc
         print(str(self.length))
         relsize = rel_emb.shape[0]
         if f == 0:
@@ -262,7 +267,7 @@ class RSALW(object):
         # Method 1: Top ones until it reaches the 100th. OMIT!
         # Method 2: Use two matrices to catch rules.
 
-        middle_syn = (np.max(syn) - np.min(syn)) * 0.6 + np.min(syn)
+        middle_syn = (np.max(syn) - np.min(syn)) * self._syn + np.min(syn)
         rawrulelist = np.argwhere(syn > middle_syn)
         print(" Begin to use syn to filter: %d" % len(rawrulelist))
         for index in rawrulelist:
@@ -284,7 +289,7 @@ class RSALW(object):
                         candidate.append([_index, result])
                         mark_Matrix[tuple(np.array(i).reshape(self.length, 1))] = 1
 
-        middle_coocc = (np.max(coocc) - np.min(coocc)) * 0.7 + np.min(coocc)
+        middle_coocc = (np.max(coocc) - np.min(coocc)) * self._coocc + np.min(coocc)
         rawrulelist = np.argwhere(coocc > middle_coocc)
         print("\n Begin to use coocc to filter: %d" % len(rawrulelist))
         for index in rawrulelist:
