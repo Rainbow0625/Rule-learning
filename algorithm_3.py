@@ -4,7 +4,7 @@ import sampling_3 as s
 from models import TransE, TransD, TransH, TransR, RESCAL
 import train_embedding as te
 import rule_search_and_learn_weights_2 as r
-
+import gc
 '''
 import sys
 sys.stdout.write('\r'+str())
@@ -18,9 +18,9 @@ R_minHC = 0.001
 QR_minSC = 0.5
 QR_minHC = 0.001
 DEGREE = [R_minSC, R_minHC, QR_minSC, QR_minHC]
-Max_rule_length = 3  # not include head atom
-_syn = 0.7
-_coocc = 0.7
+Max_rule_length = 4  # not include head atom
+_syn = 0.8
+_coocc = 0.8
 
 # embedding model parameters
 work_threads = 5
@@ -73,13 +73,13 @@ def save_rules(rule_length, nowPredicate, candidate, pre):
 
 if __name__ == '__main__':
     begin = time.time()
-    rsalw = r.RSALW()
+
     print("\nThe benchmark is " + BENCHMARK + ".")
-    predicateName, _ = rsalw.get_pre(BENCHMARK, filename='./benchmarks/')
+    predicateName, _ = r.RSALW.get_pre(BENCHMARK, filename='./benchmarks/')
     predicateSize = len(_)
     print("Total predicates:%d" % predicateSize)
     # get ALL FACTS!
-    fact_size, facts_all = rsalw.get_facts(BENCHMARK, filename="./benchmarks/")
+    fact_size, facts_all = r.RSALW.get_facts(BENCHMARK, filename="./benchmarks/")
 
     # 0:matrix 1:vector
     total_num_rule = 0
@@ -114,8 +114,8 @@ if __name__ == '__main__':
 
             t = time.time()
             print("\nGet ALL FACTS dictionary!")
-            _, pre = rsalw.get_pre(BENCHMARK, "./sampled/")
-            fact_dic = rsalw.get_fact_dic(pre, facts_all, IsUncertain)
+            _, pre = r.RSALW.get_pre(BENCHMARK, "./sampled/")
+            fact_dic = r.RSALW.get_fact_dic(pre, facts_all, IsUncertain)
             print(len(pre))
             print(len(fact_dic))
             print("Time: %s \n" % str(time.time() - t))
@@ -127,6 +127,7 @@ if __name__ == '__main__':
             print("\n##End to train embedding##\n")
 
             print("\n##Begin to search and evaluate##\n")
+            rsalw = r.RSALW()
             candidate = rsalw.search_and_evaluate(1, length+1, BENCHMARK, nowPredicate, ent_emb, rel_emb, dimension,
                                                   ent_size_all, fact_dic, DEGREE, IsUncertain, _syn, _coocc)
             print("\n##End to search and evaluate##\n")
@@ -136,6 +137,8 @@ if __name__ == '__main__':
             Pt_i = time.time()
             print("Length = %d, Time = %f" % (length+1, (Pt_i-Pt_i_1)))
             Pt_i_1 = Pt_i
+            del ent_emb, rel_emb, candidate, fact_dic, rsalw
+            gc.collect()
         total_num_rule = total_num_rule + num_rule
         Pt_end = time.time()
         Pt_time = Pt_end - Pt_start

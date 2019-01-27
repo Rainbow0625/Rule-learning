@@ -3,6 +3,7 @@ import numpy as np
 from scipy import sparse
 import model_learn_weights as mlw
 import itertools
+import gc
 
 
 class RSALW(object):
@@ -59,6 +60,8 @@ class RSALW(object):
                 else:
                     result = sum(M)
             # print(syn[M_index])
+            del M
+            gc.collect()
             syn[tuple(M_index)] = self.sim(result, relation[self.pt])
             # print(syn[M_index])
         print("\nf1 matrix: ")
@@ -91,6 +94,8 @@ class RSALW(object):
             sub = sum([entity[item, :] for item in subdic[key]]) / len(subdic[key])
             obj = sum([entity[item, :] for item in objdic[key]]) / len(objdic[key])
             average_vector[key] = [sub, obj]
+        del subdic, objdic
+        gc.collect()
         # print("\n the dic's size is equal to the predicates' number! ")
         # print(len(average_vector))
         index_list = []
@@ -111,7 +116,7 @@ class RSALW(object):
             # print(coocc[M_index])
         print("\nf2 matrix: ")
         print(coocc)
-        return factdic
+        return None
 
     def getmatrix(self, p):
         # sparse matrix
@@ -261,6 +266,8 @@ class RSALW(object):
         factsSize, facts = self.get_facts(BENCHMARK, filename="./sampled/")
         # print(facts)
         _fact_dic = self.scorefunction2(coocc, relsize, facts, ent_emb)
+        del ent_emb, rel_emb
+        gc.collect()
 
         # How to choose this value to get candidate rules? Important!
         candidate = []
@@ -288,6 +295,8 @@ class RSALW(object):
                     if result != 0:
                         candidate.append([_index, result, degree])
                         mark_Matrix[tuple(np.array(i).reshape(self.length, 1))] = 1
+        del rawrulelist
+        gc.collect()
 
         middle_coocc = (np.max(coocc) - np.min(coocc)) * self._coocc + np.min(coocc)
         rawrulelist = np.argwhere(coocc > middle_coocc)
@@ -297,8 +306,12 @@ class RSALW(object):
                 result, degree = self.evaluate_and_filter(index, DEGREE)
                 if result != 0:
                     candidate.append([index, result, degree])
+        del rawrulelist
+        gc.collect()
 
         # Evaluation is still a cue method!
         print("\n*^_^* Yeah, there are %d rules. *^_^*\n" % len(candidate))
         # learn_weights(candidate)
+        del syn, coocc, mark_Matrix
+        gc.collect()
         return candidate
