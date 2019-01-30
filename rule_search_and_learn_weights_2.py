@@ -60,8 +60,6 @@ class RSALW(object):
                 else:
                     result = sum(M)
             # print(syn[M_index])
-            del M
-            gc.collect()
             syn[tuple(M_index)] = self.sim(result, relation[self.pt])
             # print(syn[M_index])
         print("\nf1 matrix: ")
@@ -94,8 +92,6 @@ class RSALW(object):
             sub = sum([entity[item, :] for item in subdic[key]]) / len(subdic[key])
             obj = sum([entity[item, :] for item in objdic[key]]) / len(objdic[key])
             average_vector[key] = [sub, obj]
-        del subdic, objdic
-        gc.collect()
         # print("\n the dic's size is equal to the predicates' number! ")
         # print(len(average_vector))
         index_list = []
@@ -254,29 +250,38 @@ class RSALW(object):
         for i in range(self.length):
             shape.append(relsize)
         print("The shape of Matrix is %s." % str(shape))
-        syn = np.zeros(shape=shape)
-        coocc = np.zeros(shape=shape)
-        mark_Matrix = np.zeros(shape=shape)
 
         # calculate the f1
         print("\nBegin to calculate the f1: synonymy")
+        syn = np.zeros(shape=shape)
         self.scorefunction1(f, syn, rel_emb)
         # calculate the f2
         print("\nBegin to calculate the f2: Co-occurrence")
         factsSize, facts = self.get_facts(BENCHMARK, filename="./sampled/")
         # print(facts)
+        coocc = np.zeros(shape=shape)
         _fact_dic = self.scorefunction2(coocc, relsize, facts, ent_emb)
+
+        if not gc.isenabled():
+            gc.enable()
         del ent_emb, rel_emb
         gc.collect()
+        gc.disable()
 
         # How to choose this value to get candidate rules? Important!
         candidate = []
+        mark_Matrix = np.zeros(shape=shape)
         print("Begin to get candidate rules.")
         # Method 1: Top ones until it reaches the 100th. OMIT!
         # Method 2: Use two matrices to catch rules.
-
+        # syn
         middle_syn = (np.max(syn) - np.min(syn)) * self._syn + np.min(syn)
         rawrulelist = np.argwhere(syn > middle_syn)
+        if not gc.isenabled():
+            gc.enable()
+        del syn
+        gc.collect()
+        gc.disable()
         print(" Begin to use syn to filter: %d" % len(rawrulelist))
         for index in rawrulelist:
             if f == 0:  # matrix
@@ -295,23 +300,35 @@ class RSALW(object):
                     if result != 0:
                         candidate.append([_index, result, degree])
                         mark_Matrix[tuple(np.array(i).reshape(self.length, 1))] = 1
+
+        if not gc.isenabled():
+            gc.enable()
         del rawrulelist
         gc.collect()
+        gc.disable()
 
         middle_coocc = (np.max(coocc) - np.min(coocc)) * self._coocc + np.min(coocc)
         rawrulelist = np.argwhere(coocc > middle_coocc)
+        if not gc.isenabled():
+            gc.enable()
+        del coocc
+        gc.collect()
+        gc.disable()
         print("\n Begin to use coocc to filter: %d" % len(rawrulelist))
         for index in rawrulelist:
             if mark_Matrix[tuple(index.reshape(self.length, 1))] == 0:
                 result, degree = self.evaluate_and_filter(index, DEGREE)
                 if result != 0:
                     candidate.append([index, result, degree])
-        del rawrulelist
+
+        if not gc.isenabled():
+            gc.enable()
+        del rawrulelist, mark_Matrix
         gc.collect()
+        gc.disable()
 
         # Evaluation is still a cue method!
         print("\n*^_^* Yeah, there are %d rules. *^_^*\n" % len(candidate))
         # learn_weights(candidate)
-        del syn, coocc, mark_Matrix
-        gc.collect()
+
         return candidate

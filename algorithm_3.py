@@ -84,6 +84,9 @@ if __name__ == '__main__':
     # 0:matrix 1:vector
     total_num_rule = 0
     total_time = 0
+
+    # Init original algo object
+    rsalw = r.RSALW()
     for Pt in range(predicateSize):
         # 对于每个规则长度进行循环!
         Pt_start = time.time()
@@ -127,7 +130,6 @@ if __name__ == '__main__':
             print("\n##End to train embedding##\n")
 
             print("\n##Begin to search and evaluate##\n")
-            rsalw = r.RSALW()
             candidate = rsalw.search_and_evaluate(1, length+1, BENCHMARK, nowPredicate, ent_emb, rel_emb, dimension,
                                                   ent_size_all, fact_dic, DEGREE, IsUncertain, _syn, _coocc)
             print("\n##End to search and evaluate##\n")
@@ -137,15 +139,20 @@ if __name__ == '__main__':
             Pt_i = time.time()
             print("Length = %d, Time = %f" % (length+1, (Pt_i-Pt_i_1)))
             Pt_i_1 = Pt_i
-            del ent_emb, rel_emb, candidate, fact_dic, rsalw
+
+            if not gc.isenabled():
+                gc.enable()
+            del ent_emb, rel_emb, candidate, fact_dic
             gc.collect()
+            gc.disable()
+        break
         total_num_rule = total_num_rule + num_rule
         Pt_end = time.time()
         Pt_time = Pt_end - Pt_start
         total_time = total_time + Pt_time
         print("This %d th predicate's total time: %f\n" % (Pt, Pt_time))
         print("Until now, all %d predicates' average time: %f\n" % (Pt, total_time/(Pt+1)))
-        break
+
     with open('./rule/'+BENCHMARK+'/rule_' + str(model)[15:21]+'.txt', 'a+') as f:
         f.write("\nEmbedding parameter:\n")
         f.write("model: %s\n" % str(model))
