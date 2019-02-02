@@ -39,7 +39,7 @@ class RSALW(object):
                 return True
         return False
 
-    def scorefunction1(self, flag, syn, relation):  # synonymy!
+    def score_function1(self, flag, score_top_container, relation):  # synonymy!
         relsize = relation.shape[0]
         index_list = []
         for i in range(pow(relsize, self.length)):
@@ -47,25 +47,26 @@ class RSALW(object):
             index_list.append(temp)
         # print(index_list)
         for index in index_list:
-            M_index = [[i] for i in index]
             M = [relation[i] for i in index]
             # print(M)
-            # print(M_index)
             if flag == 0:  # matrix
                 # array
                 result = np.linalg.multi_dot(M)
             else:  # vector
-                if self.is_repeated(M_index):
+                if self.is_repeated(index):
                     continue
                 else:
                     result = sum(M)
-            # print(syn[M_index])
-            syn[tuple(M_index)] = self.sim(result, relation[self.pt])
-            # print(syn[M_index])
-        print("\nf1 matrix: ")
-        print(syn)
+            top_values = score_top_container[:, self.length]
+            value = self.sim(result, relation[self.pt])
+            if value > np.min(top_values):
+                replace_index = np.argmin(top_values)
+                for i in range(self.length):
+                    score_top_container[replace_index][i] = index[i]
+                score_top_container[replace_index][self.length] = value
+                # print(score_top_container[replace_index])
 
-    def scorefunction2(self, coocc, relsize, facts, entity):  # co-occurrence
+    def score_function2(self, score_top_container, relsize, facts, entity):  # co-occurrence
         # get the different object and subject for every predicate
         objdic = {}  # key:predicate value: set
         subdic = {}  # key:predicate value: set
@@ -100,19 +101,20 @@ class RSALW(object):
             index_list.append(temp)
         # print(index_list)
         for index in index_list:
-            M_index = [[i] for i in index]
-            # print(coocc[M_index])
             para_sum = 0.0
             for i in range(self.length - 1):
                 para_sum = para_sum + self.sim(average_vector.get(index[i])[1], average_vector.get(index[i + 1])[0])
-            coocc[tuple(M_index)] = para_sum + self.sim(average_vector.get(index[0])[0],
+            value = para_sum + self.sim(average_vector.get(index[0])[0],
                                                         average_vector.get(self.pt)[0]) \
                                     + self.sim(average_vector.get(index[self.length - 1])[1],
                                                average_vector.get(self.pt)[1])
-            # print(coocc[M_index])
-        print("\nf2 matrix: ")
-        print(coocc)
-        return None
+            top_values = score_top_container[:, self.length]
+            if value > np.min(top_values):
+                replace_index = np.argmin(top_values)
+                for i in range(self.length):
+                    score_top_container[replace_index][i] = index[i]
+                score_top_container[replace_index][self.length] = value
+                # print(score_top_container[replace_index])
 
     def getmatrix(self, p):
         # sparse matrix
@@ -237,7 +239,7 @@ class RSALW(object):
         self.isUncertian = isUncertain
         self._syn = _syn
         self._coocc = _coocc
-        print(str(self.length))
+        print("Length = %d." % self.length)
         relsize = rel_emb.shape[0]
         if f == 0:
             rel_emb = np.reshape(rel_emb, [relsize, dimension, dimension])
@@ -245,90 +247,69 @@ class RSALW(object):
         # print(entity.shape)  # (-1, 100)
 
         # Score Function
-        # The array's shape is decided by the length of rule.
-        shape = []
-        for i in range(self.length):
-            shape.append(relsize)
-        print("The shape of Matrix is %s." % str(shape))
+        candidate = []
+        all_candidate_set = []  # Eliminate duplicate indexes.
+        top_candidate_size = int(pow(relsize, length) * _syn)
+        score_top_container = np.zeros(shape=(top_candidate_size, self.length+1))
+        print("The number of SYN Top Candidates is %d" % top_candidate_size)
 
         # calculate the f1
         print("\nBegin to calculate the f1: synonymy")
-        syn = np.zeros(shape=shape)
-        self.scorefunction1(f, syn, rel_emb)
-        # calculate the f2
-        print("\nBegin to calculate the f2: Co-occurrence")
-        factsSize, facts = self.get_facts(BENCHMARK, filename="./sampled/")
-        # print(facts)
-        coocc = np.zeros(shape=shape)
-        _fact_dic = self.scorefunction2(coocc, relsize, facts, ent_emb)
-
-        if not gc.isenabled():
-            gc.enable()
-        del ent_emb, rel_emb
-        gc.collect()
-        gc.disable()
-
-        # How to choose this value to get candidate rules? Important!
-        candidate = []
-        mark_Matrix = np.zeros(shape=shape)
-        print("Begin to get candidate rules.")
+        self.score_function1(f, score_top_container, rel_emb)
         # Method 1: Top ones until it reaches the 100th. OMIT!
         # Method 2: Use two matrices to catch rules.
-        # syn
-        middle_syn = (np.max(syn) - np.min(syn)) * self._syn + np.min(syn)
-        rawrulelist = np.argwhere(syn > middle_syn)
-        if not gc.isenabled():
-            gc.enable()
-        del syn
-        gc.collect()
-        gc.disable()
-        print(" Begin to use syn to filter: %d" % len(rawrulelist))
-        for index in rawrulelist:
+        print(" Begin to use syn to filter: ")
+        for item in score_top_container:
+            index = [int(item[i]) for i in range(self.length)]
+            # print(index)
             if f == 0:  # matrix
                 result, degree = self.evaluate_and_filter(index, DEGREE)
-                if result != 0:
+                if result != 0 and index not in all_candidate_set:
+                    all_candidate_set.append(index)
                     candidate.append([index, result, degree])
-                    mark_Matrix[tuple(index.reshape(self.length, 1))] = 1
             elif f == 1:  # vector
                 # It needs to evaluate for all arranges of index.
-                for i in itertools.permutations(index.tolist(), self.length):
+                for i in itertools.permutations(index, self.length):
                     # Deduplicate.
-                    if mark_Matrix[tuple(np.array(i).reshape(self.length, 1))] == 1:
+                    _index = list(np.array(i))
+                    if _index in all_candidate_set:
                         continue
-                    _index = np.array(i)
                     result, degree = self.evaluate_and_filter(_index, DEGREE)
                     if result != 0:
+                        all_candidate_set.append(_index)
                         candidate.append([_index, result, degree])
-                        mark_Matrix[tuple(np.array(i).reshape(self.length, 1))] = 1
-
         if not gc.isenabled():
             gc.enable()
-        del rawrulelist
+        del rel_emb, score_top_container
         gc.collect()
         gc.disable()
 
-        middle_coocc = (np.max(coocc) - np.min(coocc)) * self._coocc + np.min(coocc)
-        rawrulelist = np.argwhere(coocc > middle_coocc)
-        if not gc.isenabled():
-            gc.enable()
-        del coocc
-        gc.collect()
-        gc.disable()
-        print("\n Begin to use coocc to filter: %d" % len(rawrulelist))
-        for index in rawrulelist:
-            if mark_Matrix[tuple(index.reshape(self.length, 1))] == 0:
+        # calculate the f2
+        top_candidate_size = int(pow(relsize, length) * _coocc)
+        score_top_container = np.zeros(shape=(top_candidate_size, self.length+1))
+        print("The number of COOCC Top Candidates is %d" % top_candidate_size)
+        factsSize, facts = self.get_facts(BENCHMARK, filename="./sampled/")
+        print("\nBegin to calculate the f2: Co-occurrence")
+        self.score_function2(score_top_container, relsize, facts, ent_emb)
+
+        print("\n Begin to use coocc to filter: ")
+        for item in score_top_container:
+            index = [int(item[i]) for i in range(self.length)]
+            if index not in all_candidate_set:
                 result, degree = self.evaluate_and_filter(index, DEGREE)
                 if result != 0:
                     candidate.append([index, result, degree])
+                    all_candidate_set.append(index)
 
         if not gc.isenabled():
             gc.enable()
-        del rawrulelist, mark_Matrix
+        del ent_emb, score_top_container
         gc.collect()
         gc.disable()
 
         # Evaluation is still a cue method!
         print("\n*^_^* Yeah, there are %d rules. *^_^*\n" % len(candidate))
+
         # learn_weights(candidate)
 
         return candidate

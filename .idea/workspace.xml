@@ -5,7 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c9808219-108e-4eff-8411-46aa89649d69" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/algorithm_3.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithm_3.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/rule/FB15K237/rule_After_RESCAL.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/rule_search_and_learn_weights_2.py" beforeDir="false" afterPath="$PROJECT_DIR$/rule_search_and_learn_weights_2.py" afterDir="false" />
@@ -30,22 +29,10 @@
       <file leaf-file-name="algorithm_3.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/algorithm_3.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="68">
-              <caret line="130" lean-forward="true" selection-start-line="130" selection-end-line="130" />
+            <state relative-caret-position="-461">
+              <caret line="24" column="11" lean-forward="true" selection-start-line="24" selection-start-column="11" selection-end-line="24" selection-end-column="11" />
               <folding>
                 <element signature="e#23#34#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="sampling_3.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/sampling_3.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1338">
-              <caret line="24" column="12" lean-forward="true" selection-start-line="24" selection-start-column="12" selection-end-line="24" selection-end-column="12" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -54,8 +41,8 @@
       <file leaf-file-name="rule_search_and_learn_weights_2.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/rule_search_and_learn_weights_2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="397">
-              <caret line="333" column="24" lean-forward="true" selection-start-line="333" selection-start-column="24" selection-end-line="333" selection-end-column="24" />
+            <state relative-caret-position="203">
+              <caret line="304" column="23" lean-forward="true" selection-start-line="304" selection-start-column="23" selection-end-line="304" selection-end-column="23" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -74,16 +61,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>This is</find>
-      <find>fb15k</find>
-      <find>iter</find>
-      <find>getmatrix</find>
-      <find>The total of train triples is</find>
-      <find>/relation2id.txt</find>
-      <find>preSize</find>
-      <find>Fact.txt</find>
-      <find>pre</find>
-      <find>extend</find>
       <find>multi_dot</find>
       <find>print</find>
       <find>rever</find>
@@ -104,6 +81,16 @@
       <find>candidate</find>
       <find>del</find>
       <find>gc.collect()</find>
+      <find>pow</find>
+      <find>max</find>
+      <find>Get ALL FACTS dictionary!</find>
+      <find>[79, 0]</find>
+      <find>[8 0]</find>
+      <find>score_top_container</find>
+      <find>39</find>
+      <find>evaluate_and_filter</find>
+      <find>top_candidate_size</find>
+      <find>[94, 0]</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -151,18 +138,18 @@
         <option value="$PROJECT_DIR$/sampling.py" />
         <option value="$PROJECT_DIR$/config/Config.py" />
         <option value="$PROJECT_DIR$/rule_search_and_learn_weights.py" />
-        <option value="$PROJECT_DIR$/test.py" />
         <option value="$PROJECT_DIR$/sampling_3.py" />
         <option value="$PROJECT_DIR$/model_learn_weights.py" />
         <option value="$PROJECT_DIR$/rule_search_and_learn_weights_2.py" />
+        <option value="$PROJECT_DIR$/test.py" />
+        <option value="$PROJECT_DIR$/send_process_report_email.py" />
         <option value="$PROJECT_DIR$/algorithm_3.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="y" value="23" />
+  <component name="ProjectFrameBounds" fullScreen="true">
     <option name="width" value="1280" />
-    <option name="height" value="723" />
+    <option name="height" value="800" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -205,7 +192,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.algorithm_3">
+  <component name="RunManager" selected="Python.test">
     <configuration name="algorithm" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="test" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -305,8 +292,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.algorithm_3" />
         <item itemvalue="Python.test" />
+        <item itemvalue="Python.algorithm_3" />
         <item itemvalue="Python.algorithm_2" />
         <item itemvalue="Python.unifiedFormatOfData" />
         <item itemvalue="Python.algorithm" />
@@ -336,13 +323,14 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1280" height="723" extended-state="6" />
+    <frame x="0" y="0" width="1280" height="800" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49676025" visible="true" weight="0.2319301" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49676025" visible="true" weight="0.1985703" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32905984" />
       <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.5019857" side_tool="true" weight="0.30528054" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4980143" weight="0.36324787" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32905984" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.4980143" visible="true" weight="0.45299146" />
       <window_info anchor="bottom" id="Version Control" order="9" weight="0.32905984" />
       <window_info anchor="bottom" id="Python Console" order="7" weight="0.32905984" />
       <window_info id="Structure" order="1" sideWeight="0.50323975" side_tool="true" weight="0.18427323" />
@@ -355,7 +343,6 @@
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.32905984" />
     </layout>
     <layout-to-restore>
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -412,23 +399,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/algorithm_3.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="418">
-          <caret line="26" column="14" selection-start-line="26" selection-start-column="14" selection-end-line="26" selection-end-column="15" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/rule_search_and_learn_weights_2.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2907">
-          <caret line="157" column="8" lean-forward="true" selection-start-line="157" selection-start-column="8" selection-end-line="157" selection-end-column="33" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/model_learn_weights.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="38">
@@ -681,13 +651,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="51" column="17" lean-forward="true" selection-start-line="51" selection-start-column="17" selection-end-line="51" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/sampled/FB15K237/relation2id.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="76">
@@ -719,16 +682,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/rule_search_and_learn_weights_2.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="397">
-          <caret line="333" column="24" lean-forward="true" selection-start-line="333" selection-start-column="24" selection-end-line="333" selection-end-column="24" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/sampling_3.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1338">
@@ -739,10 +692,47 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="204">
+          <caret line="79" column="68" lean-forward="true" selection-start-line="79" selection-start-column="68" selection-end-line="79" selection-end-column="68" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/anaconda3/python.app/Contents/lib/python3.6/smtplib.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="112">
+          <caret line="751" selection-start-line="751" selection-end-line="751" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/rule_search_and_learn_weights_2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="203">
+          <caret line="304" column="23" lean-forward="true" selection-start-line="304" selection-start-column="23" selection-end-line="304" selection-end-column="23" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/send_process_report_email.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="221">
+          <caret line="32" column="23" lean-forward="true" selection-start-line="32" selection-start-column="23" selection-end-line="32" selection-end-column="23" />
+          <folding>
+            <element signature="e#80#94#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/algorithm_3.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="68">
-          <caret line="130" lean-forward="true" selection-start-line="130" selection-end-line="130" />
+        <state relative-caret-position="-461">
+          <caret line="24" column="11" lean-forward="true" selection-start-line="24" selection-start-column="11" selection-end-line="24" selection-end-column="11" />
           <folding>
             <element signature="e#23#34#0" expanded="true" />
           </folding>

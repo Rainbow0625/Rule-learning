@@ -5,6 +5,9 @@ from models import TransE, TransD, TransH, TransR, RESCAL
 import train_embedding as te
 import rule_search_and_learn_weights_2 as r
 import gc
+
+import send_process_report_email
+
 '''
 import sys
 sys.stdout.write('\r'+str())
@@ -19,8 +22,8 @@ QR_minSC = 0.5
 QR_minHC = 0.001
 DEGREE = [R_minSC, R_minHC, QR_minSC, QR_minHC]
 Max_rule_length = 4  # not include head atom
-_syn = 0.8
-_coocc = 0.8
+_syn = 0.05
+_coocc = 0.05
 
 # embedding model parameters
 work_threads = 5
@@ -119,8 +122,6 @@ if __name__ == '__main__':
             print("\nGet ALL FACTS dictionary!")
             _, pre = r.RSALW.get_pre(BENCHMARK, "./sampled/")
             fact_dic = r.RSALW.get_fact_dic(pre, facts_all, IsUncertain)
-            print(len(pre))
-            print(len(fact_dic))
             print("Time: %s \n" % str(time.time() - t))
 
             print("\n##Begin to train embedding##\n")
@@ -145,13 +146,22 @@ if __name__ == '__main__':
             del ent_emb, rel_emb, candidate, fact_dic
             gc.collect()
             gc.disable()
-        break
+
+            # Send report process E-mail!
+            # Set options
+            subject = 'ruleLearning_RainbowWu'
+            text = 'Learning length of \'' + str(length) + '\' is DONE!' + '\nWe are going to start loop of \'' \
+                   + str(length + 1) + '\'!'
+            # Send email
+            send_process_report_email.send_email_main_process(subject, text)
+
         total_num_rule = total_num_rule + num_rule
         Pt_end = time.time()
         Pt_time = Pt_end - Pt_start
         total_time = total_time + Pt_time
         print("This %d th predicate's total time: %f\n" % (Pt, Pt_time))
         print("Until now, all %d predicates' average time: %f\n" % (Pt, total_time/(Pt+1)))
+        break
 
     with open('./rule/'+BENCHMARK+'/rule_' + str(model)[15:21]+'.txt', 'a+') as f:
         f.write("\nEmbedding parameter:\n")
