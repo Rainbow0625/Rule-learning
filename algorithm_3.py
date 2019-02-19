@@ -22,8 +22,8 @@ QR_minSC = 0.5
 QR_minHC = 0.001
 DEGREE = [R_minSC, R_minHC, QR_minSC, QR_minHC]
 Max_rule_length = 4  # not include head atom
-_syn = 0.05
-_coocc = 0.05
+_syn = 1000
+_coocc = 1000
 
 # embedding model parameters
 work_threads = 5
@@ -150,8 +150,8 @@ if __name__ == '__main__':
             # Send report process E-mail!
             # Set options
             subject = 'ruleLearning_RainbowWu'
-            text = 'Learning length of \'' + str(length) + '\' is DONE!' + '\nWe are going to start loop of \'' \
-                   + str(length + 1) + '\'!'
+            text = 'Learning length of \'' + str(length+1) + '\' is DONE!' + '\nWe are going to start loop of \'' \
+                   + str(length + 2) + '\'!'
             # Send email
             send_process_report_email.send_email_main_process(subject, text)
 

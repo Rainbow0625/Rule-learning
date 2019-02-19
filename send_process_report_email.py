@@ -9,8 +9,8 @@ import sys
 report_email_smtp_server = 'smtp.qq.com'
 report_email_smtp_port = 465
 report_email_sender = 'rainbowwu0625@foxmail.com'
-report_email_password = 'sgduwxgppilgbjjd'  # !!!!!!!!!
-report_email_receiver = ['rainbowwu0625@foxmail.com', 'jiangmenglee@foxmail.com']
+report_email_password = 'nisrhhlwaoiicacf'  # !!!!!!!!!
+report_email_receiver = ['rainbowwu0625@foxmail.com']
 
 
 def send_email_main_process(subject, text):
@@ -28,7 +28,7 @@ def send_email_main_process(subject, text):
     msg['From'] = sender
     msg['To'] = ', '.join(targets)
 
-    server = smtplib.SMTP_SSL(smtp_ssl_host, smtp_ssl_port)
+    server = smtplib.SMTP(smtp_ssl_host)
     # server.ehlo()
     # server.starttls()
     server.login(username, password)

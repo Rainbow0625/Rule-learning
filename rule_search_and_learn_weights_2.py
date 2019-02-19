@@ -249,7 +249,8 @@ class RSALW(object):
         # Score Function
         candidate = []
         all_candidate_set = []  # Eliminate duplicate indexes.
-        top_candidate_size = int(pow(relsize, length) * _syn)
+        # top_candidate_size = int(pow(relsize, length) * _syn)
+        top_candidate_size = _syn
         score_top_container = np.zeros(shape=(top_candidate_size, self.length+1))
         print("The number of SYN Top Candidates is %d" % top_candidate_size)
 
@@ -285,7 +286,8 @@ class RSALW(object):
         gc.disable()
 
         # calculate the f2
-        top_candidate_size = int(pow(relsize, length) * _coocc)
+        # top_candidate_size = int(pow(relsize, length) * _coocc)
+        top_candidate_size = _coocc
         score_top_container = np.zeros(shape=(top_candidate_size, self.length+1))
         print("The number of COOCC Top Candidates is %d" % top_candidate_size)
         factsSize, facts = self.get_facts(BENCHMARK, filename="./sampled/")
