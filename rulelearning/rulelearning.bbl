@@ -1,0 +1,140 @@
+\begin{thebibliography}{}
+
+\bibitem[\protect\citeauthoryear{Antoine \bgroup \em et al.\egroup
+  }{2013}]{Bordes:transe}
+Bordes Antoine, Usunier Nicolas, Garcia-Duran Alberto, Weston Jason, and
+  Yakhnenko Oksana.
+\newblock Translating embeddings for modeling multi-relational data.
+\newblock In {\em Advances in Neural Information Processing Systems 26}, pages
+  2787--2795. Curran Associates, Inc., 2013.
+
+\bibitem[\protect\citeauthoryear{Auer \bgroup \em et al.\egroup
+  }{2007}]{Dbpedia}
+Soren Auer, Christian Bizer, Georgi Kobilarov, Jens Lehmann, Richard Cyganiak,
+  and Zachary Ives.
+\newblock Dbpedia: A nucleus for a web of open data.
+\newblock In {\em ISWC}, page 722–735, 2007.
+
+\bibitem[\protect\citeauthoryear{Barati \bgroup \em et al.\egroup
+  }{2016}]{Molood:SWARM}
+Molood Barati, Quan Bai, and Qing Liu.
+\newblock Swarm: An approach for mining semantic association rules from
+  semantic web data.
+\newblock In Richard Booth and Min-Ling Zhang, editors, {\em PRICAI 2016:
+  Trends in Artificial Intelligence}, pages 30--43, Cham, 2016.
+
+\bibitem[\protect\citeauthoryear{Chen \bgroup \em et al.\egroup
+  }{2016}]{Chen:ScaLeKB}
+Yang Chen, Daisy~Zhe Wang, and Sean Goldberg.
+\newblock Scalekb: scalable learning and inference over large knowledge bases.
+\newblock {\em The VLDB Journal}, 25(6):893--918, Dec 2016.
+
+\bibitem[\protect\citeauthoryear{Chen \bgroup \em et al.\egroup
+  }{2018}]{UKG2018}
+Xuelu Chen, Muhao Chen, Weijia Shi, Yizhou Sun, and Carlo Zaniolo.
+\newblock Embedding uncertain knowledge graphs.
+\newblock {\em CoRR}, abs/1811.10667, 2018.
+
+\bibitem[\protect\citeauthoryear{Cohen}{2016}]{Cohen:TensorLog}
+William~W. Cohen.
+\newblock Tensorlog: A differentiable deductive database.
+\newblock {\em CoRR}, abs/1605.06523, 2016.
+
+\bibitem[\protect\citeauthoryear{Gal\'{a}rraga \bgroup \em et al.\egroup
+  }{2013}]{Galarraga:AMIE}
+Luis~Antonio Gal\'{a}rraga, Christina Teflioudi, Katja Hose, and Fabian
+  Suchanek.
+\newblock Amie: Association rule mining under incomplete evidence in
+  ontological knowledge bases.
+\newblock In {\em Proceedings of the 22Nd International Conference on World
+  Wide Web}, WWW '13, pages 413--422, New York, NY, USA, 2013. ACM.
+
+\bibitem[\protect\citeauthoryear{Gal{\'a}rraga \bgroup \em et al.\egroup
+  }{2015}]{Galarraga:AMIE+}
+Luis Gal{\'a}rraga, Christina Teflioudi, Katja Hose, and Fabian~M. Suchanek.
+\newblock Fast rule mining in ontological knowledge bases with
+  amie{\$}{\$}+{\$}{\$}+.
+\newblock {\em The VLDB Journal}, 24(6):707--730, Dec 2015.
+
+\bibitem[\protect\citeauthoryear{Jones \bgroup \em et al.\egroup
+  }{2015}]{Jones:Co-occurence}
+Michael~N. Jones, Jon Willits, and Simon Dennis.
+\newblock Models of semantic memory.
+\newblock In {\em Oxford Handbook of Mathematical and Computational
+  Psychology}, page 232–254, 2015.
+
+\bibitem[\protect\citeauthoryear{Lin \bgroup \em et al.\egroup
+  }{2015}]{Liu:ptranse}
+Yankai Lin, Zhiyuan Liu, and Maosong Sun.
+\newblock Modeling relation paths for representation learning of knowledge
+  bases.
+\newblock {\em EMNLP}, pages 705--714, 06 2015.
+
+\bibitem[\protect\citeauthoryear{Mitchell \bgroup \em et al.\egroup
+  }{2018}]{NELL}
+T.~Mitchell, W.~Cohen, E.~Hruschka, P.~Talukdar, B.~Yang, J.~Betteridge,
+  A.~Carlson, B.~Dalvi, M.~Gardner, B.~Kisiel, and et~al.
+\newblock Never-ending learning.
+\newblock {\em Communications of the ACM}, 2018.
+
+\bibitem[\protect\citeauthoryear{Nickel \bgroup \em et al.\egroup
+  }{2012}]{Nickel:RESCAL}
+Maximilian Nickel, Volker Tresp, and Hans-Peter Kriegel.
+\newblock Factorizing yago: Scalable machine learning for linked data.
+\newblock In {\em Proceedings of the 21st International Conference on World
+  Wide Web}, WWW '12, pages 271--280, New York, NY, USA, 2012. ACM.
+
+\bibitem[\protect\citeauthoryear{Omran \bgroup \em et al.\egroup
+  }{2018}]{Omran:RLvLR}
+Pouya~Ghiasnezhad Omran, Kewen Wang, and Zhe Wang.
+\newblock Scalable rule learning via learning representation.
+\newblock {\em Twenty-Seventh International Joint Conference on Artificial
+  Intelligence}, pages 2149--2155, July 2018.
+
+\bibitem[\protect\citeauthoryear{Paritosh \bgroup \em et al.\egroup
+  }{2008}]{Freebase}
+Praveen Paritosh, Tim Sturge, and Jamie Taylor.
+\newblock Freebase: a collaboratively created graph database for structuring
+  human knowledge.
+\newblock In {\em SIGMOD}, pages 1247--1250, 2008.
+
+\bibitem[\protect\citeauthoryear{Speer \bgroup \em et al.\egroup
+  }{2017}]{Conceptnet}
+R.~Speer, Chin J., and Havasi C.
+\newblock Conceptnet 5.5: An open multilingual graph of general knowledge.
+\newblock {\em AAAI}, 2017.
+
+\bibitem[\protect\citeauthoryear{Stephen}{1997}]{Muggleton:ILP}
+Muggleton Stephen.
+\newblock Learning from positive data.
+\newblock In {\em Inductive Logic Programming.}, pages 358--376. Springer
+  Berlin Heidelberg, 1997.
+
+\bibitem[\protect\citeauthoryear{Suchanek \bgroup \em et al.\egroup
+  }{2007}]{Yago}
+Fabian~M Suchanek, Gjergji Kasneci, and Gerhard Weikum.
+\newblock Yago: a core of semantic knowledge.
+\newblock In {\em WWW}, page 697–706, 2007.
+
+\bibitem[\protect\citeauthoryear{Vrandečić and Krötzsch}{2014}]{Wikidata}
+Denny Vrandečić and Markus Krötzsch.
+\newblock Wikidata: A free collaborative knowledge base.
+\newblock {\em Communications of the ACM}, 57:78--85, 2014.
+
+\bibitem[\protect\citeauthoryear{Yang \bgroup \em et al.\egroup
+  }{2015}]{Yang:2015}
+Bishan Yang, Scott Wen-tau Yih, Xiaodong He, Jianfeng Gao, and Li~Deng.
+\newblock Embedding entities and relations for learning and inference in
+  knowledge bases.
+\newblock In {\em Proceedings of the International Conference on Learning
+  Representations (ICLR)}, May 2015.
+
+\bibitem[\protect\citeauthoryear{Yang \bgroup \em et al.\egroup
+  }{2017}]{Yang:NeuralLP}
+Fan Yang, Zhilin Yang, and William~W. Cohen.
+\newblock Differentiable learning of logical rules for knowledge base
+  reasoning.
+\newblock In {\em Advances in Neural Information Processing Systems 30}, pages
+  2319--2328. Curran Associates, Inc., 2017.
+
+\end{thebibliography}

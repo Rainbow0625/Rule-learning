@@ -1,0 +1,46 @@
+This is BibTeX, Version 0.99d (TeX Live 2017)
+Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
+The top-level auxiliary file: rulelearning.aux
+The style file: named.bst
+Database file #1: rulelearning.bib
+You've used 20 entries,
+            2439 wiz_defined-function locations,
+            687 strings with 8147 characters,
+and the built_in function-call counts, 10033 in all, are:
+= -- 1056
+> -- 436
+< -- 12
++ -- 150
+- -- 150
+* -- 739
+:= -- 1507
+add.period$ -- 65
+call.type$ -- 20
+change.case$ -- 154
+chr.to.int$ -- 20
+cite$ -- 20
+duplicate$ -- 454
+empty$ -- 704
+format.name$ -- 171
+if$ -- 2194
+int.to.chr$ -- 1
+int.to.str$ -- 0
+missing$ -- 20
+newline$ -- 103
+num.names$ -- 62
+pop$ -- 153
+preamble$ -- 1
+purify$ -- 174
+quote$ -- 0
+skip$ -- 420
+stack$ -- 0
+substring$ -- 519
+swap$ -- 191
+text.length$ -- 12
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 160
+warning$ -- 0
+while$ -- 73
+width$ -- 23
+write$ -- 269
