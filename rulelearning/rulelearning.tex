@@ -67,7 +67,7 @@
 	\subsection{Representation Learning}
 	The entities, concepts and relationships in knowledge graphs are represented by discrete and explicit symbols, which are difficult to be directly applied to deep learning models such as neural networks based on continuous numerical representation. 
 	In order to effectively utilize the symbolic knowledge in the KGs, researchers have proposed a large number of representation methods for knowledge graphs. These methods transform the entities and predicates of discrete KGs into continuous dimensional space, such as {\bf RESCAL} \cite{Nickel:RESCAL}, {\bf TransE} \cite{Bordes:transe}, {\bf PTransE} \cite{Liu:ptranse} and {\bf DistMult} \cite{Yang:2015}. Deterministic KG embeddings have been extensively explored by recent work. In~\cite{UKG2018}, they propose a novel uncertain KG embedding model {\bf UKGE}, which aims to preserve both structural and uncertainty information of relation facts in the embedding space. 
-	
+
 	Based on these embedded representation models, a more reasonable {\em "rule representation"} model can be studied and a rule mining system capable of handling large KG is designed. 
 	
 	\subsection{Rule Mining}
@@ -132,10 +132,11 @@ appear in the body part.
 	Due to the characteristic of closed-path rules, we can apply the \textsf{Sampling($\cdot$)} algorithm to get a smaller KB $K^{'}=\{E^{'}, P^{'}, F^{'}\}$ that contains all the potential predicates with related entities and facts before working directly on large KB. 
 	\begin{figure}
 		\centering
-		\includegraphics[width=75mm]{sample.pdf}\\
+		\includegraphics[width=85mm]{sample.pdf}\\
 		\caption{Sample for the target predicate $P_t$.}
 		\label{fig:sample}
 	\end{figure}
+	
 	As can be seen from Figure~\ref{fig:sample}, begining with the target predicate $P_t$ (get $P_0$), the related entities are sampled (get $E_0$). Then the sample range of predicates is expanded (get $P_i$) according to the maximum length of the body atoms to obtain the related entities and facts (get $E_i$). 
 	
 	Assuming the $MaxLen = n$, the incrementing process of the sample is as follows:
@@ -154,15 +155,23 @@ appear in the body part.
 	% new add!
 	Although there must be duplicate predicates in the set $P_i$ at each $i$th layer, it doesn't matter because we allow recursionin the CP rules. In the latter rule search phase, the sequence obtained by performing the Cartesian product operation on the predicate set $P_i$ of each layer can effectively reduce the computation cost compared to using the Cartesian product of all the predicate set$P$.
 	In the work of repeating the RLvLR algorithm, we first sample all the entities and predicates of maximum layers, and then perform rule search. In most cases, when the rule length reaches 5 (including head), $P^{'}=P$.
-	
+	\begin{figure}
+		\centering
+		\includegraphics[scale=0.4,height=38mm]{rule.pdf}\\
+		\caption{The predicate sets after sampling contain the predicates on the sequence of path.}
+		\label{fig:rule}
+	\end{figure}
 	% new add!
 	NEW ADD:
 	($length$ not include head)
-	$$length = 2, P_1\times P_1$$
-	$$length = 3, P_1\times P_2\times P_1$$
-	$$length = 4, P_1\times P_2\times P_2\times P_1$$
-	$$length = 5, P_1\times P_2\times P_3\times P_2\times P_1$$
-	$$\cdots$$
+	\begin{align}
+		length &= 2, P_1\times P_1 \nonumber\\
+		length &= 3, P_1\times P_2\times P_1 \nonumber\\
+		length &= 4, P_1\times P_2\times P_2\times P_1 \nonumber\\
+		length &= 5, P_1\times P_2\times P_3\times P_2\times P_1 \nonumber\\
+		&\cdots \nonumber
+	\end{align}
+	
 	
 	\subsection{Embedding Model}
 	After sampling, in \textsf{Embedding($\cdot$)}, entities and predicates in $K^{'}$ are embedded into the representation of vector ($ent_{emb}$ and $pre_{emb}$) using the embedding model, respectively. Unlike {\bf RESCAL}, which is used in {\bf RLvLR} to embed predicates as matrices, we use those such that {\bf TransE} can project predicates into vectors.
