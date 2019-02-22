@@ -22,8 +22,8 @@ QR_minSC = 0.5
 QR_minHC = 0.001
 DEGREE = [R_minSC, R_minHC, QR_minSC, QR_minHC]
 Max_rule_length = 4  # not include head atom
-_syn = 1000
-_coocc = 1000
+_syn = 0.2
+_coocc = 0.2
 
 # embedding model parameters
 work_threads = 5
@@ -91,68 +91,99 @@ if __name__ == '__main__':
     # Init original algo object
     rsalw = r.RSALW()
     for Pt in range(predicateSize):
-        # 对于每个规则长度进行循环!
         Pt_start = time.time()
         Pt_i_1 = Pt_start
-        print("\n##Begin to sample##\n")
-        # after sample by Pt, return the E_i-1 and F_i-1.
-        E_i_1, P_i_1, F_i_1, F_rest, ent_size_all = s.first_sample_by_Pt(BENCHMARK, Pt)
-        # initialization variable.
-        E = E_i_1
-        P = P_i_1
-        F = F_i_1
-        E_i_1_new = E_i_1
-        save_path = './sampled/' + BENCHMARK
+        # Initialization all the variables.
         num_rule = 0
-        for length in range(1, Max_rule_length):
-            for i in range(length-1, length):  # only run once.
-                # Sample stage.
-                E_i, P_i, F_i_new, F_rest_new = s.sample_by_length(i+1, E_i_1_new, F_rest)
-                # get the next cycle's variable.
-                E_i_1_new = E_i - E_i_1
-                F_rest = F_rest_new
-                # merge the result
+        ent_emb = None
+        rel_emb = None
+        nowPredicate = None
+        fact_dic = None
+        pre = None
+        P_new_index_list = None
+
+        # Firstly, sample all the elements!
+        print("\n##Begin to sample##\n")
+        save_path = './sampled/' + BENCHMARK
+        # After sample by Pt, return the E_i-1 and F_i-1.
+        # Can not remove the repeated facts!
+        facts, ent_size_all = s.read_data(BENCHMARK)
+        E_0, P_0, F_0, facts = s.first_sample_by_Pt(Pt, facts)
+        # Initialization the sample variables.
+        E = E_0
+        P = P_0
+        F = F_0
+        E_i_1_new = E_0
+        P_i_list = [P_0]
+        max_i = int((Max_rule_length + 1) / 2)
+        for length in range(2, Max_rule_length+1):
+            cur_max_i = int((length+1)/2)
+            if len(P_i_list) < cur_max_i+1:
+                # If the next P_i hasn't be computed:
+                print("\nNeed to compute the P_%d\n" % cur_max_i)
+                E_i, P_i, F_i_new, facts = s.sample_by_i(cur_max_i, E_i_1_new, facts)
+                # Get the next cycle's variable.
+                E_i_1_new = E_i - E  # remove the duplicate entity.!!!!!!!!!!!!
+                # Merge the result.
                 E = E | E_i
                 P = P | P_i
                 F.extend(F_i_new)
-            nowPredicate = s.save_and_reindex(length+1, save_path, E, P, F, Pt, predicateName)
-            print("\n##End to sample##\n")
+                P_i_list.append(P_i)
+                nowPredicate, P_new_index_list = s.save_and_reindex(length, save_path, E, P, F, Pt, predicateName,
+                                                                    P_i_list)
+                print("\n##End to sample##\n")
 
-            t = time.time()
-            print("\nGet ALL FACTS dictionary!")
-            _, pre = r.RSALW.get_pre(BENCHMARK, "./sampled/")
-            fact_dic = r.RSALW.get_fact_dic(pre, facts_all, IsUncertain)
-            print("Time: %s \n" % str(time.time() - t))
+                print("\nGet ALL FACTS dictionary!")
+                t = time.time()
+                _, pre = r.RSALW.get_pre(BENCHMARK, "./sampled/")
+                fact_dic = r.RSALW.get_fact_dic(pre, facts_all, IsUncertain)
+                print("Time: %s \n" % str(time.time() - t))
 
-            print("\n##Begin to train embedding##\n")
-            # The parameter of model should be adjust to the best parameters!!!!!!
-            ent_emb, rel_emb = te.trainModel(1, BENCHMARK, work_threads, train_times, nbatches, dimension, alpha, lmbda,
-                                             bern, margin, model)
-            print("\n##End to train embedding##\n")
+                print("\n##Begin to train embedding##\n")
+                # The parameter of model should be adjust to the best parameters!
+                ent_emb, rel_emb = te.trainModel(1, BENCHMARK, work_threads, train_times, nbatches, dimension, alpha,
+                                                 lmbda, bern, margin, model)
+                print("\n##End to train embedding##\n")
+
+                # Garbage collection.
+                if not gc.isenabled():
+                    gc.enable()
+                gc.collect()
+                gc.disable()
+
+            else:
+                print("\nNeedn't to compute the next P_i")
+                print("##End to sample##\n")
+
+                print("\n##Begin to train embedding##")
+                print("Needn't to train embedding")
+                print("##End to train embedding##\n")
 
             print("\n##Begin to search and evaluate##\n")
-            candidate = rsalw.search_and_evaluate(1, length+1, BENCHMARK, nowPredicate, ent_emb, rel_emb, dimension,
-                                                  ent_size_all, fact_dic, DEGREE, IsUncertain, _syn, _coocc)
+            candidate = rsalw.search_and_evaluate(BENCHMARK, IsUncertain, 1, length, dimension, DEGREE, nowPredicate,
+                                                  ent_emb, rel_emb, ent_size_all, fact_dic,
+                                                  _syn, _coocc, P_new_index_list)
             print("\n##End to search and evaluate##\n")
 
-            save_rules(length+1, nowPredicate, candidate, pre)  # i+1:rule length.
+            # Save rules and timing.
+            save_rules(length, nowPredicate, candidate, pre)
             num_rule = num_rule + len(candidate)
             Pt_i = time.time()
-            print("Length = %d, Time = %f" % (length+1, (Pt_i-Pt_i_1)))
+            print("Length = %d, Time = %f" % (length, (Pt_i-Pt_i_1)))
             Pt_i_1 = Pt_i
 
+            # Garbage collection.
             if not gc.isenabled():
                 gc.enable()
-            del ent_emb, rel_emb, candidate, fact_dic
+            del candidate
             gc.collect()
             gc.disable()
 
             # Send report process E-mail!
-            # Set options
             subject = 'ruleLearning_RainbowWu'
-            text = 'Learning length of \'' + str(length+1) + '\' is DONE!' + '\nWe are going to start loop of \'' \
-                   + str(length + 2) + '\'!'
-            # Send email
+            text = 'Learning length of \'' + str(length) + '\' is DONE!' + '\nWe are going to start loop of \'' \
+                   + str(length + 1) + '\'!'
+            # Send email.
             send_process_report_email.send_email_main_process(subject, text)
 
         total_num_rule = total_num_rule + num_rule

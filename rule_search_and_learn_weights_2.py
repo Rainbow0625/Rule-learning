@@ -39,14 +39,31 @@ class RSALW(object):
                 return True
         return False
 
+    def get_index_tuple(self):
+        max_i = int((self.length + 1) / 2)
+        a = [x for x in range(1, max_i + 1)]
+        if self.length % 2 == 0:  # even
+            b = a.copy()
+        else:  # odd
+            b = a.copy()
+            b.pop()
+        b.reverse()
+        a.extend(b)
+        P_cartprod_list = [self.P_i[i] for i in a]
+        self.index_tuple_size = 1
+        for item in P_cartprod_list:
+            self.index_tuple_size = self.index_tuple_size * len(item)
+        print("\nindex_tuple_size: %d" % self.index_tuple_size)
+        self.index_tuple = itertools.product(*P_cartprod_list)
+
     def score_function1(self, flag, score_top_container, relation):  # synonymy!
-        relsize = relation.shape[0]
-        index_list = []
-        for i in range(pow(relsize, self.length)):
-            temp = self.index_convert(i, relsize)
-            index_list.append(temp)
+        # relsize = relation.shape[0]
+        # index_list = []
+        # for i in range(pow(relsize, self.length)):
+        #     temp = self.index_convert(i, relsize)
+        #     index_list.append(temp)
         # print(index_list)
-        for index in index_list:
+        for index in self.index_tuple:
             M = [relation[i] for i in index]
             # print(M)
             if flag == 0:  # matrix
@@ -95,12 +112,8 @@ class RSALW(object):
             average_vector[key] = [sub, obj]
         # print("\n the dic's size is equal to the predicates' number! ")
         # print(len(average_vector))
-        index_list = []
-        for i in range(pow(relsize, self.length)):
-            temp = self.index_convert(i, relsize)
-            index_list.append(temp)
-        # print(index_list)
-        for index in index_list:
+
+        for index in self.index_tuple:
             para_sum = 0.0
             for i in range(self.length - 1):
                 para_sum = para_sum + self.sim(average_vector.get(index[i])[1], average_vector.get(index[i + 1])[0])
@@ -230,8 +243,9 @@ class RSALW(object):
                     fact_dic[int(pre_sample[2 * j + 1][0])] = temp_list2
         return fact_dic
 
-    def search_and_evaluate(self, f, length, BENCHMARK, nowPredicate, ent_emb, rel_emb, dimension,
-                            ent_size_all, fact_dic, DEGREE, isUncertain, _syn, _coocc):
+    def search_and_evaluate(self, BENCHMARK, isUncertain, f, length, dimension, DEGREE, nowPredicate,
+                            ent_emb, rel_emb, ent_size_all, fact_dic,
+                            _syn, _coocc, P_new_index_list):
         self.pt = nowPredicate[0]
         self.fact_dic_all = fact_dic
         self.entity_size_all = ent_size_all
@@ -239,6 +253,7 @@ class RSALW(object):
         self.isUncertian = isUncertain
         self._syn = _syn
         self._coocc = _coocc
+        self.P_i = P_new_index_list
         print("Length = %d." % self.length)
         relsize = rel_emb.shape[0]
         if f == 0:
@@ -246,25 +261,29 @@ class RSALW(object):
         # print(relation.shape)  # (-1, 100, 100) or (-1, 100)
         # print(entity.shape)  # (-1, 100)
 
+        # Get index tuple.
+        self.get_index_tuple()
+
         # Score Function
         candidate = []
         all_candidate_set = []  # Eliminate duplicate indexes.
         # top_candidate_size = int(pow(relsize, length) * _syn)
-        top_candidate_size = _syn
+        top_candidate_size = int(_syn * self.index_tuple_size)
         score_top_container = np.zeros(shape=(top_candidate_size, self.length+1))
         print("The number of SYN Top Candidates is %d" % top_candidate_size)
 
-        # calculate the f1
+        # Calculate the f1.
         print("\nBegin to calculate the f1: synonymy")
         self.score_function1(f, score_top_container, rel_emb)
         # Method 1: Top ones until it reaches the 100th. OMIT!
         # Method 2: Use two matrices to catch rules.
-        print(" Begin to use syn to filter: ")
+        print("\n Begin to use syn to filter: ")
         for item in score_top_container:
             index = [int(item[i]) for i in range(self.length)]
             # print(index)
             if f == 0:  # matrix
                 result, degree = self.evaluate_and_filter(index, DEGREE)
+
                 if result != 0 and index not in all_candidate_set:
                     all_candidate_set.append(index)
                     candidate.append([index, result, degree])
@@ -285,9 +304,9 @@ class RSALW(object):
         gc.collect()
         gc.disable()
 
-        # calculate the f2
+        # Calculate the f2.
         # top_candidate_size = int(pow(relsize, length) * _coocc)
-        top_candidate_size = _coocc
+        top_candidate_size = int(_coocc * self.index_tuple_size)
         score_top_container = np.zeros(shape=(top_candidate_size, self.length+1))
         print("The number of COOCC Top Candidates is %d" % top_candidate_size)
         factsSize, facts = self.get_facts(BENCHMARK, filename="./sampled/")

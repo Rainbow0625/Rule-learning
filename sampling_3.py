@@ -13,45 +13,43 @@ def read_data(BENCHMARK):  # index from 0
         entity_size = int(f.readline())
         f.close()
         print("(Before sample, total entities:%d)" % entity_size)
+    f = np.zeros(factSize, dtype='int32')
+    facts = np.c_[facts, f]
     return facts, entity_size
 
 
-def first_sample_by_Pt(BENCHMARK, Pt):
+def first_sample_by_Pt(Pt, facts):
     print("Step 1: First sample by Pt to get E_0:")
     time_start = time.time()
-    facts, entitysize = read_data(BENCHMARK)
     E_0 = set()
-    P_0 = {Pt}
+    P_0 = set()
+    P_0.add(Pt)
     F_0 = []
-    F_rest = []
     for f in facts:
-        fact = f.tolist()
-        if f[2] == Pt:
+        if f[2] == Pt and f[3] == 0:
+            fact = f.tolist()
             F_0.append(fact)
+            f[3] = 1  # Mark it has been included.
             if f[0] not in E_0:
                 E_0.add(f[0])
             if f[1] not in E_0:
                 E_0.add(f[1])
-        else:
-            F_rest.append(fact)
     print("E_0 size: %d" % len(E_0))
     print("P_0 size: %d" % len(P_0))
     print("F_0 size: %d" % len(F_0))
-    print("F_rest size: %d" % len(F_rest))
     time_end = time.time()
     print('Step 1 cost time:', time_end-time_start)
-    return E_0, P_0, F_0, F_rest, entitysize
+    return E_0, P_0, F_0, facts
 
 
-def sample_by_length(index, E_i_1_new, F_rest):
-    print("\nStep 2: Sample by length get E_%d:" % index)
+def sample_by_i(index, E_i_1_new, facts):
+    print("\nStep 2: Sample by %d:" % index)
     time_start = time.time()
     E_i = set()  # Maybe it contains some repeated entities.
     P_i = set()
     F_i_new = []
-    F_rest_new = []
     flag = 0
-    for f in F_rest:
+    for f in facts:
         if f[0] in E_i_1_new:  # set can not add the same element
             E_i.add(f[1])
             P_i.add(f[2])
@@ -60,21 +58,19 @@ def sample_by_length(index, E_i_1_new, F_rest):
             E_i.add(f[0])
             P_i.add(f[2])
             flag = 1
-        if flag == 1:
+        if flag == 1 and f[3] == 0:
             F_i_new.append(f)
-        else:
-            F_rest_new.append(f)
+            f[3] = 1
         flag = 0
     print("E_%d size: %d (Maybe it contains some repeated entities.)" % (index, len(E_i)))
     print("P_%d size: %d" % (index, len(P_i)))
     print("F_%d_new size: %d" % (index, len(F_i_new)))
-    print("F_rest size: %d" % len(F_rest_new))
     time_end = time.time()
     print('Step 2 cost time:', time_end - time_start)
-    return E_i, P_i, F_i_new, F_rest_new
+    return E_i, P_i, F_i_new, facts
 
 
-def save_and_reindex(length, save_path, E, P, F, Pt, predicate_name):
+def save_and_reindex(length, save_path, E, P, F, Pt, predicate_name, P_list):
     print("\nFinal Step:save and reindex, length = %d:" % length)
     curPredicate = [Pt, predicate_name[Pt]]
 
@@ -101,8 +97,22 @@ def save_and_reindex(length, save_path, E, P, F, Pt, predicate_name):
             f.write(str(2 * i + 1) + "	" + str(name) + "^-1	" + str(pre_sampled_list[i]) + "\n")
             if pre_sampled_list[i] == curPredicate[0]:
                 nowPredicate = [i, name]
-
         f.close()
+    # process the sample predicates' index.
+    P_new_index_list = []
+    for P_i in P_list:  #P_i is a set.
+        P_i_list = []
+        for p_old_index in P_i:
+            new_index = pre_sampled_list.index(p_old_index)
+            P_i_list.append(new_index)
+        P_new_index_list.append(P_i_list)
+    # test
+    print("after sample, the index:")
+    for i in range(len(P_list)):
+        print("i = %d, len=%d" % (i, len(P_list[i])))
+    print("after sample, the reindex:")
+    for i in range(len(P_new_index_list)):
+        print("i = %d, len=%d" % (i, len(P_new_index_list[i])))
 
     # Fact: need to double.
     Fact = []
@@ -125,4 +135,4 @@ def save_and_reindex(length, save_path, E, P, F, Pt, predicate_name):
     print('old:%d new:%d' % (curPredicate[0], nowPredicate[0]))
     print("Pt's original index -- %d : %s" % (curPredicate[0], curPredicate[1]))
     print("Pt's new index -- %d : %s" % (nowPredicate[0], nowPredicate[1]))
-    return nowPredicate
+    return nowPredicate, P_new_index_list
