@@ -37,13 +37,12 @@
 	\maketitle
 	
 	\begin{abstract}
-		% Need to submit before 20:00, February 20, 2019.
-		Our work focuses on mining closed-path rules of first order rules from large Knowledge Graphs (KGs). Based on the previous related work, we propose an improved rule learning system with a simplified method of rule search and a novel  paremeter learning model of evaluation. The employment of vector calculation greatly contributed to the scalability of our approach. 
-		Since uncertain knowledge graphs have attracted the attention of more researchers, we have tried to transfer the rule learning into the Uncertain Knowledge Graphs (UKGs) using the TensorLog operation. 
-		Experiments are conducted on three benchmarks of deterministic KGs and two real-word uncertain KGs via the task of rule mining. The results show that the improvements make the system more scalable, can handle large KGs more efficiently and mine more quality rules, and finally can be applied to the UKG successfully.
+		% Change.
+		Our work focuses on mining closed-path rules of first order rules from large Knowledge Graphs (KGs). Based on the previous related work,  we propose an improved rule learning system with a hierarchical sampling algorithm and a simplified method of rule search which greatly contributed to the scalability of our approach. 
+		Experiments are conducted on three classic benchmarks of deterministic KGs compared with the latest rule learning systems RLvLR and AMIE+ via the task of rule mining. The results show that the improvements make the system more scalable, can handle large KGs more efficiently and mine more quality rules with a longer length. 
 	\end{abstract}
 	
-	
+	% Need to Change!!!
 	\section{Introduction}
 	With the popularity of {\em Knowledge Garphs (KGs)}, it is widely uesd in various fields, suh as  intelligent web search, QA, advertising recommendation, social media relationship mining, biomedicine, etc. 
 	However, the huge amount of data makes it more difficult to construct or complete knowledge graphs manually or automatically.
@@ -59,10 +58,10 @@
 	There are many KGs for research and business like YAGO~\cite{Yago}, DBpedia~\cite{Dbpedia}, Wikidata~\cite{Wikidata} and Freebase~\cite{Freebase}.
 	The huge amount of data, incompleteness, and noise data are all difficulties in its research.
 	 
-	Compared to deterministic KGs, {\em uncertain knowledge graphs} (UKGs) provide a confidence score along with every fact. The development of relation extraction and crowdsourcing in recent years enabled the construction of large-scale uncertain knowledge bases. 
-	ConceptNet~\cite{Conceptnet} is a multilingual uncertain KG for commonsense knowledge that is collected through crowdsourcing. The confidence scores in ConceptNet mainly come from the co-occurrence frequency of the labels in crowdsourced task results. 
-	NELL~\cite{NELL} collects facts by crawling data of web pages and learns the confidence scores from semi-supervised learning with the Expectation-Maximum (EM) algorithm. 
-	The research of uncertain knowledge graph will progress many knowledge-driven applications such as question-answering and intelligent semantic search by providing more uncertain characterization of knowledge.
+%	Compared to deterministic KGs, {\em uncertain knowledge graphs} (UKGs) provide a confidence score along with every fact. The development of relation extraction and crowdsourcing in recent years enabled the construction of large-scale uncertain knowledge bases. 
+%	ConceptNet~\cite{Conceptnet} is a multilingual uncertain KG for commonsense knowledge that is collected through crowdsourcing. The confidence scores in ConceptNet mainly come from the co-occurrence frequency of the labels in crowdsourced task results. 
+%	NELL~\cite{NELL} collects facts by crawling data of web pages and learns the confidence scores from semi-supervised learning with the Expectation-Maximum (EM) algorithm. 
+%	The research of uncertain knowledge graph will progress many knowledge-driven applications such as question-answering and intelligent semantic search by providing more uncertain characterization of knowledge.
 	
 	\subsection{Representation Learning}
 	The entities, concepts and relationships in knowledge graphs are represented by discrete and explicit symbols, which are difficult to be directly applied to deep learning models such as neural networks based on continuous numerical representation. 
@@ -79,10 +78,8 @@
 	Here $P_t$ is head predicate, and the other are body predicates. The variables $x, y, z_i$ can be instantiated by entities. For example: $BornIn(x, z) \wedge Country(z, y) \to Nationality(x, y)$, where the lenth of rule is set to 2 ( not include the head atom).
 	It should be noted that although the CP rule contains the symbol "$\to$", it has a different meaning from the implication symbol in the {\em First-Order Logic}. We can judge a rule is valid by the head atom of an instantiated rule holds if all body atoms of the instantiated rule appear in the KB. 
 	
-	This form of rules is called closed-path because the sequence of predicates' variables in the body of rule forms a closed path from the
-subject argument to the object of the head target predicate.
-Due to the serial path, we factor in the inverse of predicates in order to mine more rules in practice. We also allow recursion in the CP rules, which means the predicate of head can
-appear in the body part.
+	This form of rules is called closed-path because the sequence of predicates' variables in the body of rule forms a closed path from the subject argument to the object of the head target predicate.
+	Due to the serial path, we factor in the inverse of predicates in order to mine more rules in practice. We also allow recursion in the CP rules, which means the predicate of head can appear in the body part.
 	
 	\subsubsection{Inductive Logic Program} 
 	Early research on generating CP rules in KBs focused on {\em Inductive Logic Programming (ILP)}  \cite{Muggleton:ILP}, which mine rules by exploring the space of all possible hypotheses (rules). Although ILP is a mature field, it is still difficult to mine logic rules from the knowledge bases. On one hand, KBs are based on the {\em Open World Assumption (OWA)}, which means that the unknown information cannot be used as negative samples. On the other hand, the scalability of these methods are insufficient to handle the large amount of data contained in large KGs. 
@@ -97,11 +94,9 @@ appear in the body part.
 	% still need to change!
 	But there are still some improvements in the design of algorithm. When the cardinality of data or the number of predicates are in large-scale and the length of rule becomes longer, the search space is disastrously huge. In addition to this, matrix operation is too slow in the evaluation phase, which must reduce the running speed of the system to a certain extent.
 	
-	
+	% NEW CHANGE～
 	\section{The Framework of Algorithm}
-	% \subsection{Preliminaries}
-	% \subsection{Algorithm Introduction}
-	Next is our algorithm framework, which is based on the {\bf RLvLR} system. In Algorithm~\ref{alg:algorithm}, there are several differences between them.
+	As shown in Algorithm~\ref{alg:algorithm}, our algorithm framework has several improvements based on the {\bf RLvLR} system.
 	
 	For a certain knowledge graph, we randomly select a predicate as the target predicate $P_t$ to mine as many high-quality rules as possible with body's length (the number of predicates in the body part, excluding the head) less than $MaxLen$. The $Degree$ contains two types of metric thresholds for the quality rules $R$ and high quality rules $QR$: $HC$ and $SC$. For distinct embedding models, there are different parameters $EmbParas$. 
 	\begin{algorithm}[tb]
@@ -113,68 +108,71 @@ appear in the body part.
 		and parameters list of embedding $EmbParas$\\
 		\textbf{Output}: a set $Rule$ of CP rules
 		\begin{algorithmic}[1] %[1] enables line numbers
-			% The order of the FOR is soooooo important!!!
-			\STATE $E_0, P_0, F_0 = \textsf{SampleByPt}(P_t)$
-			\FOR{$ 2 \leq len \leq MaxLen$}
-			% \STATE $i=(len+1)/2$
-			\STATE $K^{'} = \textsf{Sampling}(K, P_t, MaxLen)$
+			\STATE $E_0, P_0, F_0 = \textsf{SampleByPt}(K, P_t)$
+			\FOR{$ 2 \leq len \leq MaxLen$} 
+			\STATE $E_i, P_i, F_i = \textsf{SampleByLength}(E_0, len)$
+			\STATE $K^{'} = \{ \cup^{n-1}_{i=0}E_i, \cup^{n-1}_{i=0}P_i, \cup^{n-1}_{i=0}F_i \}$
 			\STATE $Ent_{emb}, Pre_{emb} =\textsf{Embedding} (K^{'}, EmbParas)$
 			\STATE $Candidate = \emptyset$	
 			\STATE $Result=$\textsf{RuleSearch}$(K^{'}, P_t, Ent_{emb}, Pre_{emb},len)$
 			\STATE Add $Result$ to $Candidate$
 			\ENDFOR
-		\STATE $Rule=\textsf{EvaluateAndFilter}(Candidate,K,DEGREE)$
+		\STATE $Rule=\textsf{EvaluateAndFilter}(K,Candidate,DEGREE)$
 		\RETURN $Rule$
 		\end{algorithmic}
 	\end{algorithm}
 
 	\subsection{Sample}  
-	Due to the characteristic of closed-path rules, we can apply the \textsf{Sampling($\cdot$)} algorithm to get a smaller KB $K^{'}=\{E^{'}, P^{'}, F^{'}\}$ that contains all the potential predicates with related entities and facts before working directly on large KB. 
+	Due to the characteristic of closed-path rules, the path of body atoms is equivalent to the sequence of predicates. We can apply the \textsf{Sampling($\cdot$)} algorithm to get a smaller KB $K^{'}=\{E^{'}, P^{'}, F^{'}\}$ that contains all the potential predicates with related entities and facts before working directly on large KB. Further improvements to the sampling algorithm have led to a significant increase of scalability, so that longer CP rules that RLvLR cannot process can be mined in our system.
+	
 	\begin{figure}
 		\centering
 		\includegraphics[width=85mm]{sample.pdf}\\
-		\caption{Sample for the target predicate $P_t$.}
+		\caption{Sample for the target predicate $P_t$, where $i =3$. Different colors represent the phases of expansion. The light-colored entities denotes duplicate ones and no longer expand. }
 		\label{fig:sample}
 	\end{figure}
 	
-	As can be seen from Figure~\ref{fig:sample}, begining with the target predicate $P_t$ (get $P_0$), the related entities are sampled (get $E_0$). Then the sample range of predicates is expanded (get $P_i$) according to the maximum length of the body atoms to obtain the related entities and facts (get $E_i$). 
+	As can be seen from Figure~\ref{fig:sample}, begining with the target predicate $P_t$ (get $P_0$), the related entities are sampled (get $E_0$). Then the sample range of predicates is expanded (get $P_i$) according to the maximum length of the body atoms to obtain the related entities and facts (get $E_i$ and $F_i$). The incrementing of $i$ is started by a non-repeating entity $e \in E_{i-1}$, and the predicate $P$ having a certain relationship $P(e, e^{'})$ with $e$ is sampled into the candidate $P_i$ set. 
 	
 	Assuming the $MaxLen = n$, the incrementing process of the sample is as follows:
-	% 去重工作的整理！！
 	\begin{itemize}
 		\item $K_0=\{E_0, P_0, F_0\}$, where $P_0=\{P_t\}$, \\
-		$E_0=\{e | P_t(e, e^{'}) \in F$ or $P_t(e^{'}, e) \in F\}$, \\
-		$F_0=\{P_t(e_s,e_o) | P_t(e_s,e_o) \in F \}$.
-		\item $K_i=\{E_i, P_i, F_i\}$, $0<i<n$, where \\
-		$P_i=\{P|e^{'} \in E_{i-1}, P(e, e^{'})\in F$ or $P(e^{'},e)\in F\}$,\\
-		$E_i=\{e|e^{'} \in E_{i-1}, P(e, e^{'})\in F$ or $P(e^{'},e)\in F\}$,\\
-		$F_i=\{P(e_s, e_o)|e_s$ or $ e_o \in E_{i-1}, P(e_s, e_o)\in F\}$.
+		$E_0=\{e | P_t(e, e^{'})$ or $P_t(e^{'}, e) \in F\}$, \\
+		$F_0=\{P_t(e,e^{'}) | P_t(e,e^{'}) \in F \}$.
+		\item $K_i=\{E_i, P_i, F_i\}$, $0<i<n$ (when $i<2, E^{'}_{i-2} = \emptyset$),\\
+		$\textbf{for }f=P(e,e^{'}) \in F \textbf{ or } f=P(e^{'},e) \in F$ :\\
+		$\textbf{\quad if } e \in E_{i-1}-E^{'}_{i-2}$: \\
+		$\textbf{\qquad add } e^{'}\textbf{ into }E_i\text{,}\textbf{ add }P\textbf{ into }P_i\text{,}\textbf{ and add }f\textbf{ into }F_i$.
 	\end{itemize}
+	The final sampled $K^{'} = \{E^{'}, P^{'}, F^{'}\}$ is a subset of K, where $E^{'}=\cup^{n-1}_{i=0}E_i$, $P^{'}=\cup^{n-1}_{i=0}P_i$ and $F^{'}=\cup^{n-1}_{i=0}F_i$.
 	
-	The final sampled $K^{'} = \{E^{'}, P^{'}, F^{'}\}$ is a subset of K, where $E^{'}=\cup^{n-1}_{i=0}E_i$, $P^{'}=\cup^{n-1}_{i=0}P_i$ and $F^{'}=\cup^{n-1}_{i=0}F_i$. 
-	% new add!
-	Although there must be duplicate predicates in the set $P_i$ at each $i$th layer, it doesn't matter because we allow recursionin the CP rules. In the latter rule search phase, the sequence obtained by performing the Cartesian product operation on the predicate set $P_i$ of each layer can effectively reduce the computation cost compared to using the Cartesian product of all the predicate set$P$.
-	In the work of repeating the RLvLR algorithm, we first sample all the entities and predicates of maximum layers, and then perform rule search. In most cases, when the rule length reaches 5 (including head), $P^{'}=P$.
+	\subsubsection{Reduce the candidate set of predicate }
+	Although there must be duplicate predicates in the set $P_i$ at each $i$th layer, it doesn't matter because we allow recursion the CP rules. But why we still remove duplicate entities in sample phase?
+	
+	The expansion from $E_0$ to $E_i$ is to maintain the feature of CP rules: $P_1^s = P_t^s$, but it always diverges outward without forming a closed loop, i.e. $P_n^o = P_t^o$, which only increases the range of sampling in vain, resulting in extremely increasing the number of candidate predicates. Finally, it will take lots of time and space complexity to search for predicate sequences which will affect the efficiency of system. In the work of repeating the {\bf RLvLR}, they first sample all the entities and predicates of maximum layers, and then perform rule search. In most cases, when the body length reaches 4, $P^{'}=P$, causing the effect of sampling invalid and memory overflow. 
+	In summary, it removes the outward diverging path and formed a closed sequence of predicates, and ensures that  loop caused by repeated occurrences of several connected predicates is avoided in the sampled graph.
+	
+	In the latter rule search phase, as shown in Figure~\ref{fig:rule}, the sequence obtained by performing the Cartesian product operation on the predicate sets $P_i$ of each layer can effectively reduce the computation cost compared to using the Cartesian product of all the predicate set $P^{'}$. 
+	The approach of obtaining the candidate sets of predicate fundamentally contributes to the scalability of our approach to deal with the rules whose body atoms are greater than 4. 
+
 	\begin{figure}
 		\centering
-		\includegraphics[scale=0.4,height=38mm]{rule.pdf}\\
+		\includegraphics[height=40mm]{rule.pdf}\\
 		\caption{The predicate sets after sampling contain the predicates on the sequence of path.}
 		\label{fig:rule}
 	\end{figure}
-	% new add!
-	NEW ADD:
-	($length$ not include head)
-	\begin{align}
-		length &= 2, P_1\times P_1 \nonumber\\
-		length &= 3, P_1\times P_2\times P_1 \nonumber\\
-		length &= 4, P_1\times P_2\times P_2\times P_1 \nonumber\\
-		length &= 5, P_1\times P_2\times P_3\times P_2\times P_1 \nonumber\\
-		&\cdots \nonumber
-	\end{align}
 	
-	
+%	Let $len$ be the number of body atoms of the rule.
+%	\begin{align}
+%	len &= 2, P_1\times P_1 \nonumber\\
+%	len &= 3, P_1\times P_2\times P_1 \nonumber\\
+%	len &= 4, P_1\times P_2\times P_2\times P_1 \nonumber\\
+%	len &= 5, P_1\times P_2\times P_3\times P_2\times P_1 \nonumber\\
+%	&\cdots \nonumber
+%	\end{align}
+		
 	\subsection{Embedding Model}
-	After sampling, in \textsf{Embedding($\cdot$)}, entities and predicates in $K^{'}$ are embedded into the representation of vector ($ent_{emb}$ and $pre_{emb}$) using the embedding model, respectively. Unlike {\bf RESCAL}, which is used in {\bf RLvLR} to embed predicates as matrices, we use those such that {\bf TransE} can project predicates into vectors.
+	After sampling, entities and predicates in $K^{'}$ are embedded into the representation of vector ($ent_{emb}$ and $pre_{emb}$) using the embedding model  in \textsf{Embedding($\cdot$)}, respectively. The phase is prepared for calculating score functions in rule search stage. Unlike {\bf RESCAL}, which is used in {\bf RLvLR} to embed predicates as matrices, we use those such that {\bf TransE} can project predicates into vectors.
 
 	The embedding model represents entities and relationships in the knowledge graph, defining a scoring function to learn the continuous representation of entities and relationships. Among the various models, the Translational Distance Model is a outstanding and relatively simple but effective kind of model.
 	Given a fact: $P_r(e_h,e_t)$, the {\bf TransE} model represents the relationship as translation vector $\vec{r}$, and the scoring function is defined as: the distance between $\vec{h}+\vec{r}$ and $\vec{t}$: 
@@ -187,15 +185,16 @@ appear in the body part.
 	The choice of embedding models needs to be considered in conjunction with the methods of calculating the score functions. In the next phase Rule Search, it will be further explained why we choose {\bf TransE}.
 	
 	\subsection{Simplified Rule Search}
-	In the smaller KG $K^{'}$, the task of searching for candidate rules in \textsf{RuleSearch($\cdot$)} is actually
-reduced to the search for plausible paths of body predicates. As shown in formula~\ref{eq:cp rule}, the target predicate of the head has been fixed. However, score functions are needed to measure which paths conform to both the form of cp rules and the intrinsic meaning of the rules and further prune for the search space to handle large KGs more efficiently. It was mentioned before that the embedding model was used to map small $K'$ predicates into vectors, so the design of scoring function for embedding calculations would be changed and simplified. 
+	In the smaller KG $K^{'}$, the task of searching for candidate rules in \textsf{RuleSearch($\cdot$)} is actually reduced to the search for plausible paths of body predicates. As shown in formula~\ref{eq:cp rule}, the target predicate of the head has been fixed. With the set of hierarchical predicates obtained by the sampling algorithm, the range of the search predicate sequence is reduced, and the candidate sequence needs to be filtered by the score function to finally obtain the candidate. We use the vector obtained from the previous embedding model to further simplify the score function.
+	Score functions are needed to measure which paths conform to both the form of cp rules and the intrinsic meaning of the rules and further prune for the search space to handle large KGs more efficiently. 
 	
 	Let's take the example of a rule with $length=3$, where the predicates of head and body are included:
 	\begin{equation}
 	P_1(x, z) \wedge P_2(z, y)  \to P_t(x, y). \nonumber
 	\end{equation}
 	
-	\subsubsection{Synonymy Score Function}
+	\subsubsection{Score Functions}
+	\paragraph{Synonymy Score Function.}
 	Before we introduce synonymy, we should abstract out the form of CP rules first. The path of predicates in body can be abstracted into a compositional relation $P_{body}$ that approximates target predicate $P_t$ if the rule is reasonable. Therefore, \textit{synonymy} refers to this similar relationship between $P_{body}$ and $P_t$. In {\bf RLvLR} and the work of ~\cite{Yang:2015}, the embedding of compositional relation path is defined as the matrix multiplication of predicates. Here we consider the characteristics of {\bf TransE} and combine the previous methods to compute the synonymy:
 	\begin{align}
 		f_{syn}(r) = & sim(P_{body},P_t)\\
@@ -206,26 +205,21 @@ reduced to the search for plausible paths of body predicates. As shown in formul
 	The geometric meaning of vector addition is to use the Parallelogram Law, and the final sum vector is obtained from the beginning of the first vector to the end of the last vector, which is a more theoretical representation for the embedding of body's path.
 	
 	Compared to matrix multiplication which has a relatively large amount of calculation with the increase of rule length, the addition of vector itself reduces the complexity of calculation and satisfies the addition commutative law, so the results of the same predicates in different order combinations are the same. For two predicates $P_1$ and $P_2$, we only need to calculate ${\bf V}_{P_1}+{\bf V}_{P_2}$ once, and for matrix multiplication in {\bf RLvLR}, they need to calculate ${\bf M}_{P_1}\cdot {\bf M}_{P_2}$ and ${\bf M}_{P_2}\cdot {\bf M}_{P_1}$ . As the length of rule increases, it will greatly improve scalability when exploring the entire path of search space grows dramatically.
-
-	\subsubsection{Co-occurence Score Function}
+	
+	\paragraph{Co-occurence Score Function.}
 	Besides synonymy, co-occurrence is also widely studied in natural language processing~\cite{Jones:Co-occurence}. We can obviously observe a characteristic of the CP rule is that adjacent predicates in the body atoms share the same parametric variables, such as $P_1(x,z)$ sharing variables $z$ with $P_2(z,y)$. It means the rule $r$ is still reasonable when there are large numbers of entities instantiating the parameter $z$. This feature of sharing is called \textit{Co-occurence}. 
 	
-	The co-occurrence score function we use is the same as the definition of {\bf RLvLR}. It is based on the notion of argument embeddings, the average value of
-the embeddings of all the entities appearing in the position of
-this argument. Formally, the embeddings of the subject and
-object argument of a predicate P are defined as:
+	The co-occurrence score function we use is the same as the definition of {\bf RLvLR}. It is based on the notion of argument embeddings, the average value of the embeddings of all the entities appearing in the position of this argument. Formally, the embeddings of the subject and object argument of a predicate P are defined as:
 	$$
 	{\bf V}_P^s = \frac{1}{n} \sum _{e \in E_P^s}k_e.{\bf E} \text{\quad and\quad}	
 	{\bf V}_P^o = \frac{1}{n} \sum _{e \in E_P^o}l_e.{\bf E} 
 	$$ 
 	where $n = \#\{P(e_s, e_o) \in F^{'}\}, E_P^s = \{e_s|\exists e_o \text{ s.t. } P(e_s, e_o)\\
 	\in F^{'}\} , E_P^o = \{e_o|\exists e_o \text{ s.t. } P(e_s, e_o) \in F^{'}\}$, $F^{'}$ is defined by\\
-	sample phase, $k_e = \#\{P(e, e_o)|\exists e_o \text{ s.t. } P(e, e_o) \in F^{'} \}$ and
-$l_e = \#\{P(e_s,e)|\exists e_s \text{ s.t. } P(e_s, e) \in F^{'} \}$. {\bf E} denotes the embedding of $e$.
+	sample phase, $k_e = \#\{P(e, e_o)|\exists e_o \text{ s.t. } P(e, e_o) \in F^{'} \}$ and $l_e = \#\{P(e_s,e)|\exists e_s \text{ s.t. } P(e_s, e) \in F^{'} \}$. {\bf E} denotes the embedding of $e$.
 	
-	According to the definition of co-occurrence, the embedding of the object argument of $P_1$ should be similar to the
-embedding of the subject argument of $P_2$, denoted ${\bf V}^o_{P_1} \approx {\bf V}^s_{P_2}$.
-Similarly, in addition to this, there is a shared relationship between $P_t$ and the body atoms: ${\bf V}^s_{P_1} \approx {\bf V}^s_{P_t}$ and ${\bf V}^o_{P_2} \approx {\bf P}^o_{P_t}$. Thence, the co-occurrence scoring function is defined as follows:
+	According to the definition of co-occurrence, the embedding of the object argument of $P_1$ should be similar to the embedding of the subject argument of $P_2$, denoted ${\bf V}^o_{P_1} \approx {\bf V}^s_{P_2}$.
+	Similarly, in addition to this, there is a shared relationship between $P_t$ and the body atoms: ${\bf V}^s_{P_1} \approx {\bf V}^s_{P_t}$ and ${\bf V}^o_{P_2} \approx {\bf P}^o_{P_t}$. Thence, the co-occurrence scoring function is defined as follows:
 	\begin{align}
 	f_{co}(r) = &sim({\bf V}^o_{P_1}, {\bf V}^s_{P_2}) + sim({\bf V}^s_{P_1}, {\bf V}^s_{P_t}) \nonumber\\
 	 +& sim({\bf V}^o_{P_2}, {\bf P}^o_{P_t}) 
@@ -233,9 +227,6 @@ Similarly, in addition to this, there is a shared relationship between $P_t$ and
 	Note that the calculation of $sim$ is similar to that of synonymy.
 	
 	Finally, after using both of these two scoring functions to complement each other and purne the poor rules, the set of candidates will be saved for the final evaluation.
-	
-
-	
 	
 	\subsection{Evaluate and Filter}
 	The candidate rules that are initially screened by the calculated scoring functions are just a set of results that we obtain by some operations. We also need to use the evaluation function \textsf{EvaluateAndFilter($\cdot$) }to check whether these rules meet the expectations of cognition or the actual situation based on the data. Although KGs are still far from completion, it is necessary to ignore these missings or errors in practice. After being evaluatd by differnent levels of degrees in $Degree$, the last remaining rule is relatively high quality.
@@ -254,47 +245,49 @@ Similarly, in addition to this, there is a shared relationship between $P_t$ and
 	However, only counting the number of occurrences in KG is not able to fully evaluate this rule. Because KG is incomplete, the frequency of different instances varies greatly. Therefore, the support degree should be calculated for satisfying the probability ratio of body and head respectively, which can better indicate the quality.
 	% E.g, add?
 	
-	So the degrees of standard confidence
-(SC) and head coverage (HC) are defined as follows: 
+	So the degrees of standard confidence (SC) and head coverage (HC) are defined as follows: 
 	\begin{align}
 		SC(r) =& \frac{supp(r)}{\#(e_0, e_n):body(r)(e_0, e_n)}\\
 		HC(r) =& \frac{supp(r)}{\#(e_0, e_n):P_t( e_0, e_n)}
 	\end{align}
 	% add NSC? A Novel Evaluation Metric.
 	
-	\subsubsection{The Weight of Rule}  
-	In the set of rules for the same target predicate $P_t$, the confidences of distinct rules are different, and the facts obtained by rule with higher weight has higher confidence. Since KGs are incomplete and contain many noisy data, the accuracy of evaluation may be affected by the method of counting accurately the support degree of the rule in KG. Except for the above method, it is also feasible to use the supervised parameter learning model to learn the weight of rules more flexibly. We combine TensorLog operation and one-hot encoding to construct the weight model for the rules of given target predicate $P_t$.
 	
-	The TensorLog is a method of differentiable probabilistic logic, which has been used for
-	probabilistic deductive database in~\cite{Cohen:TensorLog}, KB reasoning in~\cite{Yang:NeuralLP} and so on. Next, we introduce TensorLog operator and then describe how they can be used for weight learning. 
-	\begin{align}
-		Rule\quad 1: &P_1 \land P_2 \to P_t, w_1\nonumber\\
-		Rule\quad 2: &P_3 \land P_4 \to P_t, w_2\nonumber\\
-		&\cdots \cdots \nonumber
-	\end{align}
-	
-	For the group of rules about $P_t$, $n$ denotes the number of rules that make $P_t$ as its head predicate, and $w_i$ is the confidence of rule $i$. The loss function of the model is as follows:
-	\begin{equation}
-		min\sum_{i=1}^{n}\Vert w_i\prod_{k\in p_i}{\bf M}_{P_k}-{\bf M}_{P_t}\Vert_2
-		\label{eq:weight model}
-	\end{equation}
-	
-	TensorLog defines an operator $M_P$ for each predicate $P$. Concretely, $M_P$ is the one-hot encoding matrix in $\{0,1\}^{|E| \times|E|}$ such that its $(i,j)$ entry is set 1 if and only if $R(i, j)$ is in the knowledge graph, where $i$ is the $i$-th entity and similarly for $j$. $E$ is the collection of entities about $P_t$ obtained by the sampling algorithm. $p_i$ denotes the path of body atoms of rule $i$ and $R_k$ means the predicate at the $k$th position on the path.
-	
-	\subsection{Transfer to Uncertain KGs}
-	%To be completed.
-	Since uncertain knowledge graphs have attracted the attention of more and more researchers, we have tried to transfer the rule learning into the uncertain KGs. In the weight learning model of evaluation phase, we intend to substitute the confidence of triple for the non-zero entries of the matrix.
+%	\subsubsection{The Weight of Rule}  
+%	In the set of rules for the same target predicate $P_t$, the confidences of distinct rules are different, and the facts obtained by rule with higher weight has higher confidence. Since KGs are incomplete and contain many noisy data, the accuracy of evaluation may be affected by the method of counting accurately the support degree of the rule in KG. Except for the above method, it is also feasible to use the supervised parameter learning model to learn the weight of rules more flexibly. We combine TensorLog operation and one-hot encoding to construct the weight model for the rules of given target predicate $P_t$.
+%	
+%	The TensorLog is a method of differentiable probabilistic logic, which has been used for
+%	probabilistic deductive database in~\cite{Cohen:TensorLog}, KB reasoning in~\cite{Yang:NeuralLP} and so on. Next, we introduce TensorLog operator and then describe how they can be used for weight learning. 
+%	\begin{align}
+%		Rule\quad 1: &P_1 \land P_2 \to P_t, w_1\nonumber\\
+%		Rule\quad 2: &P_3 \land P_4 \to P_t, w_2\nonumber\\
+%		&\cdots \cdots \nonumber
+%	\end{align}
+%	
+%	For the group of rules about $P_t$, $n$ denotes the number of rules that make $P_t$ as its head predicate, and $w_i$ is the confidence of rule $i$. The loss function of the model is as follows:
+%	\begin{equation}
+%		min\sum_{i=1}^{n}\Vert w_i\prod_{k\in p_i}{\bf M}_{P_k}-{\bf M}_{P_t}\Vert_2
+%		\label{eq:weight model}
+%	\end{equation}
+%	
+%	TensorLog defines an operator $M_P$ for each predicate $P$. Concretely, $M_P$ is the one-hot encoding matrix in $\{0,1\}^{|E| \times|E|}$ such that its $(i,j)$ entry is set 1 if and only if $R(i, j)$ is in the knowledge graph, where $i$ is the $i$-th entity and similarly for $j$. $E$ is the collection of entities about $P_t$ obtained by the sampling algorithm. $p_i$ denotes the path of body atoms of rule $i$ and $R_k$ means the predicate at the $k$th position on the path.
+%	
+%	\subsection{Transfer to Uncertain KGs}
+%	To be completed.
+%	 Since uncertain knowledge graphs have attracted the attention of more and more researchers, we have tried to transfer the rule learning into the uncertain KGs. In the weight learning model of evaluation phase, we intend to substitute the confidence of triple for the non-zero entries of the matrix.
 
 
 	\section{Experiments}
-	\subsection{Deterministic KGs}
-	\subsubsection{Compare with Yang. with FB15k237.}
-	\subsubsection{Compare with AMIE+ , Neural LP and RLvLR with DB, Yago2s, Wikidata.}
 	% length 更长，侧重效率更高，数量也多
-	\subsection{Unceratin KGs}
-	\subsubsection{Use NELL and ConceptNet.}
+	% 实验设置。
+	\subsection{Rule Mining}
+	\subsubsection{Compare with Yang. with FB15k-237.}
+	\subsubsection{Compare with AMIE+ , Neural LP and RLvLR with DB, Yago2s, Wikidata.}
 	
+	\subsection{Link prediction}
 	
+
+
 	\section{Conclusion}
 	
 	
