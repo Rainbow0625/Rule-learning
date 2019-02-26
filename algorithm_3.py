@@ -89,7 +89,7 @@ if __name__ == '__main__':
     total_time = 0
 
     # test_Pre_list = np.random.randint(0, predicateSize, size=5)
-    test_Pre_list = [3, 57, 163]
+    test_Pre_list = [57, 163]
     # for Pt in range(predicateSize):
     for Pt in test_Pre_list:
         Pt_start = time.time()
@@ -201,8 +201,8 @@ if __name__ == '__main__':
         print("Until now, all %d predicates' average time: %f\n" % (Pt, total_time/(Pt+1)))
 
         # Save for link prediction.
-        with open('./rule/' + BENCHMARK + '/rule_' + str(Pt) + '.pk', 'w') as fp:
-            pickle.dump(candidate_of_Pt, fp)
+        # with open('./rule/' + BENCHMARK + '/rule_' + str(Pt) + '.pk', 'wb') as fp:
+            # pickle.dump(candidate_of_Pt, fp)
 
     with open('./rule/'+BENCHMARK+'/rule_' + str(model)[15:21]+'.txt', 'a+') as f:
         f.write("\nEmbedding parameter:\n")
