@@ -267,13 +267,40 @@ class RSALW(object):
         # Score Function
         candidate = []
         all_candidate_set = []  # Eliminate duplicate indexes.
+
+
+        # Calculate the f2.
+        # top_candidate_size = int(pow(relsize, length) * _coocc)
+        # top_candidate_size = int(_coocc * self.index_tuple_size)
+        top_candidate_size = _coocc
+        score_top_container = np.zeros(shape=(top_candidate_size, self.length + 1))
+        print("The number of COOCC Top Candidates is %d" % top_candidate_size)
+        factsSize, facts = self.get_facts(BENCHMARK, filename="./sampled/")
+        print("\nBegin to calculate the f2: Co-occurrence")
+        self.score_function2(score_top_container, relsize, facts, ent_emb)
+
+        print("\n Begin to use coocc to filter: ")
+        for item in score_top_container:
+            index = [int(item[i]) for i in range(self.length)]
+            if index not in all_candidate_set:
+                # print("cal it!")
+                result, degree = self.evaluate_and_filter(index, DEGREE)
+                if result != 0:
+                    candidate.append([index, result, degree])
+                    all_candidate_set.append(index)
+
+        if not gc.isenabled():
+            gc.enable()
+        del ent_emb, score_top_container
+        gc.collect()
+        gc.disable()
+
+        # Calculate the f1.
         # top_candidate_size = int(pow(relsize, length) * _syn)
         # top_candidate_size = int(_syn * self.index_tuple_size)
         top_candidate_size = _syn
-        score_top_container = np.zeros(shape=(top_candidate_size, self.length+1))
+        score_top_container = np.zeros(shape=(top_candidate_size, self.length + 1))
         print("The number of SYN Top Candidates is %d" % top_candidate_size)
-
-        # Calculate the f1.
         print("\nBegin to calculate the f1: synonymy")
         self.score_function1(f, score_top_container, rel_emb)
         # Method 1: Top ones until it reaches the 100th. OMIT!
@@ -303,30 +330,7 @@ class RSALW(object):
         gc.collect()
         gc.disable()
 
-        # Calculate the f2.
-        # top_candidate_size = int(pow(relsize, length) * _coocc)
-        # top_candidate_size = int(_coocc * self.index_tuple_size)
-        top_candidate_size = _coocc
-        score_top_container = np.zeros(shape=(top_candidate_size, self.length+1))
-        print("The number of COOCC Top Candidates is %d" % top_candidate_size)
-        factsSize, facts = self.get_facts(BENCHMARK, filename="./sampled/")
-        print("\nBegin to calculate the f2: Co-occurrence")
-        self.score_function2(score_top_container, relsize, facts, ent_emb)
 
-        print("\n Begin to use coocc to filter: ")
-        for item in score_top_container:
-            index = [int(item[i]) for i in range(self.length)]
-            if index not in all_candidate_set:
-                result, degree = self.evaluate_and_filter(index, DEGREE)
-                if result != 0:
-                    candidate.append([index, result, degree])
-                    all_candidate_set.append(index)
-
-        if not gc.isenabled():
-            gc.enable()
-        del ent_emb, score_top_container
-        gc.collect()
-        gc.disable()
 
         # Evaluation is still a cue method!
         print("\n*^_^* Yeah, there are %d rules. *^_^*\n" % len(candidate))

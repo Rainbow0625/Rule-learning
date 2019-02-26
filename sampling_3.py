@@ -1,5 +1,8 @@
+from typing import Dict, List, Any, Union
+
 import numpy as np
 import time
+import copy
 
 '''
 For the sampling process, RLvLR picked at most 50 neighbours of an entity
@@ -53,20 +56,69 @@ def sample_by_i(index, E_i_1_new, facts):
     E_i = set()  # Maybe it contains some repeated entities.
     P_i = set()
     F_i_new = []
+
+    '''
     flag = 0
-    for f in facts:
+        for f in facts:
         if f[0] in E_i_1_new:  # set can not add the same element
-            E_i.add(f[1])
             P_i.add(f[2])
+            E_i.add(f[1])
+
             flag = 1
         if f[1] in E_i_1_new:
-            E_i.add(f[0])
             P_i.add(f[2])
+            E_i.add(f[0])
             flag = 1
         if flag == 1 and f[3] == 0:
             F_i_new.append(f)
             f[3] = 1
         flag = 0
+
+    print("E_%d size: %d (Maybe it contains some repeated entities.)" % (index, len(E_i)))
+    print("P_%d size: %d" % (index, len(P_i)))
+    print("F_%d_new size: %d" % (index, len(F_i_new)))
+    time_end = time.time()
+    print('Step 2 cost time:', time_end - time_start)
+    return E_i, P_i, F_i_new, facts
+    '''
+    # Pick out predicates with high frequency of occurrence.
+    # F_i_new  里面是list， 最后的去向要好好查看一下！
+    P_dic = {}  # Key: p's index; Value: [count, [fact's index list]]
+    for j in range(len(facts)):
+        f = list(facts[j])
+        if f[0] in E_i_1_new or f[1] in E_i_1_new:
+            if f[2] in P_dic.keys():
+                value = P_dic.get(f[2])
+                value[1].append(j)
+                P_dic[f[2]] = [value[0]+1, value[1]]
+            else:
+                P_dic[f[2]] = [1, [j]]
+
+    count_array = np.array([value[0] for value in list(P_dic.values())])
+    print(count_array)
+    count_mean = int(np.mean(count_array))
+    print(count_mean)
+
+    del_flag = 0
+    keys = list(P_dic.keys())
+    for key in keys:
+        value = P_dic[key]
+        if value[0] < 100:
+            del P_dic[key]
+            del_flag = del_flag + 1
+        else:
+            # Get E_i.
+            for j in value[1]:
+                E_i.add(facts[j][0])
+                E_i.add(facts[j][1])
+                if facts[j][3] == 0:
+                    F_i_new.append(facts[j])
+                    facts[j][3] = 1
+    P_i = set(P_dic.keys())
+    print(len(P_i))
+    print(P_i)
+    print(del_flag)
+
     print("E_%d size: %d (Maybe it contains some repeated entities.)" % (index, len(E_i)))
     print("P_%d size: %d" % (index, len(P_i)))
     print("F_%d_new size: %d" % (index, len(F_i_new)))
@@ -83,7 +135,7 @@ def save_and_reindex(length, save_path, E, P, F, Pt, predicate_name, P_list):
     with open(save_path + '/entity2id.txt', 'w') as f:
         ent_size = len(E)
         f.write(str(ent_size) + "\n")
-        print("  entity size: %d" % ent_size)
+        print("  Entity size: %d" % ent_size)
         for x in range(ent_size):
             f.write(str(x) + "\n")
         f.close()
@@ -93,7 +145,7 @@ def save_and_reindex(length, save_path, E, P, F, Pt, predicate_name, P_list):
     with open(save_path + '/relation2id.txt', 'w') as f:
         pre_size = len(P)
         f.write(str(pre_size * 2) + "\n")  # after sampling
-        print("  predicate size: %d" % (pre_size * 2))
+        print("  Predicate size: %d" % (pre_size * 2))
         pre_sampled_list = list(P)
         for i in range(pre_size):
             name = predicate_name[pre_sampled_list[i]]
@@ -133,7 +185,7 @@ def save_and_reindex(length, save_path, E, P, F, Pt, predicate_name, P_list):
     with open(save_path + '/Fact.txt', 'w') as f:
         factsSizeOfPt = len(Fact)
         f.write(str(factsSizeOfPt) + "\n")
-        print("  fact size: " + str(factsSizeOfPt))
+        print("  Fact size: " + str(factsSizeOfPt))
         for line in Fact:
             f.write(" ".join(str(letter) for letter in line) + "\n")
         f.close()

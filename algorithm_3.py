@@ -21,15 +21,15 @@ R_minHC = 0.001
 QR_minSC = 0.5
 QR_minHC = 0.001
 DEGREE = [R_minSC, R_minHC, QR_minSC, QR_minHC]
-Max_rule_length = 3  # not include head atom
-_syn = 800
-_coocc = 800
+Max_rule_length = 5  # not include head atom
+_syn = 200
+_coocc = 200
 
 # embedding model parameters
 work_threads = 5
 nbatches = 150
 margin = 1  # the margin for the loss function
-train_times = 100  # 1000
+train_times = 10  # 1000
 dimension = 50  # 50
 alpha = 0.01  # learning rate
 lmbda = 0.01  # degree of the regularization on the parameters
@@ -89,7 +89,7 @@ if __name__ == '__main__':
     total_time = 0
 
     # test_Pre_list = np.random.randint(0, predicateSize, size=5)
-    test_Pre_list = [57, 163]
+    test_Pre_list = [0, 3, 57, 163]
     # for Pt in range(predicateSize):
     for Pt in test_Pre_list:
         Pt_start = time.time()
@@ -126,6 +126,7 @@ if __name__ == '__main__':
                 E_i, P_i, F_i_new, facts = s.sample_by_i(cur_max_i, E_i_1_new, facts)
                 # Get the next cycle's variable.
                 E_i_1_new = E_i - E  # remove the duplicate entity.
+                print("The new entity size :%d   need to less than 800?" % len(E_i_1_new))
                 # Merge the result.
                 E = E | E_i
                 P = P | P_i
