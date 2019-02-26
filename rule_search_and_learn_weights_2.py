@@ -117,8 +117,7 @@ class RSALW(object):
             para_sum = 0.0
             for i in range(self.length - 1):
                 para_sum = para_sum + self.sim(average_vector.get(index[i])[1], average_vector.get(index[i + 1])[0])
-            value = para_sum + self.sim(average_vector.get(index[0])[0],
-                                                        average_vector.get(self.pt)[0]) \
+            value = para_sum + self.sim(average_vector.get(index[0])[0], average_vector.get(self.pt)[0]) \
                                     + self.sim(average_vector.get(index[self.length - 1])[1],
                                                average_vector.get(self.pt)[1])
             top_values = score_top_container[:, self.length]
@@ -176,6 +175,7 @@ class RSALW(object):
         # calculate the SC and HC
         NSC, SC, HC = self.calSCandHC(pmatrix, ptmatrix)
         degree = [NSC, SC, HC]
+        # print(degree)
         # 1: quality rule
         # 2: high quality rule
         if SC >= DEGREE[0] and HC >= DEGREE[1]:
@@ -268,7 +268,8 @@ class RSALW(object):
         candidate = []
         all_candidate_set = []  # Eliminate duplicate indexes.
         # top_candidate_size = int(pow(relsize, length) * _syn)
-        top_candidate_size = int(_syn * self.index_tuple_size)
+        # top_candidate_size = int(_syn * self.index_tuple_size)
+        top_candidate_size = _syn
         score_top_container = np.zeros(shape=(top_candidate_size, self.length+1))
         print("The number of SYN Top Candidates is %d" % top_candidate_size)
 
@@ -280,10 +281,8 @@ class RSALW(object):
         print("\n Begin to use syn to filter: ")
         for item in score_top_container:
             index = [int(item[i]) for i in range(self.length)]
-            # print(index)
             if f == 0:  # matrix
                 result, degree = self.evaluate_and_filter(index, DEGREE)
-
                 if result != 0 and index not in all_candidate_set:
                     all_candidate_set.append(index)
                     candidate.append([index, result, degree])
@@ -306,7 +305,8 @@ class RSALW(object):
 
         # Calculate the f2.
         # top_candidate_size = int(pow(relsize, length) * _coocc)
-        top_candidate_size = int(_coocc * self.index_tuple_size)
+        # top_candidate_size = int(_coocc * self.index_tuple_size)
+        top_candidate_size = _coocc
         score_top_container = np.zeros(shape=(top_candidate_size, self.length+1))
         print("The number of COOCC Top Candidates is %d" % top_candidate_size)
         factsSize, facts = self.get_facts(BENCHMARK, filename="./sampled/")

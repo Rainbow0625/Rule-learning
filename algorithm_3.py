@@ -5,9 +5,9 @@ from models import TransE, TransD, TransH, TransR, RESCAL
 import train_embedding as te
 import rule_search_and_learn_weights_2 as r
 import gc
-
 import send_process_report_email
-
+import pickle
+import numpy as np
 '''
 import sys
 sys.stdout.write('\r'+str())
@@ -21,15 +21,15 @@ R_minHC = 0.001
 QR_minSC = 0.5
 QR_minHC = 0.001
 DEGREE = [R_minSC, R_minHC, QR_minSC, QR_minHC]
-Max_rule_length = 4  # not include head atom
-_syn = 0.2
-_coocc = 0.2
+Max_rule_length = 3  # not include head atom
+_syn = 800
+_coocc = 800
 
 # embedding model parameters
 work_threads = 5
 nbatches = 150
 margin = 1  # the margin for the loss function
-train_times = 1000  # 1000
+train_times = 100  # 1000
 dimension = 50  # 50
 alpha = 0.01  # learning rate
 lmbda = 0.01  # degree of the regularization on the parameters
@@ -43,13 +43,13 @@ model = TransE.TransE
 
 def save_rules(rule_length, nowPredicate, candidate, pre):
     print("The final rules :")
-    i = 1
     f = open('./rule/' + BENCHMARK + '/rule_' + str(model)[15:21] + '.txt', 'a+')
     # print(str(nowPredicate[1]) + "\n")
     f.write(str(nowPredicate[1]) + "\n")
     f.write("length: %d, num: %d\n" % (rule_length, len(candidate)))
     R_num = 0
     QR_num = 0
+    i = 1
     for rule in candidate:
         index = rule[0]
         flag = rule[1]
@@ -70,7 +70,7 @@ def save_rules(rule_length, nowPredicate, candidate, pre):
     print("\nRules number: %d\n" % R_num)
     print("Qualify Rules number: %d\n" % QR_num)
     f.write("\nRules number: %d\n" % R_num)
-    f.write("Qualify Rules number: %d\n" % QR_num)
+    f.write("Qualify Rules number: %d\n\n" % QR_num)
     f.close()
 
 
@@ -79,7 +79,7 @@ if __name__ == '__main__':
 
     print("\nThe benchmark is " + BENCHMARK + ".")
     predicateName, _ = r.RSALW.get_pre(BENCHMARK, filename='./benchmarks/')
-    predicateSize = len(_)
+    predicateSize = len(predicateName)
     print("Total predicates:%d" % predicateSize)
     # get ALL FACTS!
     fact_size, facts_all = r.RSALW.get_facts(BENCHMARK, filename="./benchmarks/")
@@ -88,9 +88,10 @@ if __name__ == '__main__':
     total_num_rule = 0
     total_time = 0
 
-    # Init original algo object
-    rsalw = r.RSALW()
-    for Pt in range(predicateSize):
+    # test_Pre_list = np.random.randint(0, predicateSize, size=5)
+    test_Pre_list = [3, 57, 163]
+    # for Pt in range(predicateSize):
+    for Pt in test_Pre_list:
         Pt_start = time.time()
         Pt_i_1 = Pt_start
         # Initialization all the variables.
@@ -116,6 +117,7 @@ if __name__ == '__main__':
         E_i_1_new = E_0
         P_i_list = [P_0]
         max_i = int((Max_rule_length + 1) / 2)
+        candidate_of_Pt = []
         for length in range(2, Max_rule_length+1):
             cur_max_i = int((length+1)/2)
             if len(P_i_list) < cur_max_i+1:
@@ -123,7 +125,7 @@ if __name__ == '__main__':
                 print("\nNeed to compute the P_%d\n" % cur_max_i)
                 E_i, P_i, F_i_new, facts = s.sample_by_i(cur_max_i, E_i_1_new, facts)
                 # Get the next cycle's variable.
-                E_i_1_new = E_i - E  # remove the duplicate entity.!!!!!!!!!!!!
+                E_i_1_new = E_i - E  # remove the duplicate entity.
                 # Merge the result.
                 E = E | E_i
                 P = P | P_i
@@ -150,7 +152,6 @@ if __name__ == '__main__':
                     gc.enable()
                 gc.collect()
                 gc.disable()
-
             else:
                 print("\nNeedn't to compute the next P_i")
                 print("##End to sample##\n")
@@ -160,9 +161,12 @@ if __name__ == '__main__':
                 print("##End to train embedding##\n")
 
             print("\n##Begin to search and evaluate##\n")
+            # Init original object
+            rsalw = r.RSALW()
             candidate = rsalw.search_and_evaluate(BENCHMARK, IsUncertain, 1, length, dimension, DEGREE, nowPredicate,
                                                   ent_emb, rel_emb, ent_size_all, fact_dic,
                                                   _syn, _coocc, P_new_index_list)
+            candidate_of_Pt.extend(candidate)
             print("\n##End to search and evaluate##\n")
 
             # Save rules and timing.
@@ -170,21 +174,24 @@ if __name__ == '__main__':
             num_rule = num_rule + len(candidate)
             Pt_i = time.time()
             print("Length = %d, Time = %f" % (length, (Pt_i-Pt_i_1)))
+
+            # Send report process E-mail!
+            subject = 'ruleLearning_RainbowWu'
+            text = "Pt:" + str(Pt)+ '\nLearning length of \'' + str(length) + '\' is DONE!' + '\nWe are going to start loop of \'' \
+                   + str(length + 1) + '\'!\n'
+            nu = "The number of rules is " + str(len(candidate)) + ".\n"
+            ti = "The time of this length is " + str(Pt_i-Pt_i_1) + ".\n"
             Pt_i_1 = Pt_i
+            text = BENCHMARK + ": " + text + nu + ti
+            # Send email.
+            send_process_report_email.send_email_main_process(subject, text)
 
             # Garbage collection.
             if not gc.isenabled():
                 gc.enable()
-            del candidate
+            del candidate, rsalw
             gc.collect()
             gc.disable()
-
-            # Send report process E-mail!
-            subject = 'ruleLearning_RainbowWu'
-            text = 'Learning length of \'' + str(length) + '\' is DONE!' + '\nWe are going to start loop of \'' \
-                   + str(length + 1) + '\'!'
-            # Send email.
-            send_process_report_email.send_email_main_process(subject, text)
 
         total_num_rule = total_num_rule + num_rule
         Pt_end = time.time()
@@ -192,7 +199,10 @@ if __name__ == '__main__':
         total_time = total_time + Pt_time
         print("This %d th predicate's total time: %f\n" % (Pt, Pt_time))
         print("Until now, all %d predicates' average time: %f\n" % (Pt, total_time/(Pt+1)))
-        break
+
+        # Save for link prediction.
+        with open('./rule/' + BENCHMARK + '/rule_' + str(Pt) + '.pk', 'w') as fp:
+            pickle.dump(candidate_of_Pt, fp)
 
     with open('./rule/'+BENCHMARK+'/rule_' + str(model)[15:21]+'.txt', 'a+') as f:
         f.write("\nEmbedding parameter:\n")
@@ -208,10 +218,14 @@ if __name__ == '__main__':
         f.write("_coocc: %f\n" % _coocc)
         f.write("Total number of rules: %d\n" % total_num_rule)
         f.write("Average time:%s\n" % str(total_time/int(predicateSize)))  # unless it runs to end.
+
+        # Total time:
+        end = time.time() - begin
+        hour = int(end / 3600)
+        minute = int((end - hour * 3600) / 60)
+        second = end - hour * 3600 - minute * 60
+        print("\nAlgorithm total time: %f" % end)
+        print(str(hour) + " : " + str(minute) + " : " + str(second))
+
+        f.write("Algorithm total time: %d : %d : %f" % (hour, minute, second))
         f.close()
-    end = time.time()-begin
-    hour = int(end/3600)
-    minute = int((end-hour*3600)/60)
-    second = end-hour*3600-minute*60
-    print("\nAlgorithm total time: %f" % end)
-    print(str(hour)+" : "+str(minute)+" : "+str(second))

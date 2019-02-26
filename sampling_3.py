@@ -13,8 +13,8 @@ def read_data(BENCHMARK):  # index from 0
         entity_size = int(f.readline())
         f.close()
         print("(Before sample, total entities:%d)" % entity_size)
-    f = np.zeros(factSize, dtype='int32')
-    facts = np.c_[facts, f]
+    fl = np.zeros(factSize, dtype='int32')
+    facts = np.c_[facts, fl]
     return facts, entity_size
 
 
@@ -104,8 +104,10 @@ def save_and_reindex(length, save_path, E, P, F, Pt, predicate_name, P_list):
         P_i_list = []
         for p_old_index in P_i:
             new_index = pre_sampled_list.index(p_old_index)
-            P_i_list.append(new_index)
+            P_i_list.append(new_index*2)
+            P_i_list.append(new_index*2+1)
         P_new_index_list.append(P_i_list)
+        # print(P_i_list)
     # test
     print("after sample, the index:")
     for i in range(len(P_list)):
