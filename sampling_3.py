@@ -10,14 +10,14 @@ For the sampling process, RLvLR picked at most 50 neighbours of an entity
 '''
 
 
-def read_data(BENCHMARK):  # index from 0
+def read_data(BENCHMARK, filename):  # index from 0
     # read the Fact.txt: h t r
-    with open('./benchmarks/' + BENCHMARK + '/Fact.txt', 'r') as f:
+    with open(filename + BENCHMARK + '/Fact.txt', 'r') as f:
         factSize = int(f.readline())
         facts = np.array([line.strip('\n').split(' ') for line in f.readlines()], dtype='int32')
         f.close()
         print("(Before sample, total facts:%d)" % factSize)
-    with open('./benchmarks/' + BENCHMARK + '/entity2id.txt', 'r') as f:
+    with open(filename + BENCHMARK + '/entity2id.txt', 'r') as f:
         entity_size = int(f.readline())
         f.close()
         print("(Before sample, total entities:%d)" % entity_size)
@@ -34,6 +34,7 @@ def first_sample_by_Pt(Pt, facts):
     P_0.add(Pt)
     F_0 = []
     for f in facts:
+        # Sample.
         if f[2] == Pt and f[3] == 0:
             fact = f.tolist()
             F_0.append(fact)

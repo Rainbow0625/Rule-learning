@@ -21,7 +21,7 @@ R_minHC = 0.001
 QR_minSC = 0.5
 QR_minHC = 0.001
 DEGREE = [R_minSC, R_minHC, QR_minSC, QR_minHC]
-Max_rule_length = 5  # not include head atom
+Max_rule_length = 4  # not include head atom
 _syn = 200
 _coocc = 200
 
@@ -81,9 +81,7 @@ if __name__ == '__main__':
     predicateName, _ = r.RSALW.get_pre(BENCHMARK, filename='./benchmarks/')
     predicateSize = len(predicateName)
     print("Total predicates:%d" % predicateSize)
-    # get ALL FACTS!
-    fact_size, facts_all = r.RSALW.get_facts(BENCHMARK, filename="./benchmarks/")
-
+    facts_all, ent_size_all = s.read_data(BENCHMARK, filename="./benchmarks/")
     # 0:matrix 1:vector
     total_num_rule = 0
     total_time = 0
@@ -99,17 +97,24 @@ if __name__ == '__main__':
         ent_emb = None
         rel_emb = None
         nowPredicate = None
-        fact_dic = None
-        pre = None
+        fact_dic_sample = None
+        fact_dic_all = None
+        facts_sample = None
+        ent_size_sample = None
+        pre_sample = None
         P_new_index_list = None
+
+        # Garbage collection.
+        if not gc.isenabled():
+            gc.enable()
+        gc.collect()
+        gc.disable()
 
         # Firstly, sample all the elements!
         print("\n##Begin to sample##\n")
         save_path = './sampled/' + BENCHMARK
-        # After sample by Pt, return the E_i-1 and F_i-1.
-        # Can not remove the repeated facts!
-        facts, ent_size_all = s.read_data(BENCHMARK)
-        E_0, P_0, F_0, facts = s.first_sample_by_Pt(Pt, facts)
+        # After sample by Pt, return the E_0 and F_0.
+        E_0, P_0, F_0, facts_all = s.first_sample_by_Pt(Pt, facts_all)
         # Initialization the sample variables.
         E = E_0
         P = P_0
@@ -123,7 +128,7 @@ if __name__ == '__main__':
             if len(P_i_list) < cur_max_i+1:
                 # If the next P_i hasn't be computed:
                 print("\nNeed to compute the P_%d\n" % cur_max_i)
-                E_i, P_i, F_i_new, facts = s.sample_by_i(cur_max_i, E_i_1_new, facts)
+                E_i, P_i, F_i_new, facts_all = s.sample_by_i(cur_max_i, E_i_1_new, facts_all)
                 # Get the next cycle's variable.
                 E_i_1_new = E_i - E  # remove the duplicate entity.
                 print("The new entity size :%d   need to less than 800?" % len(E_i_1_new))
@@ -136,10 +141,13 @@ if __name__ == '__main__':
                                                                     P_i_list)
                 print("\n##End to sample##\n")
 
-                print("\nGet ALL FACTS dictionary!")
+                print("\nGet SAMPLE PREDICATE dictionary. (First evaluate on small sample KG.)")
                 t = time.time()
-                _, pre = r.RSALW.get_pre(BENCHMARK, "./sampled/")
-                fact_dic = r.RSALW.get_fact_dic(pre, facts_all, IsUncertain)
+                _, pre_sample = r.RSALW.get_pre(BENCHMARK, "./sampled/")
+                facts_sample, ent_size_sample = s.read_data(BENCHMARK, filename="./sampled/")
+                # First get fact_dic_sample.
+                fact_dic_sample = r.RSALW.get_fact_dic_sample(facts_sample)
+                fact_dic_all = r.RSALW.get_fact_dic_all(pre_sample, facts_all)
                 print("Time: %s \n" % str(time.time() - t))
 
                 print("\n##Begin to train embedding##\n")
@@ -165,27 +173,17 @@ if __name__ == '__main__':
             # Init original object
             rsalw = r.RSALW()
             candidate = rsalw.search_and_evaluate(BENCHMARK, IsUncertain, 1, length, dimension, DEGREE, nowPredicate,
-                                                  ent_emb, rel_emb, ent_size_all, fact_dic,
-                                                  _syn, _coocc, P_new_index_list)
+                                                  ent_emb, rel_emb, _syn, _coocc, P_new_index_list,
+                                                  fact_dic_sample, fact_dic_all, ent_size_sample, ent_size_all)
             candidate_of_Pt.extend(candidate)
+            candidate_len = len(candidate)
+            num_rule = num_rule + candidate_len
             print("\n##End to search and evaluate##\n")
 
             # Save rules and timing.
-            save_rules(length, nowPredicate, candidate, pre)
-            num_rule = num_rule + len(candidate)
+            save_rules(length, nowPredicate, candidate, pre_sample)
             Pt_i = time.time()
             print("Length = %d, Time = %f" % (length, (Pt_i-Pt_i_1)))
-
-            # Send report process E-mail!
-            subject = 'ruleLearning_RainbowWu'
-            text = "Pt:" + str(Pt)+ '\nLearning length of \'' + str(length) + '\' is DONE!' + '\nWe are going to start loop of \'' \
-                   + str(length + 1) + '\'!\n'
-            nu = "The number of rules is " + str(len(candidate)) + ".\n"
-            ti = "The time of this length is " + str(Pt_i-Pt_i_1) + ".\n"
-            Pt_i_1 = Pt_i
-            text = BENCHMARK + ": " + text + nu + ti
-            # Send email.
-            send_process_report_email.send_email_main_process(subject, text)
 
             # Garbage collection.
             if not gc.isenabled():
@@ -193,6 +191,17 @@ if __name__ == '__main__':
             del candidate, rsalw
             gc.collect()
             gc.disable()
+
+            # Send report process E-mail!
+            subject = 'ruleLearning_RainbowWu'
+            text = "Pt:" + str(Pt) + '\nLearning length of \'' + str(length) + '\' is DONE!' +\
+                   '\nWe are going to start loop of \'' + str(length + 1) + '\'!\n'
+            nu = "The number of rules is " + str(candidate_len) + ".\n"
+            ti = "The time of this length is " + str(Pt_i-Pt_i_1) + ".\n"
+            Pt_i_1 = Pt_i
+            text = BENCHMARK + ": " + text + nu + ti
+            # Send email.
+            # send_process_report_email.send_email_main_process(subject, text)
 
         total_num_rule = total_num_rule + num_rule
         Pt_end = time.time()

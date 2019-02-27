@@ -8,30 +8,80 @@ import gc
 
 class RSALW(object):
     def __int__(self):
-        self.fact_dic_all = {}
-        self.entity_size_all = 0
-        self.length = 0
+        self.pt = None
+        self.fact_dic_sample = None
+        self.fact_dic_all = None
+        self.ent_size_sample = None
+        self.ent_size_all = None
+        self.length = None
         self.isUncertian = False
+        self._syn = None
+        self._coocc = None
+        self.P_i = None
 
     @staticmethod
     def sim(para1, para2):  # similarity of vector or matrix
         return np.e ** (-np.linalg.norm(para1 - para2, ord=2))
 
-    def index_convert(self, n, relzise):
-        a = []
-        while True:
-            s = n // relzise
-            y = n % relzise
-            a = a + [y]
-            if s == 0:
-                break
-            n = s
-        le = self.length - len(a)
-        if le != 0:
-            for _ in range(le):
-                a.append(0)
-        a.reverse()
-        return a
+    # Generally, get predicates after sampled.
+    @staticmethod
+    def get_pre(BENCHMARK, filename):
+        with open(filename + BENCHMARK + "/relation2id.txt") as f:
+            preSize = f.readline()
+            pre = []
+            predicateName = []
+            for line in f.readlines():
+                pre.append(line.strip('\n').split("	"))
+                predicateName.append(line.split("	")[0])
+        return predicateName, pre
+
+    @staticmethod
+    def get_fact_dic_sample(facts_sample, isUncertian=False):
+        # Only save once for the reverse pre.e.g. 0, 2, 4....
+        fact_dic = {}
+        for f in facts_sample:
+            if f[2] % 2 == 0:
+                if f[2] in fact_dic.keys():
+                    templist = fact_dic.get(f[2])
+                else:
+                    templist = []
+                templist.append([f[0], f[1]])
+                fact_dic[f[2]] = templist
+        return fact_dic
+
+    @staticmethod
+    def get_fact_dic_all(pre_sample, facts_all):
+        # Only save once for the reverse pre.e.g. 0, 2, 4....
+        # fact_dic: key: P_index_new , value: all_fact_list
+        pre_sample_index = np.array([[pre[0], pre[2]] for pre in pre_sample], dtype=np.int32)
+        old_index_p = pre_sample_index[:, 1]
+        fact_dic = {}
+        for f in facts_all:
+            if f[2] in set(old_index_p):
+                new_index = np.where(old_index_p==f[2])[0][0]  # It must be even.
+                if new_index in fact_dic.keys():
+                    temp_list = fact_dic.get(new_index)
+                else:
+                    temp_list = []
+                temp_list.append([f[0], f[1]])
+                fact_dic[new_index] = temp_list
+        return fact_dic
+
+    # def index_convert(self, n, relzise):
+    #     a = []
+    #     while True:
+    #         s = n // relzise
+    #         y = n % relzise
+    #         a = a + [y]
+    #         if s == 0:
+    #             break
+    #         n = s
+    #     le = self.length - len(a)
+    #     if le != 0:
+    #         for _ in range(le):
+    #             a.append(0)
+    #     a.reverse()
+    #     return a
 
     def is_repeated(self, M_index):
         for i in range(1, self.length):
@@ -56,13 +106,23 @@ class RSALW(object):
         print("\nindex_tuple_size: %d" % self.index_tuple_size)
         self.index_tuple = itertools.product(*P_cartprod_list)
 
+    def get_subandobj_dic_for_f2(self):
+        # For predicates: 0, 2, 4, ... subdic, objdic
+        # For predicates: 1, 3, 5, ... objdic, subdic
+        objdic = {}  # key:predicate value: set
+        subdic = {}  # key:predicate value: set
+        for key in self.fact_dic_sample.keys():
+            tempsub = set()
+            tempobj = set()
+            facts_list = self.fact_dic_sample.get(key)
+            for f in facts_list:
+                tempsub.add(f[0])
+                tempobj.add(f[1])
+            subdic[key] = tempsub
+            objdic[key] = tempobj
+        return subdic, objdic
+
     def score_function1(self, flag, score_top_container, relation):  # synonymy!
-        # relsize = relation.shape[0]
-        # index_list = []
-        # for i in range(pow(relsize, self.length)):
-        #     temp = self.index_convert(i, relsize)
-        #     index_list.append(temp)
-        # print(index_list)
         for index in self.index_tuple:
             M = [relation[i] for i in index]
             # print(M)
@@ -83,36 +143,19 @@ class RSALW(object):
                 score_top_container[replace_index][self.length] = value
                 # print(score_top_container[replace_index])
 
-    def score_function2(self, score_top_container, relsize, facts, entity):  # co-occurrence
-        # get the different object and subject for every predicate
-        objdic = {}  # key:predicate value: set
-        subdic = {}  # key:predicate value: set
-        factdic = {}  # key:predicate value: list
-        for x in range(facts.shape[0]):
-            if facts[x, 2] not in objdic:  # new key
-                tempsub = set()
-                tempobj = set()
-                tempfact = []
-            else:
-                tempsub = subdic.get(facts[x, 2])
-                tempobj = objdic.get(facts[x, 2])
-                tempfact = factdic.get(facts[x, 2])
-            tempsub.add(facts[x, 0])
-            tempobj.add(facts[x, 1])
-            tempfact.append(facts[x, :])
-            subdic[facts[x, 2]] = tempsub
-            objdic[facts[x, 2]] = tempobj
-            factdic[facts[x, 2]] = tempfact
+    def score_function2(self, score_top_container, entity, sub_dic, obj_dic):  # co-occurrence
         # get the average vector of average predicate which is saved in the dictionary.
         average_vector = {}
-        for key in subdic:
+        for key in sub_dic:
             # print(key)
-            sub = sum([entity[item, :] for item in subdic[key]]) / len(subdic[key])
-            obj = sum([entity[item, :] for item in objdic[key]]) / len(objdic[key])
+            sub = sum([entity[item, :] for item in sub_dic[key]]) / len(sub_dic[key])
+            obj = sum([entity[item, :] for item in obj_dic[key]]) / len(obj_dic[key])
+            # For predicates: 0, 2, 4, ... [sub, obj]
+            # For predicates: 1, 3, 5, ... [obj, sub]
             average_vector[key] = [sub, obj]
-        # print("\n the dic's size is equal to the predicates' number! ")
-        # print(len(average_vector))
-
+            average_vector[key+1] = [obj, sub]
+        print("\n the dic's size is equal to the predicates' number! ")
+        print(len(average_vector))
         for index in self.index_tuple:
             para_sum = 0.0
             for i in range(self.length - 1):
@@ -128,16 +171,27 @@ class RSALW(object):
                 score_top_container[replace_index][self.length] = value
                 # print(score_top_container[replace_index])
 
-    def getmatrix(self, p):
+    def getmatrix(self, p, isfullKG=True):
         # sparse matrix
-        # print(self.fact_dic_all)
-        pfacts = self.fact_dic_all.get(p)
-        pmatrix = sparse.dok_matrix((self.entity_size_all, self.entity_size_all), dtype=np.int32)
-        for f in pfacts:
-            pmatrix[f[0], f[1]] = 1
+        re_flag = False
+        if p % 2 == 1:
+            p = p-1
+            re_flag = True
+        if isfullKG:
+            pfacts = self.fact_dic_all.get(p)
+            pmatrix = sparse.dok_matrix((self.ent_size_all, self.ent_size_all), dtype=np.int32)
+        else:
+            pfacts = self.fact_dic_sample.get(p)
+            pmatrix = sparse.dok_matrix((self.ent_size_sample, self.ent_size_sample), dtype=np.int32)
+        if re_flag:
+            for f in pfacts:
+                pmatrix[f[1], f[0]] = 1
+        else:
+            for f in pfacts:
+                pmatrix[f[0], f[1]] = 1
         return pmatrix
 
-    def calSCandHC(self, pmatrix, ptmatrix):
+    def calSCandHC(self, pmatrix, ptmatrix, isfullKG=True):
         head = len(ptmatrix)
         supp = 0
         body = 0
@@ -146,109 +200,99 @@ class RSALW(object):
         body_score = 0.0
         for key in pmatrix.keys():
             body = body + 1
-            body_score = body_score + pmatrix[key]
+            # body_score = body_score + pmatrix[key]
             if ptmatrix[key] == 1:
                 supp = supp + 1
-                supp_score = supp_score + pmatrix[key]
-        if body == 0:
-            SC = 0
-        else:
-            SC = supp / body
-        if head == 0:
-            HC = 0
-        else:
-            HC = supp / head
-        if body_score == 0.0:
-            New_SC = 0
-        else:
-            New_SC = supp_score / body_score
-        return New_SC, SC, HC
+                # supp_score = supp_score + pmatrix[key]
+        # Judge by supp.
+        if isfullKG == False:
+            if supp > 0:
+                return 0, 0, True
+            else:
+                return 0, 0, False
+        else:  # isfullKG= True
+            if body == 0:
+                SC = 0
+            else:
+                SC = supp / body
+            if head == 0:
+                HC = 0
+            else:
+                HC = supp / head
+            return SC, HC, False
+        # if body_score == 0.0:
+        #     New_SC = 0
+        # else:
+        #     New_SC = supp_score / body_score
+        # return New_SC, SC, HC
 
     def evaluate_and_filter(self, index, DEGREE):
-        # Evaluation certain rule.
         # sparse matrix
         pmatrix = self.getmatrix(index[0])
         for i in range(1, self.length):
             pmatrix = pmatrix.dot(self.getmatrix(index[i]))
         pmatrix = pmatrix.todok()
         ptmatrix = self.getmatrix(self.pt)
-        # calculate the SC and HC
-        NSC, SC, HC = self.calSCandHC(pmatrix, ptmatrix)
-        degree = [NSC, SC, HC]
-        # print(degree)
-        # 1: quality rule
-        # 2: high quality rule
+        # calculate the temp SC and HC
+        # NSC, SC, HC = self.calSCandHC(pmatrix, ptmatrix)
+        # degree = [NSC, SC, HC]
+        SC, HC, is_eval_by_full = self.calSCandHC(pmatrix, ptmatrix)
+        if is_eval_by_full:
+            isfullKG = True
+            pmatrix = self.getmatrix(index[0], isfullKG)
+            for i in range(1, self.length):
+                pmatrix = pmatrix.dot(self.getmatrix(index[i], isfullKG))
+            pmatrix = pmatrix.todok()
+            ptmatrix = self.getmatrix(self.pt, isfullKG)
+            SC, HC, _ = self.calSCandHC(pmatrix, ptmatrix, isfullKG)
+            degree = [SC, HC]
+            if SC >= DEGREE[0] and HC >= DEGREE[1]:
+                # 1: quality rule
+                # 2: high quality rule
+                print("\nThis is " + str(index))
+                print("The Head Coverage of this rule is " + str(HC))
+                print("The Standard Confidence of this rule is " + str(SC))
+                # print("The NEW Standard Confidence of this rule is " + str(NSC))
+                if SC >= DEGREE[2] and HC >= DEGREE[3]:
+                    print("WOW, a high quality rule!")
+                    return 2, degree
+                return 1, degree
+            else:
+                return 0, None
+        degree = [SC, HC]
         if SC >= DEGREE[0] and HC >= DEGREE[1]:
+            # 1: quality rule
+            # 2: high quality rule
             print("\nThis is " + str(index))
             print("The Head Coverage of this rule is " + str(HC))
             print("The Standard Confidence of this rule is " + str(SC))
-            print("The NEW Standard Confidence of this rule is " + str(NSC))
+            # print("The NEW Standard Confidence of this rule is " + str(NSC))
             if SC >= DEGREE[2] and HC >= DEGREE[3]:
                 print("WOW, a high quality rule!")
                 return 2, degree
             return 1, degree
         return 0, None
 
-    def learn_weights(self, candidate):
-        # In the whole data set to learn the weights.
-        training_Iteration = 100
-        learning_Rate = 0.1
-        regularization_rate = 0.1
-
-        model = mlw.LearnModel()
-        model.__int__(self.length, training_Iteration, learning_Rate, regularization_rate,
-                      self.fact_dic_all, self.entity_size_all, candidate, self.pt, self.isUncertian)
-        model.train()
-
-    @staticmethod
-    def get_facts(BENCHMARK, filename):
-        with open(filename + BENCHMARK + "/Fact.txt") as f:
-            factsSize = f.readline()
-            facts = np.array([line.strip('\n').split(' ') for line in f.readlines()], dtype='int32')
-        return int(factsSize), facts
-
-    # Generally, get predicates after sampled.
-    @staticmethod
-    def get_pre(BENCHMARK, filename):
-        with open(filename + BENCHMARK + "/relation2id.txt") as f:
-            preSize = f.readline()
-            pre = []
-            predicateName = []
-            for line in f.readlines():
-                pre.append(line.strip('\n').split("	"))
-                predicateName.append(line.split("	")[0])
-        return predicateName, pre
-
-    @staticmethod
-    def get_fact_dic(pre_sample, facts_all, isUncertian):
-        fact_dic = {}
-        f = len(facts_all)
-        p = int(len(pre_sample) / 2)
-        for i in range(f):
-            for j in range(p):
-                if facts_all[i, 2] == int(pre_sample[2 * j][2]):
-                    if int(pre_sample[2 * j][0]) in fact_dic.keys():
-                        temp_list1 = fact_dic.get(int(pre_sample[2 * j][0]))
-                        temp_list2 = fact_dic.get(int(pre_sample[2 * j + 1][0]))
-                    else:
-                        temp_list1 = []
-                        temp_list2 = []
-                    if isUncertian is True:
-                        temp_list1.append([facts_all[i, 0], facts_all[i, 1], facts_all[i, 3]])
-                        temp_list2.append([facts_all[i, 1], facts_all[i, 0], facts_all[i, 3]])
-                    else:
-                        temp_list1.append([facts_all[i, 0], facts_all[i, 1]])
-                        temp_list2.append([facts_all[i, 1], facts_all[i, 0]])
-                    fact_dic[int(pre_sample[2 * j][0])] = temp_list1
-                    fact_dic[int(pre_sample[2 * j + 1][0])] = temp_list2
-        return fact_dic
+    # def learn_weights(self, candidate):
+    #     # In the whole data set to learn the weights.
+    #     training_Iteration = 100
+    #     learning_Rate = 0.1
+    #     regularization_rate = 0.1
+    #     model = mlw.LearnModel()
+    #     # fact_dic_sample!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    #     model.__int__(self.length, training_Iteration, learning_Rate, regularization_rate,
+    #                   self.fact_dic_sample, self.ent_size_sample, candidate, self.pt, self.isUncertian)
+    #
+    #     model.train()
 
     def search_and_evaluate(self, BENCHMARK, isUncertain, f, length, dimension, DEGREE, nowPredicate,
-                            ent_emb, rel_emb, ent_size_all, fact_dic,
-                            _syn, _coocc, P_new_index_list):
+                            ent_emb, rel_emb, _syn, _coocc, P_new_index_list,
+                            fact_dic_sample, fact_dic_all, ent_size_sample, ent_size_all):
         self.pt = nowPredicate[0]
-        self.fact_dic_all = fact_dic
-        self.entity_size_all = ent_size_all
+        self.fact_dic_sample = fact_dic_sample
+        self.fact_dic_all = fact_dic_all
+        self.ent_size_sample = ent_size_sample
+        self.ent_size_all = ent_size_all
         self.length = length
         self.isUncertian = isUncertain
         self._syn = _syn
@@ -268,17 +312,14 @@ class RSALW(object):
         candidate = []
         all_candidate_set = []  # Eliminate duplicate indexes.
 
-
         # Calculate the f2.
-        # top_candidate_size = int(pow(relsize, length) * _coocc)
         # top_candidate_size = int(_coocc * self.index_tuple_size)
         top_candidate_size = _coocc
         score_top_container = np.zeros(shape=(top_candidate_size, self.length + 1))
         print("The number of COOCC Top Candidates is %d" % top_candidate_size)
-        factsSize, facts = self.get_facts(BENCHMARK, filename="./sampled/")
+        subdic, objdic = self.get_subandobj_dic_for_f2()
         print("\nBegin to calculate the f2: Co-occurrence")
-        self.score_function2(score_top_container, relsize, facts, ent_emb)
-
+        self.score_function2(score_top_container, ent_emb, subdic, objdic)
         print("\n Begin to use coocc to filter: ")
         for item in score_top_container:
             index = [int(item[i]) for i in range(self.length)]
@@ -291,12 +332,12 @@ class RSALW(object):
 
         if not gc.isenabled():
             gc.enable()
-        del ent_emb, score_top_container
+        del ent_emb, subdic, objdic, score_top_container
         gc.collect()
         gc.disable()
 
+        '''
         # Calculate the f1.
-        # top_candidate_size = int(pow(relsize, length) * _syn)
         # top_candidate_size = int(_syn * self.index_tuple_size)
         top_candidate_size = _syn
         score_top_container = np.zeros(shape=(top_candidate_size, self.length + 1))
@@ -329,12 +370,9 @@ class RSALW(object):
         del rel_emb, score_top_container
         gc.collect()
         gc.disable()
+        '''
 
-
-
-        # Evaluation is still a cue method!
         print("\n*^_^* Yeah, there are %d rules. *^_^*\n" % len(candidate))
 
         # learn_weights(candidate)
-
         return candidate
