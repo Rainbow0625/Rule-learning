@@ -21,7 +21,7 @@ R_minHC = 0.001
 QR_minSC = 0.5
 QR_minHC = 0.001
 DEGREE = [R_minSC, R_minHC, QR_minSC, QR_minHC]
-Max_rule_length = 4  # not include head atom
+Max_rule_length = 3  # not include head atom
 _syn = 200
 _coocc = 200
 
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     total_time = 0
 
     # test_Pre_list = np.random.randint(0, predicateSize, size=5)
-    test_Pre_list = [0, 3, 57, 163]
+    test_Pre_list = [3, 12, 27, 47]
     # for Pt in range(predicateSize):
     for Pt in test_Pre_list:
         Pt_start = time.time()
@@ -172,7 +172,9 @@ if __name__ == '__main__':
             print("\n##Begin to search and evaluate##\n")
             # Init original object
             rsalw = r.RSALW()
-            candidate = rsalw.search_and_evaluate(BENCHMARK, IsUncertain, 1, length, dimension, DEGREE, nowPredicate,
+            print(len(fact_dic_sample))
+            print(len(fact_dic_all))
+            candidate = rsalw.search_and_evaluate(IsUncertain, 1, length, dimension, DEGREE, nowPredicate,
                                                   ent_emb, rel_emb, _syn, _coocc, P_new_index_list,
                                                   fact_dic_sample, fact_dic_all, ent_size_sample, ent_size_all)
             candidate_of_Pt.extend(candidate)
@@ -194,14 +196,13 @@ if __name__ == '__main__':
 
             # Send report process E-mail!
             subject = 'ruleLearning_RainbowWu'
-            text = "Pt:" + str(Pt) + '\nLearning length of \'' + str(length) + '\' is DONE!' +\
-                   '\nWe are going to start loop of \'' + str(length + 1) + '\'!\n'
-            nu = "The number of rules is " + str(candidate_len) + ".\n"
-            ti = "The time of this length is " + str(Pt_i-Pt_i_1) + ".\n"
+            text = "Pt:" + str(Pt) + '\nLength: ' + str(length) + '\n'
+            nu = "The number of rules: " + str(candidate_len) + "\n"
+            ti = "The time of this length: " + str(Pt_i-Pt_i_1)[0:5] + "\n"
             Pt_i_1 = Pt_i
             text = BENCHMARK + ": " + text + nu + ti
             # Send email.
-            # send_process_report_email.send_email_main_process(subject, text)
+            send_process_report_email.send_email_main_process(subject, text)
 
         total_num_rule = total_num_rule + num_rule
         Pt_end = time.time()
@@ -213,6 +214,11 @@ if __name__ == '__main__':
         # Save for link prediction.
         # with open('./rule/' + BENCHMARK + '/rule_' + str(Pt) + '.pk', 'wb') as fp:
             # pickle.dump(candidate_of_Pt, fp)
+
+        # After the mining of Pt, facts_all's usage need to be set 0.
+        facts_all = np.delete(facts_all, -1, axis=1)
+        fl = np.zeros(facts_all.shape[0], dtype='int32')
+        facts_all = np.c_[facts_all, fl]
 
     with open('./rule/'+BENCHMARK+'/rule_' + str(model)[15:21]+'.txt', 'a+') as f:
         f.write("\nEmbedding parameter:\n")
@@ -239,3 +245,7 @@ if __name__ == '__main__':
 
         f.write("Algorithm total time: %d : %d : %f" % (hour, minute, second))
         f.close()
+
+    subject = "Over!"
+    text = "Let's watch the result! Go Go Go!\n"
+    send_process_report_email.send_email_main_process(subject, text)

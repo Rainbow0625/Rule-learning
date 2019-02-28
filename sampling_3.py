@@ -9,7 +9,6 @@ For the sampling process, RLvLR picked at most 50 neighbours of an entity
  and set the maximum size of each sample to 800 entities. 
 '''
 
-
 def read_data(BENCHMARK, filename):  # index from 0
     # read the Fact.txt: h t r
     with open(filename + BENCHMARK + '/Fact.txt', 'r') as f:
@@ -94,7 +93,6 @@ def sample_by_i(index, E_i_1_new, facts):
                 P_dic[f[2]] = [value[0]+1, value[1]]
             else:
                 P_dic[f[2]] = [1, [j]]
-
     count_array = np.array([value[0] for value in list(P_dic.values())])
     print(count_array)
     count_mean = int(np.mean(count_array))
@@ -104,7 +102,7 @@ def sample_by_i(index, E_i_1_new, facts):
     keys = list(P_dic.keys())
     for key in keys:
         value = P_dic[key]
-        if value[0] < 100:
+        if value[0] < 100 :
             del P_dic[key]
             del_flag = del_flag + 1
         else:

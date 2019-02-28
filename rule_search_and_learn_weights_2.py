@@ -58,7 +58,7 @@ class RSALW(object):
         fact_dic = {}
         for f in facts_all:
             if f[2] in set(old_index_p):
-                new_index = np.where(old_index_p==f[2])[0][0]  # It must be even.
+                new_index = np.where(old_index_p == f[2])[0][0]  # It must be even.
                 if new_index in fact_dic.keys():
                     temp_list = fact_dic.get(new_index)
                 else:
@@ -111,6 +111,7 @@ class RSALW(object):
         # For predicates: 1, 3, 5, ... objdic, subdic
         objdic = {}  # key:predicate value: set
         subdic = {}  # key:predicate value: set
+        print(len(self.fact_dic_sample))
         for key in self.fact_dic_sample.keys():
             tempsub = set()
             tempobj = set()
@@ -136,6 +137,7 @@ class RSALW(object):
                     result = sum(M)
             top_values = score_top_container[:, self.length]
             value = self.sim(result, relation[self.pt])
+
             if value > np.min(top_values):
                 replace_index = np.argmin(top_values)
                 for i in range(self.length):
@@ -156,8 +158,10 @@ class RSALW(object):
             average_vector[key+1] = [obj, sub]
         print("\n the dic's size is equal to the predicates' number! ")
         print(len(average_vector))
+        f = 0
         for index in self.index_tuple:
-            para_sum = 0.0
+            f = f+1
+            para_sum = float(0)
             for i in range(self.length - 1):
                 para_sum = para_sum + self.sim(average_vector.get(index[i])[1], average_vector.get(index[i + 1])[0])
             value = para_sum + self.sim(average_vector.get(index[0])[0], average_vector.get(self.pt)[0]) \
@@ -169,7 +173,7 @@ class RSALW(object):
                 for i in range(self.length):
                     score_top_container[replace_index][i] = index[i]
                 score_top_container[replace_index][self.length] = value
-                # print(score_top_container[replace_index])
+        print(f)
 
     def getmatrix(self, p, isfullKG=True):
         # sparse matrix
@@ -193,24 +197,28 @@ class RSALW(object):
 
     def calSCandHC(self, pmatrix, ptmatrix, isfullKG=True):
         head = len(ptmatrix)
+        body = len(pmatrix)
         supp = 0
-        body = 0
         # calculate New SC
-        supp_score = 0.0
-        body_score = 0.0
-        for key in pmatrix.keys():
-            body = body + 1
-            # body_score = body_score + pmatrix[key]
-            if ptmatrix[key] == 1:
-                supp = supp + 1
-                # supp_score = supp_score + pmatrix[key]
+        # supp_score = 0.0
+        # body_score = 0.0
+        if head < body:
+            for key in ptmatrix.keys():
+                if pmatrix.get(key) > 0:
+                    supp = supp + 1
+        elif head >= body:
+            for key in pmatrix.keys():
+                # body_score = body_score + pmatrix[key]
+                if ptmatrix.get(key) == 1:
+                    supp = supp + 1
+                    # supp_score = supp_score + pmatrix[key]
         # Judge by supp.
         if isfullKG == False:
             if supp > 0:
                 return 0, 0, True
             else:
                 return 0, 0, False
-        else:  # isfullKG= True
+        else:  # isfullKG = True
             if body == 0:
                 SC = 0
             else:
@@ -228,11 +236,16 @@ class RSALW(object):
 
     def evaluate_and_filter(self, index, DEGREE):
         # sparse matrix
+        # print(index)
         pmatrix = self.getmatrix(index[0])
+        # print(pmatrix)
         for i in range(1, self.length):
             pmatrix = pmatrix.dot(self.getmatrix(index[i]))
+            # print(pmatrix)
         pmatrix = pmatrix.todok()
+        # print(pmatrix)
         ptmatrix = self.getmatrix(self.pt)
+        # print(ptmatrix)
         # calculate the temp SC and HC
         # NSC, SC, HC = self.calSCandHC(pmatrix, ptmatrix)
         # degree = [NSC, SC, HC]
@@ -260,6 +273,7 @@ class RSALW(object):
             else:
                 return 0, None
         degree = [SC, HC]
+        # print(degree)
         if SC >= DEGREE[0] and HC >= DEGREE[1]:
             # 1: quality rule
             # 2: high quality rule
@@ -285,7 +299,7 @@ class RSALW(object):
     #
     #     model.train()
 
-    def search_and_evaluate(self, BENCHMARK, isUncertain, f, length, dimension, DEGREE, nowPredicate,
+    def search_and_evaluate(self, isUncertain, f, length, dimension, DEGREE, nowPredicate,
                             ent_emb, rel_emb, _syn, _coocc, P_new_index_list,
                             fact_dic_sample, fact_dic_all, ent_size_sample, ent_size_all):
         self.pt = nowPredicate[0]
@@ -314,8 +328,11 @@ class RSALW(object):
 
         # Calculate the f2.
         # top_candidate_size = int(_coocc * self.index_tuple_size)
-        top_candidate_size = _coocc
-        score_top_container = np.zeros(shape=(top_candidate_size, self.length + 1))
+        if self.index_tuple_size < _coocc:
+            top_candidate_size = self.index_tuple_size
+        else:
+            top_candidate_size = _coocc
+        score_top_container = np.zeros(shape=(top_candidate_size, self.length + 1), dtype=np.float)
         print("The number of COOCC Top Candidates is %d" % top_candidate_size)
         subdic, objdic = self.get_subandobj_dic_for_f2()
         print("\nBegin to calculate the f2: Co-occurrence")
@@ -339,8 +356,12 @@ class RSALW(object):
         '''
         # Calculate the f1.
         # top_candidate_size = int(_syn * self.index_tuple_size)
+        if self.index_tuple_size < _syn:
+            top_candidate_size = self.index_tuple_size
+        else:
+            top_candidate_size = _syn
         top_candidate_size = _syn
-        score_top_container = np.zeros(shape=(top_candidate_size, self.length + 1))
+        score_top_container = np.zeros(shape=(top_candidate_size, self.length + 1), dtype=np.float)
         print("The number of SYN Top Candidates is %d" % top_candidate_size)
         print("\nBegin to calculate the f1: synonymy")
         self.score_function1(f, score_top_container, rel_emb)
