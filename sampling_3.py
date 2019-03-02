@@ -77,7 +77,7 @@ def sample_by_i(index, E_i_1_new, facts):
     keys = list(P_dic.keys())
     for key in keys:
         value = P_dic[key]
-        if value[0] > 2000:
+        if value[0] < 0:
             del P_dic[key]
             i = np.where(P_count[:, 0] == key)[0][0]
             P_count = np.delete(P_count, i, axis=0)
@@ -102,17 +102,16 @@ def sample_by_i(index, E_i_1_new, facts):
     return E_i, P_i, F_i_new, facts, P_count
 
 
-def filter_predicates_by_count(P_count_dic, P_new_index_list, fact_dic_sample):
+def filter_predicates_by_count(P_count_dic, P_new_index_list):
     del_flag = 0
     keys = list(P_count_dic.keys())
     for key in keys:
-        if P_count_dic.get(key) > 5000:
+        if P_count_dic.get(key) > 500:
             # Remove the elements filtered.
             P_new_index_list[-1].remove(key)
-            del fact_dic_sample[key]
             del_flag = del_flag + 1
     print("Remove num: %d" % del_flag)
-    return P_new_index_list, fact_dic_sample
+    return P_new_index_list
 
 
 def save_and_reindex(length, save_path, E, P, F, Pt, predicate_name, P_list, _P_count):
@@ -164,7 +163,8 @@ def save_and_reindex(length, save_path, E, P, F, Pt, predicate_name, P_list, _P_
     P_count_dic = {}
     for i in range(_P_count.shape[0]):
         new_index = pre_sampled_list.index(_P_count[i][0])
-        P_count_dic[new_index] = _P_count[i][1]
+        P_count_dic[new_index*2] = _P_count[i][1]
+        P_count_dic[new_index*2+1] = _P_count[i][1]
     # for p_old_index in _P_count[:, 0]:
     #     new_index = pre_sampled_list.index(p_old_index)
     #     P_count_dic[new_index] = _P_count[p_old_index][1]

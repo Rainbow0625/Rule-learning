@@ -53,12 +53,14 @@ class RSALW(object):
     def get_fact_dic_all(pre_sample, facts_all):
         # Only save once for the reverse pre.e.g. 0, 2, 4....
         # fact_dic: key: P_index_new , value: all_fact_list
-        pre_sample_index = np.array([[pre[0], pre[2]] for pre in pre_sample], dtype=np.int32)
-        old_index_p = pre_sample_index[:, 1]
+        # pre_sample_index = np.array([[pre[0], pre[2]] for pre in pre_sample], dtype=np.int32)
+        # old_index_p = pre_sample_index[:, 1]
+        old_index_p = np.array([pre[2] for pre in pre_sample], dtype=np.int32)
         fact_dic = {}
         for f in facts_all:
             if f[2] in set(old_index_p):
                 new_index = np.where(old_index_p == f[2])[0][0]  # It must be even.
+                # new_index = pre_sample_index[np.where(old_index_p == f[2])[0][0]][0]
                 if new_index in fact_dic.keys():
                     temp_list = fact_dic.get(new_index)
                 else:

@@ -86,8 +86,9 @@ if __name__ == '__main__':
     total_num_rule = 0
     total_time = 0
 
-    test_Pre_list = np.random.randint(0, predicateSize, size=5)
-    # test_Pre_list = [3, 12, 27, 47]
+    # test_Pre_list = np.random.randint(0, predicateSize, size=5)
+    # test_Pre_list = [0, 3, 52, 163, 12, 27, 47]
+    test_Pre_list = [163]
     # for Pt in range(predicateSize):
     for Pt in test_Pre_list:
         Pt_start = time.time()
@@ -166,9 +167,8 @@ if __name__ == '__main__':
             else:
                 print("\nNeedn't to compute the next P_i")
                 print("Filter out predicates that appear too frequently to reduce the computational time complexity.\n")
-                P_new_index_list, fact_dic_sample = s.filter_predicates_by_count(P_count_dic, P_new_index_list,
-                                                                                 fact_dic_sample)
-                print("After filter, the length of pre: %d : %d" % (len(P_count_dic), len(fact_dic_sample)))
+                P_new_index_list = s.filter_predicates_by_count(P_count_dic, P_new_index_list)
+                print("After filter, the length of pre: %d :%d " % (len(P_new_index_list[-1]), len(P_count_dic)))
                 print("##End to sample##")
 
                 print("\n##Begin to train embedding##")
@@ -206,7 +206,7 @@ if __name__ == '__main__':
             gc.disable()
 
             # Send report process E-mail!
-            subject = 'ruleLearning_RainbowWu'
+            subject = 'ruleLearning'
             text = "Pt:" + str(Pt) + '\nLength: ' + str(length) + '\n'
             nu = "The number of rules: " + str(candidate_len) + "\n"
             ti = "The time of this length: " + str(Pt_i-Pt_i_1)[0:5] + "\n"
