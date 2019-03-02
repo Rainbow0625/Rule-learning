@@ -146,6 +146,7 @@ if __name__ == '__main__':
 
                 print("\nGet SAMPLE PREDICATE dictionary. (First evaluate on small sample KG.)")
                 t = time.time()
+                # The predicates in "pre_sample" is the total number written in file.
                 _, pre_sample = r.RSALW.get_pre(BENCHMARK, "./sampled/")
                 facts_sample, ent_size_sample = s.read_data(BENCHMARK, filename="./sampled/")
                 # First get fact_dic_sample.
@@ -255,7 +256,6 @@ if __name__ == '__main__':
         print(str(hour) + " : " + str(minute) + " : " + str(second))
 
         f.write("Algorithm total time: %d : %d : %f" % (hour, minute, second))
-        f.close()
 
     subject = "Over!"
     text = "Let's watch the result! Go Go Go!\n"
