@@ -53,34 +53,6 @@ def first_sample_by_Pt(Pt, facts):
 def sample_by_i(index, E_i_1_new, facts):
     print("\nStep 2: Sample by %d:" % index)
     time_start = time.time()
-    E_i = set()  # Maybe it contains some repeated entities.
-    P_i = set()
-    F_i_new = []
-
-    '''
-    flag = 0
-        for f in facts:
-        if f[0] in E_i_1_new:  # set can not add the same element
-            P_i.add(f[2])
-            E_i.add(f[1])
-
-            flag = 1
-        if f[1] in E_i_1_new:
-            P_i.add(f[2])
-            E_i.add(f[0])
-            flag = 1
-        if flag == 1 and f[3] == 0:
-            F_i_new.append(f)
-            f[3] = 1
-        flag = 0
-
-    print("E_%d size: %d (Maybe it contains some repeated entities.)" % (index, len(E_i)))
-    print("P_%d size: %d" % (index, len(P_i)))
-    print("F_%d_new size: %d" % (index, len(F_i_new)))
-    time_end = time.time()
-    print('Step 2 cost time:', time_end - time_start)
-    return E_i, P_i, F_i_new, facts
-    '''
     # Pick out predicates with high frequency of occurrence.
     # F_i_new  里面是list， 最后的去向要好好查看一下！
     P_dic = {}  # Key: p's index; Value: [count, [fact's index list]]
@@ -93,17 +65,22 @@ def sample_by_i(index, E_i_1_new, facts):
                 P_dic[f[2]] = [value[0]+1, value[1]]
             else:
                 P_dic[f[2]] = [1, [j]]
-    count_array = np.array([value[0] for value in list(P_dic.values())])
-    print(count_array)
-    count_mean = int(np.mean(count_array))
-    print(count_mean)
+    P_count = np.array([[key, P_dic[key][0]] for key in list(P_dic.keys())])
+    print("Count list:")    
+    print(P_count[:, 1])
+    count_mean = int(np.mean(P_count[:, 1]))
+    print("count_mean: %d" % count_mean)
 
     del_flag = 0
+    E_i = set()  # Maybe it contains some repeated entities.
+    F_i_new = []
     keys = list(P_dic.keys())
     for key in keys:
         value = P_dic[key]
-        if value[0] < 100 :
+        if value[0] > 2000:
             del P_dic[key]
+            i = np.where(P_count[:, 0] == key)[0][0]
+            P_count = np.delete(P_count, i, axis=0)
             del_flag = del_flag + 1
         else:
             # Get E_i.
@@ -114,19 +91,31 @@ def sample_by_i(index, E_i_1_new, facts):
                     F_i_new.append(facts[j])
                     facts[j][3] = 1
     P_i = set(P_dic.keys())
-    print(len(P_i))
-    print(P_i)
-    print(del_flag)
+    print("Leave num:%d" % len(P_i))
+    print("Delete num:%d \n" % del_flag)
 
     print("E_%d size: %d (Maybe it contains some repeated entities.)" % (index, len(E_i)))
     print("P_%d size: %d" % (index, len(P_i)))
     print("F_%d_new size: %d" % (index, len(F_i_new)))
     time_end = time.time()
     print('Step 2 cost time:', time_end - time_start)
-    return E_i, P_i, F_i_new, facts
+    return E_i, P_i, F_i_new, facts, P_count
 
 
-def save_and_reindex(length, save_path, E, P, F, Pt, predicate_name, P_list):
+def filter_predicates_by_count(P_count_dic, P_new_index_list, fact_dic_sample):
+    del_flag = 0
+    keys = list(P_count_dic.keys())
+    for key in keys:
+        if P_count_dic.get(key) > 5000:
+            # Remove the elements filtered.
+            P_new_index_list[-1].remove(key)
+            del fact_dic_sample[key]
+            del_flag = del_flag + 1
+    print("Remove num: %d" % del_flag)
+    return P_new_index_list, fact_dic_sample
+
+
+def save_and_reindex(length, save_path, E, P, F, Pt, predicate_name, P_list, _P_count):
     print("\nFinal Step:save and reindex, length = %d:" % length)
     curPredicate = [Pt, predicate_name[Pt]]
 
@@ -154,9 +143,9 @@ def save_and_reindex(length, save_path, E, P, F, Pt, predicate_name, P_list):
             if pre_sampled_list[i] == curPredicate[0]:
                 nowPredicate = [i, name]
         f.close()
-    # process the sample predicates' index.
+    # Process the sample predicates' index.
     P_new_index_list = []
-    for P_i in P_list:  #P_i is a set.
+    for P_i in P_list:  # P_i is a set.
         P_i_list = []
         for p_old_index in P_i:
             new_index = pre_sampled_list.index(p_old_index)
@@ -171,6 +160,19 @@ def save_and_reindex(length, save_path, E, P, F, Pt, predicate_name, P_list):
     print("after sample, the reindex:")
     for i in range(len(P_new_index_list)):
         print("i = %d, len=%d" % (i, len(P_new_index_list[i])))
+    # Update the P_count_dic's index to new.
+    P_count_dic = {}
+    for i in range(_P_count.shape[0]):
+        new_index = pre_sampled_list.index(_P_count[i][0])
+        P_count_dic[new_index] = _P_count[i][1]
+    # for p_old_index in _P_count[:, 0]:
+    #     new_index = pre_sampled_list.index(p_old_index)
+    #     P_count_dic[new_index] = _P_count[p_old_index][1]
+    # test
+    # print(P_new_index_list)
+    # print(P_count_dic.keys())
+    # print(P_count_dic)
+    # print(_P_count)
 
     # Fact: need to double.
     Fact = []
@@ -193,4 +195,4 @@ def save_and_reindex(length, save_path, E, P, F, Pt, predicate_name, P_list):
     print('old:%d new:%d' % (curPredicate[0], nowPredicate[0]))
     print("Pt's original index -- %d : %s" % (curPredicate[0], curPredicate[1]))
     print("Pt's new index -- %d : %s" % (nowPredicate[0], nowPredicate[1]))
-    return nowPredicate, P_new_index_list
+    return nowPredicate, P_new_index_list, P_count_dic

@@ -21,9 +21,9 @@ R_minHC = 0.001
 QR_minSC = 0.5
 QR_minHC = 0.001
 DEGREE = [R_minSC, R_minHC, QR_minSC, QR_minHC]
-Max_rule_length = 3  # not include head atom
-_syn = 200
-_coocc = 200
+Max_rule_length = 4  # not include head atom
+_syn = 500
+_coocc = 500
 
 # embedding model parameters
 work_threads = 5
@@ -86,8 +86,8 @@ if __name__ == '__main__':
     total_num_rule = 0
     total_time = 0
 
-    # test_Pre_list = np.random.randint(0, predicateSize, size=5)
-    test_Pre_list = [3, 12, 27, 47]
+    test_Pre_list = np.random.randint(0, predicateSize, size=5)
+    # test_Pre_list = [3, 12, 27, 47]
     # for Pt in range(predicateSize):
     for Pt in test_Pre_list:
         Pt_start = time.time()
@@ -103,6 +103,7 @@ if __name__ == '__main__':
         ent_size_sample = None
         pre_sample = None
         P_new_index_list = None
+        P_count_dic = None
 
         # Garbage collection.
         if not gc.isenabled():
@@ -128,7 +129,7 @@ if __name__ == '__main__':
             if len(P_i_list) < cur_max_i+1:
                 # If the next P_i hasn't be computed:
                 print("\nNeed to compute the P_%d\n" % cur_max_i)
-                E_i, P_i, F_i_new, facts_all = s.sample_by_i(cur_max_i, E_i_1_new, facts_all)
+                E_i, P_i, F_i_new, facts_all, _P_count = s.sample_by_i(cur_max_i, E_i_1_new, facts_all)
                 # Get the next cycle's variable.
                 E_i_1_new = E_i - E  # remove the duplicate entity.
                 print("The new entity size :%d   need to less than 800?" % len(E_i_1_new))
@@ -137,8 +138,9 @@ if __name__ == '__main__':
                 P = P | P_i
                 F.extend(F_i_new)
                 P_i_list.append(P_i)
-                nowPredicate, P_new_index_list = s.save_and_reindex(length, save_path, E, P, F, Pt, predicateName,
-                                                                    P_i_list)
+                # _P_count list are old indices; P_count dictionary's keys are new indices.
+                nowPredicate, P_new_index_list, P_count_dic = s.save_and_reindex(length, save_path, E, P, F, Pt,
+                                                                                 predicateName, P_i_list, _P_count)
                 print("\n##End to sample##\n")
 
                 print("\nGet SAMPLE PREDICATE dictionary. (First evaluate on small sample KG.)")
@@ -163,12 +165,21 @@ if __name__ == '__main__':
                 gc.disable()
             else:
                 print("\nNeedn't to compute the next P_i")
-                print("##End to sample##\n")
+                print("Filter out predicates that appear too frequently to reduce the computational time complexity.\n")
+                P_new_index_list, fact_dic_sample = s.filter_predicates_by_count(P_count_dic, P_new_index_list,
+                                                                                 fact_dic_sample)
+                print("After filter, the length of pre: %d : %d" % (len(P_count_dic), len(fact_dic_sample)))
+                print("##End to sample##")
 
                 print("\n##Begin to train embedding##")
                 print("Needn't to train embedding")
                 print("##End to train embedding##\n")
-
+                # Garbage collection.
+                if not gc.isenabled():
+                    gc.enable()
+                del P_count_dic
+                gc.collect()
+                gc.disable()
             print("\n##Begin to search and evaluate##\n")
             # Init original object
             rsalw = r.RSALW()
