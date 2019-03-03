@@ -86,7 +86,7 @@ if __name__ == '__main__':
     total_num_rule = 0
     total_time = 0
 
-    # test_Pre_list = np.random.randint(0, predicateSize, size=5)
+    # test_Pre_list = np.random.randint(0, predicateSize-1, size=5)
     # test_Pre_list = [0, 3, 52, 163, 12, 27, 47]
     test_Pre_list = [0, 3, 52, 163, 12, 27, 47]
     # for Pt in range(predicateSize):

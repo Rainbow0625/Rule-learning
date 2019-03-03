@@ -1,4 +1,3 @@
-import rule_search_and_learn_weights_2 as r
 import numpy as np
 import pickle
 import time
@@ -6,18 +5,44 @@ from scipy import sparse
 import gc
 
 
-def read_data(filename, type):
+def read_data(filename, file_type):
     # read the Fact.txt: h t r
     with open(filename + 'Fact.txt', 'r') as f:
         factSize = int(f.readline())
         facts = np.array([line.strip('\n').split(' ') for line in f.readlines()], dtype='int32')
-        f.close()
-        print("Total %s facts:%d" % (type, factSize))
-    with open(filename + 'entity2id.txt', 'r') as f:
-        entity_size = int(f.readline())
-        f.close()
-        print("Total %s entities:%d" % (type, entity_size))
+        print("Total %s facts:%d" % (file_type, factSize))
+    entity_size = 0
+    if file_type == "train":
+        with open(filename + 'entity2id.txt', 'r') as f:
+            entity_size = int(f.readline())
+            print("Total %s entities:%d" % (file_type, entity_size))
     return facts, entity_size
+
+
+def get_pre(benchmark, filename):
+    with open(filename + benchmark + "/relation2id.txt") as f:
+        preSize = f.readline()
+        pre = []
+        for line in f.readlines():
+            pre.append(line.strip('\n').split("	"))
+    return pre
+
+
+def get_fact_dic(pre, facts_all):
+    # Only save once for the reverse pre.e.g. 0, 2, 4....
+    # fact_dic: key: P_index_new , value: all_fact_list
+    old_index_p = np.array([pre[2] for pre in pre], dtype=np.int32)
+    fact_dic = {}
+    for f in facts_all:
+        if f[2] in set(old_index_p):
+            new_index = np.where(old_index_p == f[2])[0][0]  # It must be even.
+            if new_index in fact_dic.keys():
+                temp_list = fact_dic.get(new_index)
+            else:
+                temp_list = []
+            temp_list.append([f[0], f[1]])
+            fact_dic[new_index] = temp_list
+    return fact_dic
 
 
 def get_onehot_matrix(p, fact_dic, ent_size):
@@ -37,23 +62,22 @@ def get_onehot_matrix(p, fact_dic, ent_size):
     return pmatrix
 
 
-def train_predict(Pt):
+def train_predict(benchmark, pt, pre):
     predict_fact_num = 0
     predict_Qfact_num = 0
     pre_facts_list = []
-    with open('./rule/' + BENCHMARK + '/rule_' + str(Pt) + '.pk', 'rb') as fp:
+    with open('./rule/' + benchmark + '/rule_' + str(pt) + '.pk', 'rb') as fp:
         rules = pickle.load(fp)  # [index, flag={1:Rule, 2:Quality Rule}, degree=[SC, HC]]
     # Get fact_dic_all to generate the sparse matrix.
-    facts, ent_size = read_data(filename="./benchmarks/" + str(Pt) + "/train/", type="train")
+    facts, ent_size = read_data(filename="./benchmarks/" + benchmark + '/' + str(pt) + "/train/", file_type="train")
     # fact_dic: key: P_index_new , value: all_fact_list
     # Note that fact_dic ONLY save once for the reverse pre.e.g. 0, 2, 4....
-    fact_dic = r.RSALW.get_fact_dic_all(pre_sample, facts)
+    fact_dic = get_fact_dic(pre, facts)
     predict_matrix = sparse.dok_matrix((ent_size, ent_size), dtype=np.int32)
     predict_key_by_rule = []
     for rule in rules:
         index = rule[0]
-        degree = rule[2]
-        predict_key = []
+        # degree = rule[2]
         pmatrix = get_onehot_matrix(index[0], fact_dic, ent_size)
         for i in range(1, len(index)):
             pmatrix = pmatrix.dot(get_onehot_matrix(index[i], fact_dic, ent_size))
@@ -81,26 +105,26 @@ def train_predict(Pt):
         else:
             pre_facts_list.append([fact, CD, 0])
     # Save the fact and CD in file.
-    with open('./linkprediction/' + BENCHMARK + '/predict_Pt_' + str(Pt) + '.txt', 'w') as f:
+    with open('./linkprediction/' + benchmark + '/predict_Pt_' + str(pt) + '.txt', 'w') as f:
         for item in pre_facts_list:
             f.write(str(item) + '\n')
-        f.write("For Pt: %d, predict fact num: %d\n" % (Pt, predict_fact_num))
-        f.write("For Pt: %d, predict Qfact num: %d\n" % (Pt, predict_Qfact_num))
-    print("For Pt: %d, predict fact num: %d" % (Pt, predict_fact_num))
-    print("For Pt: %d, predict Qfact num: %d" % (Pt, predict_Qfact_num))
+        f.write("For Pt: %d, predict fact num: %d\n" % (pt, predict_fact_num))
+        f.write("For Pt: %d, predict Qfact num: %d\n" % (pt, predict_Qfact_num))
+    print("For Pt: %d, predict fact num: %d" % (pt, predict_fact_num))
+    print("For Pt: %d, predict Qfact num: %d" % (pt, predict_Qfact_num))
     return pre_facts_list
 
 
-def test(Pt, pre_facts_list):
+def test(benchmark, pt, pre_facts_list):
     mid_Hits_10 = 0
     mid_MRR = 0
-    test_facts, ent_size = read_data(filename="./benchmarks/" + str(Pt) + "/test/", type="train")
+    test_facts, _ = read_data(filename="./benchmarks/" + benchmark + '/' + str(pt) + "/test/", file_type="test")
     # Rank the predicted facts.
     pre_facts_list.sort()
     predicted_facts = [item[0] for item in pre_facts_list]
     test_result = []
-    for test in test_facts:
-        t = [test[0], test[1]]
+    for test_fact in test_facts:
+        t = [test_fact[0], test_fact[1]]
         if t in predicted_facts:
             top = predicted_facts.index(t) + 1
             mid_MRR += 1 / top
@@ -112,29 +136,29 @@ def test(Pt, pre_facts_list):
     Hit_10 = mid_Hits_10/len(test_facts)
     MRR = mid_MRR/len(test_facts)
     # Save the results in file.
-    with open('./linkprediction/' + BENCHMARK + '/test_Pt_' + str(Pt) + '.txt', 'w') as f:
+    with open('./linkprediction/' + benchmark + '/test_Pt_' + str(pt) + '.txt', 'w') as f:
         for item in test_result:
             f.write(str(item) + '\n')
-        f.write("For Pt: %d, Hits@10: %f" % (Pt, Hit_10))
-        f.write("For Pt: %d, MRR: %f" % (Pt, MRR))
-    print("For Pt: %d, Hits@10: %f" % (Pt, Hit_10))
-    print("For Pt: %d, MRR: %f" % (Pt, MRR))
+        f.write("For Pt: %d, Hits@10: %f\n" % (pt, Hit_10))
+        f.write("For Pt: %d, MRR: %f\n" % (pt, MRR))
+    print("For Pt: %d, Hits@10: %f" % (pt, Hit_10))
+    print("For Pt: %d, MRR: %f" % (pt, MRR))
 
 
 if __name__ == '__main__':
     # Run it alone.
     BENCHMARK = "FB15K237"
     begin = time.time()
-    _, pre_sample = r.RSALW.get_pre(BENCHMARK, filename="./sampled/")
+    pre_sample = get_pre(BENCHMARK, filename="./sampled/")
     Pt_list = [0]  # Randomly select 5.
     for Pt in Pt_list:
         print("Begin to train %d." % Pt)
-        pre_facts_list = train_predict(Pt)
+        pre_facts = train_predict(BENCHMARK, Pt, pre_sample)
         mid = time.time()
         print("Train total time: %f" % mid - begin)
         print('\n')
         print("Begin to test %d." % Pt)
-        test(Pt, pre_facts_list)
+        test(BENCHMARK, Pt, pre_facts)
         mid2 = time.time()
         print("Test total time: %f" % mid2 - mid)
     total_time = time.time() - begin
