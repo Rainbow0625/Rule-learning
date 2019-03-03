@@ -88,7 +88,7 @@ if __name__ == '__main__':
 
     # test_Pre_list = np.random.randint(0, predicateSize, size=5)
     # test_Pre_list = [0, 3, 52, 163, 12, 27, 47]
-    test_Pre_list = [163]
+    test_Pre_list = [0, 3, 52, 163, 12, 27, 47]
     # for Pt in range(predicateSize):
     for Pt in test_Pre_list:
         Pt_start = time.time()
@@ -255,7 +255,7 @@ if __name__ == '__main__':
         print("\nAlgorithm total time: %f" % end)
         print(str(hour) + " : " + str(minute) + " : " + str(second))
 
-        f.write("Algorithm total time: %d : %d : %f" % (hour, minute, second))
+        f.write("Algorithm total time: %d : %d : %f\n" % (hour, minute, second))
 
     subject = "Over!"
     text = "Let's watch the result! Go Go Go!\n"

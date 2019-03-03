@@ -106,9 +106,11 @@ def filter_predicates_by_count(P_count_dic, P_new_index_list):
     del_flag = 0
     keys = list(P_count_dic.keys())
     for key in keys:
-        if P_count_dic.get(key) > 500:
+        if P_count_dic.get(key) > 300 or P_count_dic.get(key) < 100:
             # Remove the elements filtered.
             P_new_index_list[-1].remove(key)
+            if key in P_new_index_list[-2]:
+                P_new_index_list[-2].remove(key)
             del_flag = del_flag + 1
     print("Remove num: %d" % del_flag)
     return P_new_index_list
