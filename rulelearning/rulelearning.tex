@@ -21,6 +21,7 @@
 \usepackage{booktabs}
 \usepackage{algorithm}
 \usepackage{algorithmic}
+\usepackage{multirow}
 \urlstyle{same}
 
 \title{Rule Learning}
@@ -280,8 +281,48 @@
 	\section{Experiments}
 	% length 更长，侧重效率更高，数量也多
 	% 实验设置。
+	For the following five benchmarks, we select different datasets for the two tasks of rule mining and link prediction.
+	
+	\begin{table}[htbp]
+		\centering
+		\caption{The specifications of five benchmarks.}
+		\begin{tabular}{lrrr}
+			\toprule  % 顶部线
+			KG & Fact & Entity & Predicate \\ 
+			\midrule  % 中部线
+			FB15K-237 & 310116 & 0 & 237 \\
+			FB75K & 0 & 0 & 13 \\
+			YAGO2s & 4125967 & 0 & 37 \\
+			Wikidata & 8397936 & 0 & 430 \\
+			DBpedia 3.8 & 11024066 & 0 & 650 \\
+			\bottomrule  % 底部线
+		\end{tabular}
+	\end{table}
+
 	\subsection{Rule Mining}
 	\subsubsection{Compare with Yang. with FB15k-237.}
+	
+	\renewcommand\arraystretch{1.2}
+	\begin{table*}[htbp]
+	\centering
+	\caption{For FB15k-237K, compare the number of rules and time spent on mining with RLVLR.}
+	\begin{tabular}{ |l|c|c|c|r|r|r|r| }  
+		%\toprule
+		\hline
+		\multirow{2}{*}{Target Predicate} & \multicolumn{5}{c|}{Our}     & \multicolumn{2}{c|}{RLvLR} \\ \cline{2-8}
+						                  & Len=3&Len=4&Len=5&Num&Time   & Num & Time \\
+		\hline
+		formOfGovernment & 20 & 239 & 142 & {\bf 401} & {\bf 1.13h}     & 137 & 5h \\
+		\hline
+		awardWinner & 0 & 0 & 0 &  {\bf 0} & {\bf h}                    & 1024 & 5h \\
+		\hline
+		parentGenre & 0 & 0 & 0 &  {\bf 0} & {\bf h}                    & 52 & 5h \\
+		\hline
+		eventLocation & 18 & 240 & 32 & {\bf 290} & {\bf 2.56h}         & 229 & 5h \\
+		\hline
+	\end{tabular}
+	\end{table*}
+	
 	\subsubsection{Compare with AMIE+ , Neural LP and RLvLR with DB, Yago2s, Wikidata.}
 	
 	\subsection{Link prediction}

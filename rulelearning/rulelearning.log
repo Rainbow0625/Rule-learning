@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/W32TeX) (preloaded format=pdflatex 2018.4.24)  26 FEB 2019 15:45
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/W32TeX) (preloaded format=pdflatex 2018.4.24)  3 MAR 2019 22:50
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -511,23 +511,30 @@ Package: algorithmic 2009/08/24 v0.1 Document Style `algorithmic'
 \ALC@tlm=\skip49
 \algorithmicindent=\skip50
 )
-(./rulelearning.aux)
+(d:/texLive/texmf-dist/tex/latex/multirow/multirow.sty
+Package: multirow 2016/11/25 v2.2 Span multiple rows of a table
+\multirow@colwidth=\skip51
+\multirow@cntb=\count110
+\multirow@dima=\skip52
+\bigstrutjot=\dimen137
+) (./rulelearning.aux)
 \openout1 = `rulelearning.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 36.
-LaTeX Font Info:    ... okay on input line 36.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 36.
-LaTeX Font Info:    ... okay on input line 36.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 36.
-LaTeX Font Info:    ... okay on input line 36.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 36.
-LaTeX Font Info:    ... okay on input line 36.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 36.
-LaTeX Font Info:    ... okay on input line 36.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 36.
-LaTeX Font Info:    ... okay on input line 36.
-LaTeX Font Info:    Try loading font information for OT1+ptm on input line 36.
- (d:/texLive/texmf-dist/tex/latex/psnfss/ot1ptm.fd
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 37.
+LaTeX Font Info:    ... okay on input line 37.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 37.
+LaTeX Font Info:    ... okay on input line 37.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 37.
+LaTeX Font Info:    ... okay on input line 37.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 37.
+LaTeX Font Info:    ... okay on input line 37.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 37.
+LaTeX Font Info:    ... okay on input line 37.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 37.
+LaTeX Font Info:    ... okay on input line 37.
+LaTeX Font Info:    Try loading font information for OT1+ptm on input line 37.
+
+(d:/texLive/texmf-dist/tex/latex/psnfss/ot1ptm.fd
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
 )
 Package caption Info: Begin \AtBeginDocument code.
@@ -536,16 +543,16 @@ Package caption Info: End \AtBeginDocument code.
 
 (d:/texLive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count110
-\scratchdimen=\dimen137
+\scratchcounter=\count111
+\scratchdimen=\dimen138
 \scratchbox=\box30
-\nofMPsegments=\count111
-\nofMParguments=\count112
+\nofMPsegments=\count112
+\nofMParguments=\count113
 \everyMPshowfont=\toks30
-\MPscratchCnt=\count113
-\MPscratchDim=\dimen138
-\MPnumerator=\count114
-\makeMPintoPDFobject=\count115
+\MPscratchCnt=\count114
+\MPscratchDim=\dimen139
+\MPnumerator=\count115
+\makeMPintoPDFobject=\count116
 \everyMPtoPDFconversion=\toks31
 ) (d:/texLive/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
 Package: epstopdf-base 2016/05/15 v2.6 Base part for package epstopdf
@@ -605,32 +612,32 @@ e
 ))
 \titlearea=\box31
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <14.4> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 37.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 38.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 37.
-\actualheight=\skip51
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 38.
+\actualheight=\skip53
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 56.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 57.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 68.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 69.
  [1{d:/texLive/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
 
 
 
 ]
-LaTeX Font Info:    Try loading font information for OT1+phv on input line 111.
+LaTeX Font Info:    Try loading font information for OT1+phv on input line 112.
 
 
 (d:/texLive/texmf-dist/tex/latex/psnfss/ot1phv.fd
 File: ot1phv.fd 2001/06/04 scalable font definitions for OT1/phv.
 )
-Overfull \hbox (1.80298pt too wide) in paragraph at lines 117--118
+Overfull \hbox (1.80298pt too wide) in paragraph at lines 118--119
 [] []$\OML/cmm/m/it/10 Result \OT1/cmr/m/n/10 =$\OT1/phv/m/n/10 RuleSearch$\OT1
 /cmr/m/n/10 (\OML/cmm/m/it/10 K[]; P[]; Ent[]; Pre[]; len\OT1/cmr/m/n/10 )$ 
  []
 
 
-Overfull \hbox (6.16531pt too wide) in paragraph at lines 120--121
+Overfull \hbox (6.16531pt too wide) in paragraph at lines 121--122
 [] []$\OML/cmm/m/it/10 Rule \OT1/cmr/m/n/10 = [](\OML/cmm/m/it/10 K; Candidate;
  DEGREE\OT1/cmr/m/n/10 )$ 
  []
@@ -638,42 +645,47 @@ Overfull \hbox (6.16531pt too wide) in paragraph at lines 120--121
 <sample.pdf, id=15, 804.42023pt x 522.87025pt>
 File: sample.pdf Graphic file (type pdf)
 <use sample.pdf>
-Package pdftex.def Info: sample.pdf  used on input line 130.
+Package pdftex.def Info: sample.pdf  used on input line 131.
 (pdftex.def)             Requested size: 241.84842pt x 157.19737pt.
-LaTeX Font Info:    Try loading font information for OMS+ptm on input line 139.
+LaTeX Font Info:    Try loading font information for OMS+ptm on input line 140.
 
 (d:/texLive/texmf-dist/tex/latex/psnfss/omsptm.fd
 File: omsptm.fd 
 )
 LaTeX Font Info:    Font shape `OMS/ptm/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 139.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 140.
  [2]
 <rule.pdf, id=21, 781.81514pt x 398.96667pt>
 File: rule.pdf Graphic file (type pdf)
 <use rule.pdf>
-Package pdftex.def Info: rule.pdf  used on input line 160.
+Package pdftex.def Info: rule.pdf  used on input line 161.
 (pdftex.def)             Requested size: 223.02243pt x 113.81102pt.
 
-Underfull \hbox (badness 1377) in paragraph at lines 198--199
+Underfull \hbox (badness 1377) in paragraph at lines 199--200
  \OT1/ptm/b/n/10 Syn-onymy Score Func-tion.[] \OT1/ptm/m/n/10 Be-fore we in-tro
 -duce syn-
  []
 
 [3 <./sample.pdf> <./rule.pdf>]
-Underfull \hbox (badness 1052) in paragraph at lines 210--211
+Underfull \hbox (badness 1052) in paragraph at lines 211--212
  \OT1/ptm/b/n/10 Co-occurence Score Func-tion.[] \OT1/ptm/m/n/10 Be-sides syn-o
 nymy, co-
  []
 
 
-Underfull \hbox (badness 1946) in paragraph at lines 242--244
+Underfull \hbox (badness 1946) in paragraph at lines 243--245
 \OT1/ptm/m/n/10 that $\OML/cmm/m/it/10 P[]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 e[]
 ; e[]\OT1/cmr/m/n/10 )\OML/cmm/m/it/10 ; P[]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 e
 []; e[]\OT1/cmr/m/n/10 )\OML/cmm/m/it/10 ; [] ; P[]\OT1/cmr/m/n/10 (\OML/cmm/m/
 it/10 e[]; e[]\OT1/cmr/m/n/10 )$ \OT1/ptm/m/n/10 ex-ist in the
  []
 
-(./rulelearning.bbl
+
+Underfull \hbox (badness 1661) in paragraph at lines 284--285
+\OT1/ptm/m/n/10 For the fol-low-ing five bench-marks, we se-lect dif-fer-ent
+ []
+
+[4] (./rulelearning.bbl
 Underfull \hbox (badness 4441) in paragraph at lines 5--10
 []\OT1/ptm/m/n/10 Bordes An-toine, Usunier Nico-las,
  []
@@ -683,7 +695,7 @@ Underfull \hbox (badness 1005) in paragraph at lines 5--10
 \OT1/ptm/m/n/10 Garcia-Duran Al-berto, We-ston Ja-son, and Yakhnenko
  []
 
-[4]
+
 Underfull \hbox (badness 2762) in paragraph at lines 89--93
 []\OT1/ptm/m/n/10 Pouya Ghi-as-nezhad Om-ran, Kewen
  []
@@ -698,35 +710,35 @@ Underfull \hbox (badness 10000) in paragraph at lines 120--123
 []\OT1/ptm/m/n/10 Denny Vrande[]ci[]c and
  []
 
-) [5] (./rulelearning.aux) ) 
+) [5] [6] (./rulelearning.aux) ) 
 Here is how much of TeX's memory you used:
- 4201 strings out of 494338
- 58456 string characters out of 6171513
- 124863 words of memory out of 5000000
- 7457 multiletter control sequences out of 15000+600000
+ 4254 strings out of 494338
+ 59253 string characters out of 6171513
+ 129392 words of memory out of 5000000
+ 7506 multiletter control sequences out of 15000+600000
  26590 words of font info for 54 fonts, out of 8000000 for 9000
  452 hyphenation exceptions out of 8191
  41i,9n,39p,731b,498s stack positions out of 5000i,500n,10000p,200000b,80000s
-{d:/texLive/texmf-dist/fonts/enc/dvips/base/8r.enc}
-<d:/texLive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb><d:/texLive/te
-xmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb><d:/texLive/texmf-dist/fonts
-/type1/public/amsfonts/cm/cmmi10.pfb><d:/texLive/texmf-dist/fonts/type1/public/
-amsfonts/cm/cmmi5.pfb><d:/texLive/texmf-dist/fonts/type1/public/amsfonts/cm/cmm
-i6.pfb><d:/texLive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb><d:/texL
-ive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb><d:/texLive/texmf-dist/
-fonts/type1/public/amsfonts/cm/cmr10.pfb><d:/texLive/texmf-dist/fonts/type1/pub
-lic/amsfonts/cm/cmr5.pfb><d:/texLive/texmf-dist/fonts/type1/public/amsfonts/cm/
-cmr7.pfb><d:/texLive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb><d:/tex
-Live/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb><d:/texLive/texmf-dis
-t/fonts/type1/public/amsfonts/cm/cmsy5.pfb><d:/texLive/texmf-dist/fonts/type1/p
-ublic/amsfonts/cm/cmsy7.pfb><d:/texLive/texmf-dist/fonts/type1/urw/helvetic/uhv
-r8a.pfb><d:/texLive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb><d:/texLive/tex
-mf-dist/fonts/type1/urw/times/utmr8a.pfb><d:/texLive/texmf-dist/fonts/type1/urw
-/times/utmri8a.pfb>
-Output written on rulelearning.pdf (5 pages, 230483 bytes).
+{d:/texLive/texmf-dist/fonts/enc/dvips/base/8r.
+enc}<d:/texLive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb><d:/texLiv
+e/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb><d:/texLive/texmf-dist/f
+onts/type1/public/amsfonts/cm/cmmi10.pfb><d:/texLive/texmf-dist/fonts/type1/pub
+lic/amsfonts/cm/cmmi5.pfb><d:/texLive/texmf-dist/fonts/type1/public/amsfonts/cm
+/cmmi6.pfb><d:/texLive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb><d:/
+texLive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb><d:/texLive/texmf-d
+ist/fonts/type1/public/amsfonts/cm/cmr10.pfb><d:/texLive/texmf-dist/fonts/type1
+/public/amsfonts/cm/cmr5.pfb><d:/texLive/texmf-dist/fonts/type1/public/amsfonts
+/cm/cmr7.pfb><d:/texLive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb><d:
+/texLive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb><d:/texLive/texmf
+-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb><d:/texLive/texmf-dist/fonts/typ
+e1/public/amsfonts/cm/cmsy7.pfb><d:/texLive/texmf-dist/fonts/type1/urw/helvetic
+/uhvr8a.pfb><d:/texLive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb><d:/texLive
+/texmf-dist/fonts/type1/urw/times/utmr8a.pfb><d:/texLive/texmf-dist/fonts/type1
+/urw/times/utmri8a.pfb>
+Output written on rulelearning.pdf (6 pages, 232453 bytes).
 PDF statistics:
- 125 PDF objects out of 1000 (max. 8388607)
- 91 compressed objects within 1 object stream
+ 128 PDF objects out of 1000 (max. 8388607)
+ 93 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  11 words of extra memory for PDF output out of 10000 (max. 10000000)
 
