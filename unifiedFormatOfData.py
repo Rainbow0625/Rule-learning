@@ -1,3 +1,5 @@
+from typing import Dict, Any
+
 import scipy.io as sio
 
 
@@ -26,6 +28,7 @@ def format_fact_entity(path):
     entity_size = int(str(size[0]).strip('[').strip(']'))
     print("Total entity:%d" % entity_size)
     fact = data.get('subs')
+    ent_set = set()
     fact_size = len(fact)
     print("Total facts:%d" % fact_size)
     with open(path+'/entity2id.txt', 'w') as f:
@@ -34,15 +37,18 @@ def format_fact_entity(path):
     with open(path + '/Fact.txt', 'w') as f:
         f.write(str(fact_size)+'\n')
         for i in range(fact_size):
+            ent_set.add(int(fact[i, 0]-1))
+            ent_set.add(int(fact[i, 1]-1))
             line = str(fact[i, 0]-1) + ' ' + str(fact[i, 1]-1) + ' ' + str(fact[i, 2]-1)+'\n'
             f.write(line)
         f.close()
+    print("entity size: %d" % len(ent_set))
     return True
 
 
 if __name__ == "__main__":
     # "DB"  "Wiki"  "Yago"
-    BENCHMARK = "Yago"
+    BENCHMARK = "DB"
     path = './benchmarks/' + BENCHMARK
     if format_predicate(path):
         print("Format predicate ok!")
