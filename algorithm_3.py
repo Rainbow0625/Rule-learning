@@ -88,7 +88,7 @@ if __name__ == '__main__':
 
     # test_Pre_list = np.random.randint(0, predicateSize-1, size=5)
     # test_Pre_list = [0, 3, 52, 163, 12, 27, 47]
-    test_Pre_list = [0, 3, 52, 163, 12, 27, 47]
+    test_Pre_list = [12]
     # for Pt in range(predicateSize):
     for Pt in test_Pre_list:
         Pt_start = time.time()
@@ -160,6 +160,8 @@ if __name__ == '__main__':
                                                  lmbda, bern, margin, model)
                 print("\n##End to train embedding##\n")
 
+                isfullKG = True
+
                 # Garbage collection.
                 if not gc.isenabled():
                     gc.enable()
@@ -175,6 +177,9 @@ if __name__ == '__main__':
                 print("\n##Begin to train embedding##")
                 print("Needn't to train embedding")
                 print("##End to train embedding##\n")
+
+                isfullKG = False
+
                 # Garbage collection.
                 if not gc.isenabled():
                     gc.enable()
@@ -187,7 +192,7 @@ if __name__ == '__main__':
             print(len(fact_dic_sample))
             print(len(fact_dic_all))
             candidate = rsalw.search_and_evaluate(IsUncertain, 1, length, dimension, DEGREE, nowPredicate,
-                                                  ent_emb, rel_emb, _syn, _coocc, P_new_index_list,
+                                                  ent_emb, rel_emb, _syn, _coocc, P_new_index_list, isfullKG,
                                                   fact_dic_sample, fact_dic_all, ent_size_sample, ent_size_all)
             candidate_of_Pt.extend(candidate)
             candidate_len = len(candidate)
