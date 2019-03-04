@@ -177,7 +177,7 @@ class RSALW(object):
                 score_top_container[replace_index][self.length] = value
         print(f)
 
-    def getmatrix(self, p, isfullKG=True):
+    def getmatrix(self, p, isfullKG):
         # sparse matrix
         re_flag = False
         if p % 2 == 1:
@@ -197,7 +197,7 @@ class RSALW(object):
                 pmatrix[f[0], f[1]] = 1
         return pmatrix
 
-    def calSCandHC(self, pmatrix, ptmatrix, isfullKG=True):
+    def calSCandHC(self, pmatrix, ptmatrix, isfullKG):
         head = len(ptmatrix)
         body = len(pmatrix)
         supp = 0
@@ -236,22 +236,22 @@ class RSALW(object):
         #     New_SC = supp_score / body_score
         # return New_SC, SC, HC
 
-    def evaluate_and_filter(self, index, DEGREE):
+    def evaluate_and_filter(self, index, DEGREE, isfullKG):
         # sparse matrix
         # print(index)
-        pmatrix = self.getmatrix(index[0])
+        pmatrix = self.getmatrix(index[0], isfullKG)
         # print(pmatrix)
         for i in range(1, self.length):
-            pmatrix = pmatrix.dot(self.getmatrix(index[i]))
+            pmatrix = pmatrix.dot(self.getmatrix(index[i], isfullKG))
             # print(pmatrix)
         pmatrix = pmatrix.todok()
         # print(pmatrix)
-        ptmatrix = self.getmatrix(self.pt)
+        ptmatrix = self.getmatrix(self.pt, isfullKG)
         # print(ptmatrix)
         # calculate the temp SC and HC
         # NSC, SC, HC = self.calSCandHC(pmatrix, ptmatrix)
         # degree = [NSC, SC, HC]
-        SC, HC, is_eval_by_full = self.calSCandHC(pmatrix, ptmatrix)
+        SC, HC, is_eval_by_full = self.calSCandHC(pmatrix, ptmatrix, isfullKG)
         if is_eval_by_full:
             isfullKG = True
             pmatrix = self.getmatrix(index[0], isfullKG)
@@ -302,7 +302,7 @@ class RSALW(object):
     #     model.train()
 
     def search_and_evaluate(self, isUncertain, f, length, dimension, DEGREE, nowPredicate,
-                            ent_emb, rel_emb, _syn, _coocc, P_new_index_list,
+                            ent_emb, rel_emb, _syn, _coocc, P_new_index_list, isfullKG,
                             fact_dic_sample, fact_dic_all, ent_size_sample, ent_size_all):
         self.pt = nowPredicate[0]
         self.fact_dic_sample = fact_dic_sample
@@ -344,7 +344,7 @@ class RSALW(object):
             index = [int(item[i]) for i in range(self.length)]
             if index not in all_candidate_set:
                 # print("cal it!")
-                result, degree = self.evaluate_and_filter(index, DEGREE)
+                result, degree = self.evaluate_and_filter(index, DEGREE, isfullKG)
                 if result != 0:
                     candidate.append([index, result, degree])
                     all_candidate_set.append(index)
