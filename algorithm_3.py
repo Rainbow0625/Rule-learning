@@ -51,7 +51,7 @@ def save_rules(Pt, rule_length, nowPredicate, candidate, pre):
     R_num = 0
     QR_num = 0
     i = 1
-    rule_ade_list = []
+    rule_aed_list = []
     HC_value_list = []
     for rule in candidate:
         index = rule[0]
@@ -59,7 +59,7 @@ def save_rules(Pt, rule_length, nowPredicate, candidate, pre):
         degree = str(rule[2])
         # Duplicate elimination.
         if rule[2][1] not in HC_value_list:
-            rule_ade_list.append(rule)
+            rule_aed_list.append(rule)
             HC_value_list.append(rule[2][1])
 
         # Save Quality rules and rules.
@@ -82,9 +82,9 @@ def save_rules(Pt, rule_length, nowPredicate, candidate, pre):
     f.write("Qualify Rules number: %d\n\n" % QR_num)
     f.close()
 
-    with open('./rule/' + BENCHMARK + '/rule_' + str(Pt) + '.txt', 'a+') as fp:
+    with open('./rule/' + BENCHMARK + '/rule_aed' + str(Pt) + '.txt', 'a+') as fp:
         i = 0
-        for rule in rule_ade_list:
+        for rule in rule_aed_list:
             index = rule[0]
             flag = rule[1]
             degree = str(rule[2])
