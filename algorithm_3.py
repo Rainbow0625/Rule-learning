@@ -22,8 +22,8 @@ QR_minSC = 0.5
 QR_minHC = 0.001
 DEGREE = [R_minSC, R_minHC, QR_minSC, QR_minHC]
 Max_rule_length = 4  # not include head atom
-_syn = 500
-_coocc = 500
+_syn = 800
+_coocc = 800
 
 # embedding model parameters
 work_threads = 5
@@ -41,26 +41,35 @@ model = TransE.TransE
 # Matrix: RESCAL.RESCAL
 
 
-def save_rules(rule_length, nowPredicate, candidate, pre):
+def save_rules(Pt, rule_length, nowPredicate, candidate, pre):
     print("The final rules :")
-    f = open('./rule/' + BENCHMARK + '/rule_' + str(model)[15:21] + '.txt', 'a+')
+    # str(model)[15:21]
+    f = open('./rule/' + BENCHMARK + '/rule_' + str(Pt) + '.txt', 'a+')
     # print(str(nowPredicate[1]) + "\n")
     f.write(str(nowPredicate[1]) + "\n")
     f.write("length: %d, num: %d\n" % (rule_length, len(candidate)))
     R_num = 0
     QR_num = 0
     i = 1
+    rule_ade_list = []
+    HC_value_list = []
     for rule in candidate:
         index = rule[0]
         flag = rule[1]
         degree = str(rule[2])
+        # Duplicate elimination.
+        if rule[2][1] not in HC_value_list:
+            rule_ade_list.append(rule)
+            HC_value_list.append(rule[2][1])
+
+        # Save Quality rules and rules.
         if flag == 1:
             R_num = R_num + 1
             title = "Rule " + str(i) + ": "
         else:
             QR_num = QR_num + 1
             title = "Qualify Rule " + str(i) + ": "
-        line = title + " " + str(index) + " :[NSC, SC, HC] " + degree + " "
+        line = title + " " + str(index) + " :[SC, HC] " + degree + " "
         for j in range(rule_length):
             line = line + str(index[j]) + " " + pre[index[j]][1] + "; "
         line = line + "\n"
@@ -72,6 +81,27 @@ def save_rules(rule_length, nowPredicate, candidate, pre):
     f.write("\nRules number: %d\n" % R_num)
     f.write("Qualify Rules number: %d\n\n" % QR_num)
     f.close()
+
+    with open('./rule/' + BENCHMARK + '/rule_' + str(Pt) + '.txt', 'a+') as fp:
+        i = 0
+        for rule in rule_ade_list:
+            index = rule[0]
+            flag = rule[1]
+            degree = str(rule[2])
+            # Save Quality rules and rules.
+            if flag == 1:
+                R_num = R_num + 1
+                title = "Rule " + str(i) + ": "
+            else:
+                QR_num = QR_num + 1
+                title = "Qualify Rule " + str(i) + ": "
+            line = title + " " + str(index) + " :[SC, HC] " + degree + " "
+            for j in range(rule_length):
+                line = line + str(index[j]) + " " + pre[index[j]][1] + "; "
+            line = line + "\n"
+            # print(line)
+            fp.write(line)
+            i = i + 1
 
 
 if __name__ == '__main__':
@@ -87,8 +117,8 @@ if __name__ == '__main__':
     total_time = 0
 
     # test_Pre_list = np.random.randint(0, predicateSize-1, size=5)
-    # test_Pre_list = [0, 3, 52, 163, 12, 27, 47]
-    test_Pre_list = [12]
+    # test_Pre_list = [0, 3, 52, 102, 163, 12, 27, 47]
+    test_Pre_list = [0, 3, 52, 102, 163, 12, 27, 47]
     # for Pt in range(predicateSize):
     for Pt in test_Pre_list:
         Pt_start = time.time()
@@ -200,7 +230,7 @@ if __name__ == '__main__':
             print("\n##End to search and evaluate##\n")
 
             # Save rules and timing.
-            save_rules(length, nowPredicate, candidate, pre_sample)
+            save_rules(Pt, length, nowPredicate, candidate, pre_sample)
             Pt_i = time.time()
             print("Length = %d, Time = %f" % (length, (Pt_i-Pt_i_1)))
 
@@ -237,7 +267,7 @@ if __name__ == '__main__':
         fl = np.zeros(facts_all.shape[0], dtype='int32')
         facts_all = np.c_[facts_all, fl]
 
-    with open('./rule/'+BENCHMARK+'/rule_' + str(model)[15:21]+'.txt', 'a+') as f:
+    with open('./rule/'+BENCHMARK+'/rule_top' + str(_coocc) + '_maxlen' + str(Max_rule_length) + '.txt', 'a+') as f:
         f.write("\nEmbedding parameter:\n")
         f.write("model: %s\n" % str(model))
         f.write("train_times: %d\n" % train_times)

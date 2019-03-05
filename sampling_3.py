@@ -9,6 +9,7 @@ For the sampling process, RLvLR picked at most 50 neighbours of an entity
  and set the maximum size of each sample to 800 entities. 
 '''
 
+
 def read_data(BENCHMARK, filename):  # index from 0
     # read the Fact.txt: h t r
     with open(filename + BENCHMARK + '/Fact.txt', 'r') as f:
