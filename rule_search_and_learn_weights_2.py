@@ -264,12 +264,10 @@ class RSALW(object):
             if SC >= DEGREE[0] and HC >= DEGREE[1]:
                 # 1: quality rule
                 # 2: high quality rule
-                print("\nThis is " + str(index))
-                print("The Head Coverage of this rule is " + str(HC))
-                print("The Standard Confidence of this rule is " + str(SC))
+                print("\n%s - HC:%s, SC:%s." % (str(index), str(HC), str(SC)))
                 # print("The NEW Standard Confidence of this rule is " + str(NSC))
                 if SC >= DEGREE[2] and HC >= DEGREE[3]:
-                    print("WOW, a high quality rule!")
+                    print("WOW, a quality rule!")
                     return 2, degree
                 return 1, degree
             else:
@@ -279,12 +277,10 @@ class RSALW(object):
         if SC >= DEGREE[0] and HC >= DEGREE[1]:
             # 1: quality rule
             # 2: high quality rule
-            print("\nThis is " + str(index))
-            print("The Head Coverage of this rule is " + str(HC))
-            print("The Standard Confidence of this rule is " + str(SC))
+            print("\n%s - HC:%s, SC:%s." % (str(index), str(HC), str(SC)))
             # print("The NEW Standard Confidence of this rule is " + str(NSC))
             if SC >= DEGREE[2] and HC >= DEGREE[3]:
-                print("WOW, a high quality rule!")
+                print("WOW, a quality rule!")
                 return 2, degree
             return 1, degree
         return 0, None

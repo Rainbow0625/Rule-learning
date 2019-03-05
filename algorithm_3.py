@@ -51,7 +51,7 @@ def save_rules(Pt, rule_length, nowPredicate, candidate, pre):
     R_num = 0
     QR_num = 0
     i = 1
-    rule_aed_list = []
+    rule_ade_list = []
     HC_value_list = []
     for rule in candidate:
         index = rule[0]
@@ -59,7 +59,7 @@ def save_rules(Pt, rule_length, nowPredicate, candidate, pre):
         degree = str(rule[2])
         # Duplicate elimination.
         if rule[2][1] not in HC_value_list:
-            rule_aed_list.append(rule)
+            rule_ade_list.append(rule)
             HC_value_list.append(rule[2][1])
 
         # Save Quality rules and rules.
@@ -76,15 +76,17 @@ def save_rules(Pt, rule_length, nowPredicate, candidate, pre):
         # print(line)
         f.write(line)
         i = i + 1
-    print("\nRules number: %d\n" % R_num)
-    print("Qualify Rules number: %d\n" % QR_num)
-    f.write("\nRules number: %d\n" % R_num)
-    f.write("Qualify Rules number: %d\n\n" % QR_num)
+    print("\nRule_num: %d\n" % R_num)
+    print("Qualify_Rule_num: %d\n" % QR_num)
+    f.write("\nRule_num: %d\n" % R_num)
+    f.write("Qualify_Rule_num: %d\n\n" % QR_num)
     f.close()
 
-    with open('./rule/' + BENCHMARK + '/rule_aed' + str(Pt) + '.txt', 'a+') as fp:
+    with open('./rule/' + BENCHMARK + '/rule_ade_' + str(Pt) + '.txt', 'a+') as fp:
         i = 0
-        for rule in rule_aed_list:
+        R_num = 0
+        QR_num = 0
+        for rule in rule_ade_list:
             index = rule[0]
             flag = rule[1]
             degree = str(rule[2])
@@ -102,6 +104,10 @@ def save_rules(Pt, rule_length, nowPredicate, candidate, pre):
             # print(line)
             fp.write(line)
             i = i + 1
+        print("\nAfter duplicate elimination, Rule_num: %d\n" % R_num)
+        print("After duplicate elimination, Qualify_Rule_num: %d\n" % QR_num)
+        fp.write("\nAfter duplicate elimination, Rule_num: %d\n" % R_num)
+        fp.write("After duplicate elimination, Qualify_Rule_num: %d\n\n" % QR_num)
 
 
 if __name__ == '__main__':
@@ -256,7 +262,7 @@ if __name__ == '__main__':
         Pt_time = Pt_end - Pt_start
         total_time = total_time + Pt_time
         print("This %d th predicate's total time: %f\n" % (Pt, Pt_time))
-        print("Until now, all %d predicates' average time: %f\n" % (Pt, total_time/(Pt+1)))
+        print("Until now, all %d predicates' average time: %f\n" % (len(test_Pre_list), total_time/len(test_Pre_list)))
 
         # Save for link prediction.
         # with open('./rule/' + BENCHMARK + '/rule_' + str(Pt) + '.pk', 'wb') as fp:
