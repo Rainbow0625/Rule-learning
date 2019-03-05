@@ -176,15 +176,18 @@ if __name__ == '__main__':
                 F.extend(F_i_new)
                 P_i_list.append(P_i)
                 # _P_count list are old indices; P_count dictionary's keys are new indices.
-                nowPredicate, P_new_index_list, P_count_dic = s.save_and_reindex(length, save_path, E, P, F, Pt,
-                                                                                 predicateName, P_i_list, _P_count)
+                nowPredicate, P_new_index_list, P_count_dic, facts_sample = s.save_and_reindex(length, save_path,
+                                                                                               E, P, F, Pt,
+                                                                                               predicateName,
+                                                                                               P_i_list, _P_count)
+                # The predicates in "pre_sample" is the total number written in file.
+                _, pre_sample = r.RSALW.get_pre(BENCHMARK, "./sampled/")
+                ent_size_sample = len(E)
                 print("\n##End to sample##\n")
 
                 print("\nGet SAMPLE PREDICATE dictionary. (First evaluate on small sample KG.)")
                 t = time.time()
-                # The predicates in "pre_sample" is the total number written in file.
-                _, pre_sample = r.RSALW.get_pre(BENCHMARK, "./sampled/")
-                facts_sample, ent_size_sample = s.read_data(BENCHMARK, filename="./sampled/")
+
                 # First get fact_dic_sample.
                 fact_dic_sample = r.RSALW.get_fact_dic_sample(facts_sample)
                 fact_dic_all = r.RSALW.get_fact_dic_all(pre_sample, facts_all)

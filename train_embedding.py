@@ -18,7 +18,6 @@ def trainModel(flag, BENCHMARK, work_threads, train_times, nbatches, dimension, 
     file = "after"
     con.set_in_path("./sampled/" + BENCHMARK + "/")
 
-
     # True: Input test files from the same folder.
     # con.set_test_flag(True)
 
@@ -36,12 +35,12 @@ def trainModel(flag, BENCHMARK, work_threads, train_times, nbatches, dimension, 
 
     con.get_test_file()
     con.set_test_link_prediction(False)
-    con.set_test_triple_classification(True)
+    con.set_test_triple_classification(False)
 
     # Models will be exported via tf.Saver() automatically.
-    con.set_export_files("./embedding/"+file + "/" + BENCHMARK+"/model.vec.tf", 0)
+    # con.set_export_files("./embedding/"+file + "/" + BENCHMARK+"/model.vec.tf", 0)
     # Model parameters will be exported to json files automatically.
-    con.set_out_files("./embedding/"+file + "/" + BENCHMARK+"/embedding.vec.json")  # because of the big data!
+    # con.set_out_files("./embedding/"+file + "/" + BENCHMARK+"/embedding.vec.json")  # because of the big data!
     # Initialize experimental settings.
     con.init()
     # Set the knowledge embedding model
@@ -51,7 +50,7 @@ def trainModel(flag, BENCHMARK, work_threads, train_times, nbatches, dimension, 
     print("\nTrain successfully!")
 
     # To test models after training needs "set_test_flag(True)".
-    con.test()
+    # con.test()
 
     # print("Test result??? ")  # nothing important
     # con.show_link_prediction(2, 1)  # h, r

@@ -130,6 +130,7 @@ def save_and_reindex(length, save_path, E, P, F, Pt, predicate_name, P_list, _P_
             f.write(str(x) + "\n")
         f.close()
 
+    # 为什么需要存整个的P? 是个问题！
     # Predicate: need to add R^-1.
     nowPredicate = []
     with open(save_path + '/relation2id.txt', 'w') as f:
@@ -168,34 +169,30 @@ def save_and_reindex(length, save_path, E, P, F, Pt, predicate_name, P_list, _P_
         new_index = pre_sampled_list.index(_P_count[i][0])
         P_count_dic[new_index*2] = _P_count[i][1]
         P_count_dic[new_index*2+1] = _P_count[i][1]
-    # for p_old_index in _P_count[:, 0]:
-    #     new_index = pre_sampled_list.index(p_old_index)
-    #     P_count_dic[new_index] = _P_count[p_old_index][1]
-    # test
-    # print(P_new_index_list)
-    # print(P_count_dic.keys())
-    # print(P_count_dic)
-    # print(_P_count)
 
     # Fact: need to double.
-    Fact = []
+    facts_sample = np.zeros(shape=(1, 3), dtype=np.int32)
     Entity = np.array(list(E))
     Predicate = np.array(pre_sampled_list)
     for f in F:
-        Fact.append([int(np.argwhere(Entity == f[0])), int(np.argwhere(Entity == f[1])),
-                     int(np.argwhere(Predicate == f[2])) * 2])
-        Fact.append([int(np.argwhere(Entity == f[1])), int(np.argwhere(Entity == f[0])),
-                     int(np.argwhere(Predicate == f[2])) * 2 + 1])
+        facts_sample = np.r_[facts_sample, np.array([[int(np.argwhere(Entity == f[0])),
+                                                     int(np.argwhere(Entity == f[1])),
+                                                     int(np.argwhere(Predicate == f[2])) * 2],
+                                                     [int(np.argwhere(Entity == f[1])),
+                                                      int(np.argwhere(Entity == f[0])),
+                                                      int(np.argwhere(Predicate == f[2])) * 2 + 1]],
+                                                    dtype=np.int32)]
+    facts_sample = np.delete(facts_sample, 0, axis=0)
+
     with open(save_path + '/Fact.txt', 'w') as f:
-        factsSizeOfPt = len(Fact)
+        factsSizeOfPt = len(facts_sample)
         f.write(str(factsSizeOfPt) + "\n")
         print("  Fact size: " + str(factsSizeOfPt))
-        for line in Fact:
+        for line in facts_sample:
             f.write(" ".join(str(letter) for letter in line) + "\n")
-        f.close()
 
     # reindex step:
     print('old:%d new:%d' % (curPredicate[0], nowPredicate[0]))
     print("Pt's original index -- %d : %s" % (curPredicate[0], curPredicate[1]))
     print("Pt's new index -- %d : %s" % (nowPredicate[0], nowPredicate[1]))
-    return nowPredicate, P_new_index_list, P_count_dic
+    return nowPredicate, P_new_index_list, P_count_dic, facts_sample
