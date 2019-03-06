@@ -23,18 +23,6 @@ class RSALW(object):
     def sim(para1, para2):  # similarity of vector or matrix
         return np.e ** (-np.linalg.norm(para1 - para2, ord=2))
 
-    # Generally, get predicates after sampled.
-    @staticmethod
-    def get_pre(BENCHMARK, filename):
-        with open(filename + BENCHMARK + "/relation2id.txt") as f:
-            preSize = f.readline()
-            pre = []
-            predicateName = []
-            for line in f.readlines():
-                pre.append(line.strip('\n').split("	"))
-                predicateName.append(line.split("	")[0])
-        return predicateName, pre
-
     @staticmethod
     def get_fact_dic_sample(facts_sample, isUncertian=False):
         # Only save once for the reverse pre.e.g. 0, 2, 4....
@@ -68,22 +56,6 @@ class RSALW(object):
                 temp_list.append([f[0], f[1]])
                 fact_dic[new_index] = temp_list
         return fact_dic
-
-    # def index_convert(self, n, relzise):
-    #     a = []
-    #     while True:
-    #         s = n // relzise
-    #         y = n % relzise
-    #         a = a + [y]
-    #         if s == 0:
-    #             break
-    #         n = s
-    #     le = self.length - len(a)
-    #     if le != 0:
-    #         for _ in range(le):
-    #             a.append(0)
-    #     a.reverse()
-    #     return a
 
     def is_repeated(self, M_index):
         for i in range(1, self.length):
@@ -380,7 +352,7 @@ class RSALW(object):
                     _index = list(np.array(i))
                     if _index in all_candidate_set:
                         continue
-                    result, degree = self.evaluate_and_filter(_index, DEGREE)
+                    result, degree = self.evaluate_and_filter(_index, DEGREE, isfullKG)
                     if result != 0:
                         all_candidate_set.append(_index)
                         candidate.append([_index, result, degree])
