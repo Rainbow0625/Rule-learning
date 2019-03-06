@@ -156,7 +156,7 @@ if __name__ == '__main__':
         P = P_0
         F = F_0
         E_i_1_new = E_0
-        P_i_list = [P_0]
+        P_i_list = [list(P_0)]
         max_i = int((Max_rule_length + 1) / 2)
         for length in range(2, Max_rule_length+1):  # body length
             cur_max_i = int((length+1)/2)

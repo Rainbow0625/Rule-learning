@@ -92,7 +92,7 @@ def sample_by_i(index, E_i_1_new, facts):
             P_count[key] = value[0]
     P_i = set(P_count.keys())
     print("Count list:")
-    print(P_count.values())
+    print(list(P_count.values()))
     count_mean = int(np.mean(np.array(list(P_count.values()), dtype=np.int32)))
     print("count_mean: %d" % count_mean)
     print("Leave pre num:%d" % len(P_i))
@@ -115,11 +115,13 @@ def filter_predicates_by_count(P_count_dic, P_new_index_list, fact_dic_sample, f
             if key in P_new_index_list[-2]:
                 P_new_index_list[-2].remove(key)
             if key % 2 == 0:
-                del fact_dic_all[key]
-                del fact_dic_sample[key]
+                if key in fact_dic_all.keys():
+                    del fact_dic_all[key]
+                    del fact_dic_sample[key]
             else:
-                del fact_dic_all[key-1]
-                del fact_dic_sample[key-1]
+                if key-1 in fact_dic_all.keys():
+                    del fact_dic_all[key-1]
+                    del fact_dic_sample[key-1]
             del_flag = del_flag + 1
     print("Remove num: %d" % del_flag)
     return P_new_index_list, fact_dic_sample, fact_dic_all
@@ -139,11 +141,11 @@ def save_and_reindex(length, save_path, E, P, F, Pt, predicate_name, P_i_list, P
 
     # Predicate: need to add R^-1.
     new_index_Pt = []
+    pre_sampled_list = list(P)
     with open(save_path + '/relation2id.txt', 'w') as f:
         pre_size = len(P)
         f.write(str(pre_size * 2) + "\n")  # after sampling
         print("  Predicate size: %d" % (pre_size * 2))
-        pre_sampled_list = list(P)
         for i in range(pre_size):
             name = predicate_name[pre_sampled_list[i]]
             # Note that pre_sampled_list[i] is the old index!
