@@ -67,7 +67,7 @@ def save_rules(Pt, rule_length, new_index_Pt, candidate, pre_sample):
                 title = "Qualify Rule " + str(i) + ": "
             line = title + " " + str(index) + " :[SC, HC] " + degree + " "
             for j in range(rule_length):
-                line = line + str(index[j]) + " " + pre[index[j]][1] + "; "
+                line = line + str(index[j]) + " " + pre_sample[index[j]][1] + "; "
             line = line + "\n"
             # print(line)
             f.write(line)
@@ -96,7 +96,7 @@ def save_rules(Pt, rule_length, new_index_Pt, candidate, pre_sample):
                 title = "Qualify Rule " + str(i) + ": "
             line = title + " " + str(index) + " :[SC, HC] " + degree + " "
             for j in range(rule_length):
-                line = line + str(index[j]) + " " + pre[index[j]][1] + "; "
+                line = line + str(index[j]) + " " + pre_sample[index[j]][1] + "; "
             line = line + "\n"
             # print(line)
             fp.write(line)
@@ -120,7 +120,7 @@ if __name__ == '__main__':
     total_time = 0
     # test_Pre_list = np.random.randint(0, predicateSize-1, size=5)
     # test_Pre_list = [0, 3, 52, 102, 163, 12, 27, 47]
-    test_Pre_list = [0, 3, 52, 102, 163, 12, 27, 47]  # FB15k
+    test_Pre_list = [0]  # FB15k
     # test_Pre_list = [16, 32, 98, 314, 500, 480, 160, 45, 90, 121, 531, 285, 580, 613, 380, 289, 485, 282, 1]  # DB 19?
     # test_Pre_list = [6, 8, 13, 24, 35, 29, 32, 22, 18, 34, 16, 1, 25, 11, 0, 4, 27, 28, 30, 3]  # yago
     # test_Pre_list = [15, 49, 58, 84, 135, 177, 31, 22, 220, 325, 99, 56, 187, 364, 146, 345, 180, 151, 42, 114] # wiki
@@ -171,7 +171,8 @@ if __name__ == '__main__':
                 E = E | E_i  # set
                 P = P | P_i  # set
                 F.extend(F_i_new)
-                P_i_list.append(list(P_i.add(Pt)))
+                P_i.add(Pt)
+                P_i_list.append(list(P_i))
                 # P_count_old dictionary's keys are old indices; P_count dictionary's keys are new indices.
                 save_path = './sampled/' + BENCHMARK
                 new_index_Pt, P_i_list_new, P_count_new, facts_sample = s.save_and_reindex(length, save_path,

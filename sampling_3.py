@@ -24,7 +24,7 @@ def read_data(BENCHMARK, filename):  # index from 0
 
 def get_pre(BENCHMARK, filename):
     with open(filename + BENCHMARK + "/relation2id.txt") as f:
-        preSize = f.readline()
+        preSize = int(f.readline())
         pre = []
         for line in f.readlines():
             pre.append(line.strip('\n').split("	"))
@@ -93,7 +93,7 @@ def sample_by_i(index, E_i_1_new, facts):
     P_i = set(P_count.keys())
     print("Count list:")
     print(P_count.values())
-    count_mean = int(np.mean(np.array(P_count.values(), dtype=np.int32)))
+    count_mean = int(np.mean(np.array(list(P_count.values()), dtype=np.int32)))
     print("count_mean: %d" % count_mean)
     print("Leave pre num:%d" % len(P_i))
     print("Delete pre num:%d \n" % del_flag)
@@ -169,10 +169,6 @@ def save_and_reindex(length, save_path, E, P, F, Pt, predicate_name, P_i_list, P
         new_index = pre_sampled_list.index(old_index)
         P_count_new[new_index * 2] = P_count_old.get(old_index)
         P_count_new[new_index * 2 + 1] = P_count_old.get(old_index)
-    for i in range(len(P_count_old)):
-        new_index = pre_sampled_list.index(P_count_old[i][0])
-        P_count_new[new_index*2] = P_count_old[i][1]
-        P_count_new[new_index*2+1] = P_count_old[i][1]
 
     # Fact: need to double.
     facts_sample = np.zeros(shape=(1, 3), dtype=np.int32)
