@@ -114,8 +114,12 @@ def filter_predicates_by_count(P_count_dic, P_new_index_list, fact_dic_sample, f
             P_new_index_list[-1].remove(key)
             if key in P_new_index_list[-2]:
                 P_new_index_list[-2].remove(key)
-            del fact_dic_all[key]
-            del fact_dic_sample[key]
+            if key % 2 == 0:
+                del fact_dic_all[key]
+                del fact_dic_sample[key]
+            else:
+                del fact_dic_all[key-1]
+                del fact_dic_sample[key-1]
             del_flag = del_flag + 1
     print("Remove num: %d" % del_flag)
     return P_new_index_list, fact_dic_sample, fact_dic_all
