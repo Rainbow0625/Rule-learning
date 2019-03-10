@@ -36,7 +36,7 @@ def get_fact_dic(facts_all, Pts):
 if __name__ == '__main__':
     BENCHMARK = "FB15K237"
     FILENAME = "./benchmarks/" + BENCHMARK + '/'
-    Pt_list = [0]
+    Pt_list = [0]  # Need to create the file to save samples.
     facts, ent_size, pre_size = read_data(FILENAME)
     fact_dic = get_fact_dic(facts, Pt_list)
     for pt in fact_dic.keys():
