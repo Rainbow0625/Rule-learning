@@ -389,7 +389,11 @@ class RSALW(object):
         print(len(self.ptmatrix_full) / self.ent_size_all ** 2)
         print(sys.getsizeof(self.ptmatrix_full))
         print("\n")
+        count = 0
         for item in score_top_container:
+            count += 1
+            sys.stdout.write('\rProgress: %d - %d' % (count, top_candidate_size))
+            sys.stdout.flush()
             index = [int(item[i]) for i in range(self.length)]
             if index not in all_candidate_set:
                 result, degree = self.evaluate_and_filter(index, DEGREE, isfullKG)
