@@ -75,6 +75,7 @@ def sample_by_i(index, E_i_1_new, facts):
                 P_dic[f[2]] = [value[0]+1, value[1]]
             else:
                 P_dic[f[2]] = [1, [i]]
+
     keys = list(P_dic.keys())
     for key in keys:
         value = P_dic[key]
@@ -82,6 +83,7 @@ def sample_by_i(index, E_i_1_new, facts):
         if value[0] < 0:
             del_flag = del_flag + 1
         else:
+            P_count[key] = value[0]
             # Get E_i and P_count.
             for j in value[1]:
                 E_i.add(facts[j][0])
@@ -89,7 +91,6 @@ def sample_by_i(index, E_i_1_new, facts):
                 if facts[j][3] == 0:
                     F_i_new.append(list(facts[j]))
                     facts[j][3] = 1
-            P_count[key] = value[0]
     P_i = set(P_count.keys())
     print("Count list:")
     print(list(P_count.values()))
@@ -114,7 +115,7 @@ def filter_predicates_by_count(P_count_dic, P_new_index_list, fact_dic_sample, f
             P_new_index_list[-1].remove(key)
             if key in P_new_index_list[-2]:
                 P_new_index_list[-2].remove(key)
-            if key % 2 == 0:
+            if key %2 == 0:
                 if key in fact_dic_all.keys():
                     del fact_dic_all[key]
                     del fact_dic_sample[key]
