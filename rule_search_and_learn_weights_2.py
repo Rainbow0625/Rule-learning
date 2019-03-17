@@ -86,7 +86,7 @@ class RSALW(object):
         # For predicates: 1, 3, 5, ... objdic, subdic
         objdic = {}  # key:predicate value: set
         subdic = {}  # key:predicate value: set
-        print(len(self.fact_dic_sample))
+        # print(len(self.fact_dic_sample))
         for key in self.fact_dic_sample.keys():
             tempsub = set()
             tempobj = set()
@@ -130,25 +130,26 @@ class RSALW(object):
             # For predicates: 0, 2, 4, ... [sub, obj]
             # For predicates: 1, 3, 5, ... [obj, sub]
             average_vector[key] = [sub, obj]
-            average_vector[key+1] = [obj, sub]
-        print("\n the dic's size is equal to the predicates' number! ")
-        print(len(average_vector))
+            average_vector[key + 1] = [obj, sub]
+        # print("\n the dic's size is equal to the predicates' number! ")
+        # print(len(average_vector))
         f = 0
         for index in self.index_tuple:
-            f = f+1
+            sys.stdout.write('\rProgress: %d - %d ' % (f, self.index_tuple_size))
+            sys.stdout.flush()
+            f = f + 1
             para_sum = float(0)
             for i in range(self.length - 1):
                 para_sum = para_sum + self.sim(average_vector.get(index[i])[1], average_vector.get(index[i + 1])[0])
             value = para_sum + self.sim(average_vector.get(index[0])[0], average_vector.get(self.pt)[0]) \
-                                    + self.sim(average_vector.get(index[self.length - 1])[1],
-                                               average_vector.get(self.pt)[1])
+                    + self.sim(average_vector.get(index[self.length - 1])[1],
+                               average_vector.get(self.pt)[1])
             top_values = score_top_container[:, self.length]
             if value > np.min(top_values):
                 replace_index = np.argmin(top_values)
                 for i in range(self.length):
                     score_top_container[replace_index][i] = index[i]
                 score_top_container[replace_index][self.length] = value
-        print(f)
 
     def getmatrix(self, p, isfullKG):
         # sparse matrix
@@ -392,7 +393,7 @@ class RSALW(object):
         count = 0
         for item in score_top_container:
             count += 1
-            sys.stdout.write('\rProgress: %d - %d' % (count, top_candidate_size))
+            sys.stdout.write('\rProgress: %d - %d ' % (count, top_candidate_size))
             sys.stdout.flush()
             index = [int(item[i]) for i in range(self.length)]
             if index not in all_candidate_set:
@@ -446,7 +447,7 @@ class RSALW(object):
         gc.disable()
         '''
 
-        print("\n*^_^* Yeah, there are %d rules. *^_^*\n" % len(candidate))
+        print("\n*^_^* Yeah, there are %d rules. *^_^*." % len(candidate))
 
         # learn_weights(candidate)
         return candidate

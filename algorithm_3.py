@@ -24,15 +24,15 @@ Max_rule_length = 4  # not include head atom
 _syn = 800
 _coocc = 800
 # embedding model parameters
-work_threads = 5
-nbatches = 150
-margin = 1  # the margin for the loss function
+model = TransE.TransE
 train_times = 10  # 1000
 dimension = 50  # 50
 alpha = 0.01  # learning rate
 lmbda = 0.01  # degree of the regularization on the parameters
 bern = 1  # set negative sampling algorithms, unif(0) or bern(1)
-model = TransE.TransE
+work_threads = 5
+nbatches = 150
+margin = 1  # the margin for the loss function
 # Vetor:DistMult.DistMult HolE.HolE
 #       TransE.TransE
 # Unknown: TransD.TransD TransH.TransH TransR.TransR
@@ -162,7 +162,7 @@ if __name__ == '__main__':
             cur_max_i = int((length+1)/2)
             if len(P_i_list) < cur_max_i+1:
                 # If the next P_i hasn't be computed:
-                print("\nNeed to compute the P_%d\n" % cur_max_i)
+                print("\nNeed to compute the P_%d." % cur_max_i)
                 E_i, P_i, F_i_new, facts_all, P_count_old = s.sample_by_i(cur_max_i, E_i_1_new, facts_all)
                 # Get the next cycle's variable.
                 E_i_1_new = E_i - E  # remove the duplicate entity.
@@ -243,7 +243,7 @@ if __name__ == '__main__':
             subject = 'ruleLearning'
             text = "Pt:" + str(Pt) + '\nLength: ' + str(length) + '\n'
             nu = "The number of rules: " + str(candidate_len) + "\n"
-            ti = "The time of this length: " + str(Pt_i-Pt_i_1)[0:5] + "\n"
+            ti = "The time of this length: " + str(Pt_i-Pt_i_1)[0:7] + "\n"
             Pt_i_1 = Pt_i
             text = BENCHMARK + ": " + text + nu + ti
             # Send email.
