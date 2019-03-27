@@ -7,6 +7,7 @@ import numpy as np
 import gc
 import time
 import send_process_report_email
+import csv
 import pickle
 '''
 import sys
@@ -40,7 +41,7 @@ margin = 1  # the margin for the loss function
 
 
 def save_rules(Pt, rule_length, new_index_Pt, candidate, pre_sample):
-    print("The final rules :")
+    print(str(Pt)+":")
     # str(model)[15:21]
     with open('./rule/' + BENCHMARK + '/rule_' + str(Pt) + '.txt', 'a+') as f:
         f.write(str(new_index_Pt[1]) + "\n")
@@ -72,8 +73,8 @@ def save_rules(Pt, rule_length, new_index_Pt, candidate, pre_sample):
             # print(line)
             f.write(line)
             i = i + 1
-        print("\nRule_num: %d\n" % R_num)
-        print("Qualify_Rule_num: %d\n" % QR_num)
+        print("\nRule_num: %d" % R_num)
+        print("Qualify_Rule_num: %d" % QR_num)
         f.write("\nRule_num: %d\n" % R_num)
         f.write("Qualify_Rule_num: %d\n\n" % QR_num)
 
@@ -101,8 +102,8 @@ def save_rules(Pt, rule_length, new_index_Pt, candidate, pre_sample):
             # print(line)
             fp.write(line)
             i = i + 1
-        print("\nAfter duplicate elimination, Rule_num: %d\n" % R_num)
-        print("After duplicate elimination, Qualify_Rule_num: %d\n" % QR_num)
+        print("\nAfter duplicate elimination, Rule_num: %d" % R_num)
+        print("After duplicate elimination, Qualify_Rule_num: %d" % QR_num)
         fp.write("\nAfter duplicate elimination, Rule_num: %d\n" % R_num)
         fp.write("After duplicate elimination, Qualify_Rule_num: %d\n\n" % QR_num)
 
@@ -124,6 +125,10 @@ if __name__ == '__main__':
     # test_Pre_list = [16, 32, 98, 314, 500, 480, 160, 45, 90, 121, 531, 285, 580, 613, 380, 289, 485, 282, 1]  # DB 19?
     # test_Pre_list = [6, 8, 13, 24, 35, 29, 32, 22, 18, 34, 16, 1, 25, 11, 0, 4, 27, 28, 30, 3]  # yago
     # test_Pre_list = [15, 49, 58, 84, 135, 177, 31, 22, 220, 325, 99, 56, 187, 364, 146, 345, 180, 151, 42, 114] # wiki
+    with open(BENCHMARK + ".csv", "w") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(
+            ["Pt", "len=2", "len=3", "len=4", "Total num", "time=2", "time=3", "time=4", "Total time"])
     for Pt in test_Pre_list:
         Pt_start = time.time()
         Pt_i_1 = Pt_start
@@ -141,6 +146,8 @@ if __name__ == '__main__':
         P_i_list_new = None
         P_count_new = None
         candidate_of_Pt = []
+        num_li = []
+        time_li = []
 
         # Garbage collection.
         if not gc.isenabled():
@@ -148,6 +155,7 @@ if __name__ == '__main__':
         gc.collect()
         gc.disable()
 
+        print(Pt)
         print("\n##Begin to sample##\n")
         # After sampling by Pt, return the E_0 and F_0.
         E_0, P_0, F_0, facts_all = s.first_sample_by_Pt(Pt, facts_all)
@@ -220,6 +228,7 @@ if __name__ == '__main__':
             print("\n##Begin to search and evaluate##\n")
             # Init original object.
             rsalw = r.RSALW()
+            rsalw.__int__()
             candidate = rsalw.search_and_evaluate(IsUncertain, 1, length, dimension, DEGREE, new_index_Pt,
                                                   ent_emb, rel_emb, _syn, _coocc, P_i_list_new, isfullKG,
                                                   fact_dic_sample, fact_dic_all, ent_size_sample, ent_size_all)
@@ -239,20 +248,36 @@ if __name__ == '__main__':
             del candidate, rsalw
             gc.collect()
             gc.disable()
+
             # Send report process E-mail!
             subject = 'ruleLearning'
             text = "Pt:" + str(Pt) + '\nLength: ' + str(length) + '\n'
             nu = "The number of rules: " + str(candidate_len) + "\n"
             ti = "The time of this length: " + str(Pt_i-Pt_i_1)[0:7] + "\n"
+
+            # Save in CSV file.
+            num_li.append(candidate_len)
+            time_li.append(Pt_i - Pt_i_1)
+
             Pt_i_1 = Pt_i
             text = BENCHMARK + ": " + text + nu + ti
             # Send email.
             send_process_report_email.send_email_main_process(subject, text)
+
         Pt_end = time.time()
         Pt_time = Pt_end - Pt_start
         total_time += Pt_time
-        print("This %d th predicate's total rule num: %d\n" % (Pt, num_rule))
-        print("This %d th predicate's total time: %f\n" % (Pt, Pt_time))
+        print("\nThis %d th predicate's total rule num: %d" % (Pt, num_rule))
+        print("This %d th predicate's total time: %f\n\n\n\n" % (Pt, Pt_time))
+        line = [Pt]
+        line.extend(num_li)
+        line.append(num_rule)
+        line.extend(time_li)
+        line.append(Pt_time)
+        with open(BENCHMARK + ".csv", "a") as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(line)
+            # ["Pt", "len=2", "len=3", "len=4", "Total num", "time=2", "time=3", "time=4", "Total time"]
 
         # Save for link prediction.
         # with open('./rule/' + BENCHMARK + '/rule_' + str(Pt) + '.pk', 'wb') as fp:
@@ -284,9 +309,8 @@ if __name__ == '__main__':
         second = end - hour * 3600 - minute * 60
         print("\nAlgorithm total time: %f" % end)
         print(str(hour) + " : " + str(minute) + " : " + str(second))
-
         f.write("Algorithm total time: %d : %d : %f\n" % (hour, minute, second))
 
-    subject = "Over!"
+    subject = BENCHMARK+", over!"
     text = "Let's watch the result! Go Go Go!\n"
     send_process_report_email.send_email_main_process(subject, text)
