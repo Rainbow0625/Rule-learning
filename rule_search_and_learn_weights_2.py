@@ -491,7 +491,7 @@ class RSALW(object):
         gc.disable()
         '''
 
-        print("\n*^_^* Yeah, there are %d rules. *^_^*." % len(candidate))
+        # print("\n*^_^* Yeah, there are %d rules. *^_^*." % len(candidate))
 
         # learn_weights(candidate)
         return candidate
