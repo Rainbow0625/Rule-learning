@@ -19,6 +19,9 @@ class RSALW(object):
         self._syn = None
         self._coocc = None
         self.P_i = None
+        self.ptmatrix_part = None
+        self.ptmatrix_full = None
+        self.ptmatrix_sample = None
 
     @staticmethod
     def sim(para1, para2):  # similarity of vector or matrix
@@ -121,6 +124,7 @@ class RSALW(object):
                 # print(score_top_container[replace_index])
 
     def score_function2(self, score_top_container, entity, sub_dic, obj_dic):  # co-occurrence
+        tt = time.time()
         # get the average vector of average predicate which is saved in the dictionary.
         average_vector = {}
         for key in sub_dic:
@@ -150,41 +154,90 @@ class RSALW(object):
                 for i in range(self.length):
                     score_top_container[replace_index][i] = index[i]
                 score_top_container[replace_index][self.length] = value
+        print("Time: %f." % (time.time()-tt))
 
     def getmatrix(self, p, isfullKG):
+    def getmatrix(self, p, isWhichKG):
         # sparse matrix
         re_flag = False
         if p % 2 == 1:
-            p = p-1
+            p = p - 1
             re_flag = True
-        if isfullKG:
-            pfacts = self.fact_dic_all.get(p)
-            pmatrix = sparse.dok_matrix((self.ent_size_all, self.ent_size_all), dtype=np.int8)
-        else:
+        # Pt: avoid cal it again.
+        if p == self.pt:
+            if isWhichKG == 0:
+                if self.ptmatrix_sample != None:
+                    return self.ptmatrix_sample
+            elif isWhichKG == 1:
+                if self.ptmatrix_part != None:
+                    return self.ptmatrix_part
+            elif isWhichKG == 2:
+                if self.ptmatrix_full != None:
+                    return self.ptmatrix_full
+        if isWhichKG == 0:
             pfacts = self.fact_dic_sample.get(p)
             pmatrix = sparse.dok_matrix((self.ent_size_sample, self.ent_size_sample), dtype=np.int8)
-        if re_flag:
+            if re_flag:
+                for f in pfacts:
+                    pmatrix[f[1], f[0]] = 1
+            else:
+                for f in pfacts:
+                    pmatrix[f[0], f[1]] = 1
+        elif isWhichKG == 1:  # Evaluate on Pt's entity one-hot matrix.
+            pfacts = self.fact_dic_all.get(p)
+            ent_size = len(self.E_0)
+            E_0_list = list(self.E_0)
+            pmatrix = sparse.dok_matrix((ent_size, ent_size), dtype=np.int8)
             for f in pfacts:
-                pmatrix[f[1], f[0]] = 1
+                if f[0] in self.E_0 and f[1] in self.E_0:
+                    if re_flag:
+                        pmatrix[E_0_list.index(f[1]), E_0_list.index(f[0])] = 1
+                    else:
+                        pmatrix[E_0_list.index(f[0]), E_0_list.index(f[1])] = 1
         else:
-            for f in pfacts:
-                pmatrix[f[0], f[1]] = 1
+            pfacts = self.fact_dic_all.get(p)
+            pmatrix = sparse.dok_matrix((self.ent_size_all, self.ent_size_all), dtype=np.int8)
+            if re_flag:
+                for f in pfacts:
+                    pmatrix[f[1], f[0]] = 1
+            else:
+                for f in pfacts:
+                    pmatrix[f[0], f[1]] = 1
         return pmatrix
 
-    def calSCandHC_csr(self, pmatrix, isfullKG):
-        print("\n!!!!!!!!!!!!!!!csr!!!!!!!!!!!!!!!\n")
+    def calSupportGreaterThanOne(self, pmatrix, isSampleKG):
+        if isSampleKG:
+            ptmatrix = self.ptmatrix_sample
+        else:
+            ptmatrix = self.ptmatrix_part
+        supp = 0
+        head = len(ptmatrix)
+        body = len(pmatrix)
+        if head == 0 or body == 0:
+            return False
+        if head < body:
+            for key in ptmatrix.keys():
+                if pmatrix.get(key) > 0:
+                    supp += 1
+                    return True
+        if head >= body:
+            for key in pmatrix.keys():
+                if ptmatrix.get(key) == 1:
+                    supp += 1
+                    return True
+        return False
+
+    def calSCandHC_csr(self, pmatrix):
+        print("\n---------------csr---------------\n")
         # calculate New SC
         # supp_score = 0.0
         # body_score = 0.0
-        if isfullKG:
-            ptmatrix = self.ptmatrix_full
-        else:
-            ptmatrix = self.ptmatrix_part
+        ptmatrix = self.ptmatrix_full
         head = len(ptmatrix)
         body = pmatrix.nnz
         supp = 0
         if head == 0 or body == 0:
-            return 0, 0, False
+            return 0, 0
         row_compress = pmatrix.indptr
         col = pmatrix.indices
         # print(pmatrix.nnz)
@@ -198,33 +251,20 @@ class RSALW(object):
             for j in range(row_num):
                 if ptmatrix.get(tuple([i, row_col[j]])) == 1:
                     supp = supp + 1
-                    if not isfullKG:
-                        return 0, 0, True
             flag += row_num
         # Judge by supp.
-        if not isfullKG:
-            return 0, 0, False
-        else:  # isfullKG == True
-            if body == 0:
-                SC = 0
-            else:
-                SC = supp / body
-            if head == 0:
-                HC = 0
-            else:
-                HC = supp / head
-            return SC, HC, False
-        # if body_score == 0.0:
-        #     New_SC = 0
-        # else:
-        #     New_SC = supp_score / body_score
-        # return New_SC, SC, HC
-
-    def calSCandHC_dok(self, pmatrix, isfullKG):
-        if isfullKG:
-            ptmatrix = self.ptmatrix_full
+        if body == 0:
+            SC = 0
         else:
-            ptmatrix = self.ptmatrix_part
+            SC = supp / body
+        if head == 0:
+            HC = 0
+        else:
+            HC = supp / head
+        return SC, HC
+
+    def calSCandHC_dok(self, pmatrix):
+        ptmatrix = self.ptmatrix_full
         head = len(ptmatrix)
         body = len(pmatrix)
         supp = 0
@@ -232,46 +272,55 @@ class RSALW(object):
         # supp_score = 0.0
         # body_score = 0.0
         if head == 0 or body == 0:
-            return 0, 0, False
+            return 0, 0
         if head < body:
             for key in ptmatrix.keys():
                 if pmatrix.get(key) > 0:
                     supp = supp + 1
         elif head >= body:
             for key in pmatrix.keys():
-                # body_score = body_score + pmatrix[key]
                 if ptmatrix.get(key) == 1:
                     supp = supp + 1
-                    if not isfullKG:
-                        return 0, 0, True
-                    # supp_score = supp_score + pmatrix[key]
         # Judge by supp.
-        if not isfullKG:
-            return 0, 0, False
-        else:  # isfullKG == True
-            if body == 0:
-                SC = 0
-            else:
-                SC = supp / body
-            if head == 0:
-                HC = 0
-            else:
-                HC = supp / head
-            return SC, HC, False
+        if body == 0:
+            SC = 0
+        else:
+            SC = supp / body
+        if head == 0:
+            HC = 0
+        else:
+            HC = supp / head
+        return SC, HC
 
-    def evaluate_and_filter(self, index, DEGREE, isfullKG):
-        # sparse matrix
-        # print(index)
-        pmatrix = self.getmatrix(index[0], isfullKG)
+    def matrix_dot(self, index, isWhichKG):  # 0:sample 1:part 2:fu;
+        pmatrix = self.getmatrix(index[0], isWhichKG)
         for i in range(1, self.length):
-            pmatrix = pmatrix.dot(self.getmatrix(index[i], isfullKG))
+            # Matrix distribution law
+            pmatrix = pmatrix.dot(self.getmatrix(index[i], isWhichKG))
             if not gc.isenabled():
                 gc.enable()
             gc.collect()
             gc.disable()
-        
+        return pmatrix
+
+    def evaluate_and_filter(self, index, DEGREE, isfullKG):
+        if not isfullKG:
+            if len(self.E_0) <= 100000:
+                # On part. (Priority)
+                pmatrix = self.matrix_dot(index, 1)
+                pmatrix = pmatrix.todok()
+                if not self.calSupportGreaterThanOne(pmatrix, False):
+                    return 0, None
+            else:
+                # On sample.
+                pmatrix = self.matrix_dot(index, 0)
+                pmatrix = pmatrix.todok()
+                if not self.calSupportGreaterThanOne(pmatrix, True):
+                    return 0, None
+        # On full.
+        pmatrix = self.matrix_dot(index, 2)
         # calculate the temp SC and HC
-        if sys.getsizeof(pmatrix) > 536870912:  # 0.5G
+        if sys.getsizeof(pmatrix) > 10485760:  # 10M
             # Type of pmatrix:  csr_matrix!
             print(sys.getsizeof(pmatrix))
             print("Date size:")
@@ -282,26 +331,19 @@ class RSALW(object):
             else:
                 print(pmatrix.nnz / self.ent_size_sample ** 2)
             print("\n")
-            SC, HC, is_eval_by_full = self.calSCandHC_csr(pmatrix, isfullKG)
+            SC, HC = self.calSCandHC_csr(pmatrix)
         else:
             pmatrix = pmatrix.todok()
             # Type of pmatrix:  dok_matrix!
             # print("Date size:")
             # print("pmatrix len:%d" % len(pmatrix))
             # if isfullKG:
-                # print("full:")
-                # print(len(pmatrix) / self.ent_size_all ** 2)
+            # print("full:")
+            # print(len(pmatrix) / self.ent_size_all ** 2)
             # else:
-                # print(len(pmatrix) / self.ent_size_sample ** 2)
+            # print(len(pmatrix) / self.ent_size_sample ** 2)
             # print("\n")
-            SC, HC, is_eval_by_full = self.calSCandHC_dok(pmatrix, isfullKG)
-        if is_eval_by_full:
-            if not gc.isenabled():
-                gc.enable()
-            del pmatrix
-            gc.collect()
-            gc.disable()
-            return self.evaluate_and_filter(index, DEGREE, True)
+            SC, HC = self.calSCandHC_dok(pmatrix)
         degree = [SC, HC]
         # print(degree)
         if SC >= DEGREE[0] and HC >= DEGREE[1]:
@@ -329,7 +371,7 @@ class RSALW(object):
 
     def search_and_evaluate(self, isUncertain, f, length, dimension, DEGREE, nowPredicate,
                             ent_emb, rel_emb, _syn, _coocc, P_new_index_list, isfullKG,
-                            fact_dic_sample, fact_dic_all, ent_size_sample, ent_size_all):
+                            fact_dic_sample, fact_dic_all, ent_size_sample, ent_size_all, E_0):
         self.pt = nowPredicate[0]
         self.fact_dic_sample = fact_dic_sample
         self.fact_dic_all = fact_dic_all
@@ -340,15 +382,13 @@ class RSALW(object):
         self._syn = _syn
         self._coocc = _coocc
         self.P_i = P_new_index_list
+        self.E_0 = E_0
         print("Length = %d." % self.length)
         relsize = rel_emb.shape[0]
         if f == 0:
             rel_emb = np.reshape(rel_emb, [relsize, dimension, dimension])
         # print(relation.shape)  # (-1, 100, 100) or (-1, 100)
         # print(entity.shape)  # (-1, 100)
-
-        # Get index tuple.
-        self.get_index_tuple()
 
         # Score Function
         candidate = []
@@ -359,6 +399,9 @@ class RSALW(object):
         del rel_emb
         gc.collect()
         gc.disable()
+
+        # Get index tuple.
+        self.get_index_tuple()
 
         # Calculate the f2.
         # top_candidate_size = int(_coocc * self.index_tuple_size)
@@ -378,19 +421,20 @@ class RSALW(object):
         gc.collect()
         gc.disable()
 
-        print("\n Begin to use coocc to filter: ")
-        self.ptmatrix_part = self.getmatrix(self.pt, False)
-        self.ptmatrix_full = self.getmatrix(self.pt, True)
-        print("part:")
-        print("ptmatrix:%d" % len(self.ptmatrix_part))
-        print(len(self.ptmatrix_part) / self.ent_size_sample ** 2)
-        print(sys.getsizeof(self.ptmatrix_part))
-        print("full:")
-        print("ptmatrix:%d" % len(self.ptmatrix_full))
-        print(len(self.ptmatrix_full) / self.ent_size_all ** 2)
-        print(sys.getsizeof(self.ptmatrix_full))
-        print("\n")
+        print("\nPt matrix:")
+        if not isfullKG:
+            if len(self.E_0) > 100000:
+                self.ptmatrix_sample = self.getmatrix(self.pt, 0)
+                print(" Sample: len:%d  size:%d" % (len(self.ptmatrix_sample), sys.getsizeof(self.ptmatrix_sample)))
+            else:
+                self.ptmatrix_part = self.getmatrix(self.pt, 1)
+                print(" Part: len:%d  size:%d" % (len(self.ptmatrix_part), sys.getsizeof(self.ptmatrix_part)))
+        self.ptmatrix_full = self.getmatrix(self.pt, 2)
+        print(" Full: len:%d  size:%d" % (len(self.ptmatrix_full), sys.getsizeof(self.ptmatrix_full)))
+
+        print("\nBegin to use coocc to filter: ")
         count = 0
+        tt = time.time()
         for item in score_top_container:
             count += 1
             sys.stdout.write('\rProgress: %d - %d ' % (count, top_candidate_size))
@@ -401,6 +445,7 @@ class RSALW(object):
                 if result != 0:
                     candidate.append([index, result, degree])
                     all_candidate_set.append(index)
+        print("Time:%f." % (time.time()-tt))
         if not gc.isenabled():
             gc.enable()
         del score_top_container

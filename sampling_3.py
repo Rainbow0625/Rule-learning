@@ -34,6 +34,7 @@ def get_pre(BENCHMARK, filename):
 def first_sample_by_Pt(Pt, facts):
     print("Step 1: First sample by Pt to get E_0:")
     time_start = time.time()
+    E_0_all = set()
     E_0 = set()
     P_0 = set()
     P_0.add(Pt)
@@ -41,17 +42,23 @@ def first_sample_by_Pt(Pt, facts):
     for f in facts:
         # Sample.
         if f[2] == Pt and f[3] == 0:
-            fact = f.tolist()
-            F_0.append(fact)
-            f[3] = 1  # Mark it has been included.
-            E_0.add(f[0])
-            E_0.add(f[1])
+            E_0_all.add(f[0])
+            E_0_all.add(f[1])
+            if len(E_0) < 5000:  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                fact = f.tolist()
+                F_0.append(fact)
+                f[3] = 1  # Mark it has been included.
+                E_0.add(f[0])
+                E_0.add(f[1])
+            # else:
+            #     break
+    print("E_0_all size: %d" % len(E_0_all))
     print("E_0 size: %d" % len(E_0))
     print("P_0 size: %d" % len(P_0))
     print("F_0 size: %d" % len(F_0))
     time_end = time.time()
     print('Step 1 cost time:', time_end-time_start)
-    return E_0, P_0, F_0, facts
+    return E_0, P_0, F_0, facts, E_0_all
 
 
 def sample_by_i(index, E_i_1_new, facts):
@@ -69,8 +76,8 @@ def sample_by_i(index, E_i_1_new, facts):
             if f[2] in P_dic.keys():
                 value = P_dic.get(f[2])
                 # Restrict the number of entity!
-                # if len(value[1]) <= 50:
-                #     value[1].append(i)
+                #if len(value[1]) <= 50:   # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                #    value[1].append(i)  # else, only count the freq.
                 value[1].append(i)
                 P_dic[f[2]] = [value[0]+1, value[1]]
             else:
@@ -80,7 +87,7 @@ def sample_by_i(index, E_i_1_new, facts):
     for key in keys:
         value = P_dic[key]
         # Pick out predicates with high frequency of occurrence.
-        if value[0] < 0:
+        if value[0] > 5000:   # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             del_flag = del_flag + 1
         else:
             P_count[key] = value[0]
@@ -106,16 +113,19 @@ def sample_by_i(index, E_i_1_new, facts):
     return E_i, P_i, F_i_new, facts, P_count
 
 
-def filter_predicates_by_count(P_count_dic, P_new_index_list, fact_dic_sample, fact_dic_all):
+def filter_predicates_by_count(Pt, P_count_dic, P_new_index_list, fact_dic_sample, fact_dic_all):
     del_flag = 0
     keys = list(P_count_dic.keys())
     for key in keys:
         if P_count_dic.get(key) > 300 or P_count_dic.get(key) < 100:
+        if key == Pt or key-1 == Pt:
+            continue
+        if P_count_dic.get(key) > 250 or P_count_dic.get(key) < 150:  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             # Remove the elements filtered.
             P_new_index_list[-1].remove(key)
             if key in P_new_index_list[-2]:
                 P_new_index_list[-2].remove(key)
-            if key %2 == 0:
+            if key % 2 == 0:
                 if key in fact_dic_all.keys():
                     del fact_dic_all[key]
                     del fact_dic_sample[key]

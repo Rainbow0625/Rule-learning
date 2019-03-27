@@ -158,7 +158,7 @@ if __name__ == '__main__':
         print(Pt)
         print("\n##Begin to sample##\n")
         # After sampling by Pt, return the E_0 and F_0.
-        E_0, P_0, F_0, facts_all = s.first_sample_by_Pt(Pt, facts_all)
+        E_0, P_0, F_0, facts_all, E_0_all = s.first_sample_by_Pt(Pt, facts_all)
         # Initialization the sample variables.
         E = E_0
         P = P_0
@@ -211,8 +211,9 @@ if __name__ == '__main__':
             else:
                 print("\nNeedn't to compute the next P_i")
                 print("Filter out predicates that appear too frequently to reduce the computational time complexity.\n")
-                P_i_list_new, fact_dic_sample, fact_dic_all = \
-                    s.filter_predicates_by_count(P_count_new, P_i_list_new, fact_dic_sample, fact_dic_all)
+                P_i_list_new, fact_dic_sample, fact_dic_all = s.filter_predicates_by_count(new_index_Pt[0],
+                                                                                           P_count_new, P_i_list_new,
+                                                                                           fact_dic_sample,fact_dic_all)
                 print("After filter, the length of pre: %d :%d " % (len(P_i_list_new[-1]), len(P_count_new)))
                 print("##End to sample##")
                 print("\n##Begin to train embedding##")
@@ -231,7 +232,8 @@ if __name__ == '__main__':
             rsalw.__int__()
             candidate = rsalw.search_and_evaluate(IsUncertain, 1, length, dimension, DEGREE, new_index_Pt,
                                                   ent_emb, rel_emb, _syn, _coocc, P_i_list_new, isfullKG,
-                                                  fact_dic_sample, fact_dic_all, ent_size_sample, ent_size_all)
+                                                  fact_dic_sample, fact_dic_all, ent_size_sample, ent_size_all,
+                                                  E_0_all)
             candidate_of_Pt.extend(candidate)
             candidate_len = len(candidate)
             num_rule += candidate_len
