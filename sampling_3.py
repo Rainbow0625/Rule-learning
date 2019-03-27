@@ -117,7 +117,6 @@ def filter_predicates_by_count(Pt, P_count_dic, P_new_index_list, fact_dic_sampl
     del_flag = 0
     keys = list(P_count_dic.keys())
     for key in keys:
-        if P_count_dic.get(key) > 300 or P_count_dic.get(key) < 100:
         if key == Pt or key-1 == Pt:
             continue
         if P_count_dic.get(key) > 250 or P_count_dic.get(key) < 150:  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

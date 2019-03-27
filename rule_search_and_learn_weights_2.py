@@ -156,7 +156,6 @@ class RSALW(object):
                 score_top_container[replace_index][self.length] = value
         print("Time: %f." % (time.time()-tt))
 
-    def getmatrix(self, p, isfullKG):
     def getmatrix(self, p, isWhichKG):
         # sparse matrix
         re_flag = False
