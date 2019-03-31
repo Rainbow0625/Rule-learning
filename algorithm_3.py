@@ -23,7 +23,7 @@ QR_minHC = 0.001
 DEGREE = [R_minSC, R_minHC, QR_minSC, QR_minHC]
 Max_rule_length = 4  # not include head atom
 _syn = 800
-_coocc = 800
+_coocc = 1000
 # embedding model parameters
 model = TransE.TransE
 train_times = 10  # 1000
@@ -77,6 +77,8 @@ def save_rules(Pt, rule_length, new_index_Pt, candidate, pre_sample):
         print("Qualify_Rule_num: %d" % QR_num)
         f.write("\nRule_num: %d\n" % R_num)
         f.write("Qualify_Rule_num: %d\n\n" % QR_num)
+    R_num_return = R_num
+    QR_num_return = QR_num
 
     R_num = 0
     QR_num = 0
@@ -106,7 +108,7 @@ def save_rules(Pt, rule_length, new_index_Pt, candidate, pre_sample):
         print("After duplicate elimination, Qualify_Rule_num: %d" % QR_num)
         fp.write("\nAfter duplicate elimination, Rule_num: %d\n" % R_num)
         fp.write("After duplicate elimination, Qualify_Rule_num: %d\n\n" % QR_num)
-    return R_num, QR_num
+    return R_num_return, QR_num_return
 
 
 if __name__ == '__main__':
@@ -237,7 +239,7 @@ if __name__ == '__main__':
                                                   fact_dic_sample, fact_dic_all, ent_size_sample, ent_size_all,
                                                   E_0_all)
             candidate_of_Pt.extend(candidate)
-            # candidate_len = len(candidate)
+            candidate_len = len(candidate)
 
             print("\n##End to search and evaluate##\n")
 
@@ -246,31 +248,31 @@ if __name__ == '__main__':
             Pt_i = time.time()
             print("\nLength = %d, Time = %f" % (length, (Pt_i-Pt_i_1)))
 
-            # Garbage collection.
-            if not gc.isenabled():
-                gc.enable()
-            del candidate, rsalw
-            gc.collect()
-            gc.disable()
-
             # Save in CSV file.
-            num_ade = R_num + QR_num
-            num_rule += num_ade
+            # num_ade = R_num + QR_num
+            num_rule += candidate_len
             num_Qrule += QR_num
-            num_li.append(num_ade)
+            num_li.append(candidate_len)
             time_li.append(Pt_i - Pt_i_1)
-            print("*^_^* Yeah, there are %d rules. *^_^*." % num_ade)
+            print("*^_^* Yeah, there are %d rules. *^_^*." % candidate_len)
 
             # Send report process E-mail!
-            subject = 'FB15K237'
+            subject = 'xxxx'
             text = "Pt:" + str(Pt) + '\nLength: ' + str(length) + '\n'
-            nu = "The number of rules: " + str(num_ade) + "\n"
+            nu = "The number of rules: " + str(candidate_len) + "\n"
             ti = "The time of this length: " + str(Pt_i - Pt_i_1)[0:7] + "\n"
 
             Pt_i_1 = Pt_i
             text = BENCHMARK + ": " + text + nu + ti
             # Send email.
             # send_process_report_email.send_email_main_process(subject, text)
+
+            # Garbage collection.
+            if not gc.isenabled():
+                gc.enable()
+            del candidate, rsalw
+            gc.collect()
+            gc.disable()
 
         Pt_end = time.time()
         Pt_time = Pt_end - Pt_start
@@ -283,7 +285,7 @@ if __name__ == '__main__':
         line.append(num_rule)
         line.append(num_Qrule)
         line.extend(time_li)
-        line.append(Pt_time)
+        line.append(Pt_time/3600)
         with open(BENCHMARK + ".csv", "a") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(line)
