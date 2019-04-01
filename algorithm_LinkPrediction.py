@@ -15,11 +15,11 @@ sys.stdout.write('\r'+str())
 sys.stdout.flush()
 '''
 IsUncertain = False
-BENCHMARK = "FB15K237"
-R_minSC = 0.01
-R_minHC = 0.001
-QR_minSC = 0.5
-QR_minHC = 0.001
+BENCHMARK = "DB"
+R_minSC = 0.1
+R_minHC = 0.01
+QR_minSC = 0.7
+QR_minHC = 0.01
 DEGREE = [R_minSC, R_minHC, QR_minSC, QR_minHC]
 Max_rule_length = 4  # not include head atom
 _syn = 800
@@ -34,10 +34,6 @@ bern = 1  # set negative sampling algorithms, unif(0) or bern(1)
 work_threads = 5
 nbatches = 150
 margin = 1  # the margin for the loss function
-# Vetor:DistMult.DistMult HolE.HolE
-#       TransE.TransE
-# Unknown: TransD.TransD TransH.TransH TransR.TransR
-# Matrix: RESCAL.RESCAL
 
 
 def save_rules(Pt, rule_length, new_index_Pt, candidate, pre_sample):
@@ -113,7 +109,7 @@ def save_rules(Pt, rule_length, new_index_Pt, candidate, pre_sample):
 
 if __name__ == '__main__':
     begin = time.time()
-    print("\nThe benchmark is " + BENCHMARK + ".")
+    print("\nLink Prediction.\nThe benchmark is " + BENCHMARK + ".")
     predicate_all = s.get_pre(BENCHMARK, filename='./benchmarks/')
     predicate_name = [p[0] for p in predicate_all]
     facts_all, ent_size_all = s.read_data(BENCHMARK, filename="./benchmarks/")
@@ -206,7 +202,7 @@ if __name__ == '__main__':
                 ent_emb, rel_emb = te.trainModel(1, BENCHMARK, work_threads, train_times, nbatches, dimension, alpha,
                                                  lmbda, bern, margin, model)
                 print("\n##End to train embedding##\n")
-                isfullKG = True
+                isfullKG = False
                 # Garbage collection.
                 if not gc.isenabled():
                     gc.enable()
@@ -291,9 +287,8 @@ if __name__ == '__main__':
             writer.writerow(line)
             # ["Pt", "len=2", "len=3", "len=4", "Total num", "time=2", "time=3", "time=4", "Total time"]
 
-        # Save for link prediction.
-        # with open('./rule/' + BENCHMARK + '/rule_' + str(Pt) + '.pk', 'wb') as fp:
-            # pickle.dump(candidate_of_Pt, fp)
+        # Link prediction.
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         # After the mining of Pt, facts_all's usage need to be set 0.
         facts_all = np.delete(facts_all, -1, axis=1)

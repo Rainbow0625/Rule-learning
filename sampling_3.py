@@ -28,7 +28,7 @@ def get_pre(BENCHMARK, filename):
         pre = []
         for line in f.readlines():
             pre.append(line.strip('\n').split("	"))
-    return pre, preSize
+    return pre
 
 
 def first_sample_by_Pt(Pt, facts):
