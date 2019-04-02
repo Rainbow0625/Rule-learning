@@ -79,8 +79,8 @@ if __name__ == '__main__':
             content = f.read()
             f.seek(0, 0)
             f.write(str(train_num) + '\n' + content)
-        with open("./benchmarks/" + BENCHMARK + '/' + str(pt) + "/train/entity2id.txt", 'w') as f:
-            f.write(str(len(rest_ent))+'\n')
+        # with open("./benchmarks/" + BENCHMARK + '/' + str(pt) + "/train/entity2id.txt", 'w') as f:
+            # f.write(str(len(rest_ent))+'\n')
         if len(rest_ent) == ent_size:
             print("Entity size is equal.")
             print("Split data for %d successfully!!! " % pt)

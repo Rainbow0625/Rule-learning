@@ -307,14 +307,15 @@ if __name__ == '__main__':
         predict_fact_num_total += predict_fact_num
         predict_Qfact_num_total += predict_Qfact_num
         mid = time.time()
-        print("Predict time: %f" % mid - time_lp_start)
+        print("Predict time: %f" % (mid - time_lp_start))
         print('\n')
         print("Begin to test %d." % Pt)
-        MRR, Hit_10 = lp.test(lp_save_path, Pt, pre_facts)
+        test_file_path = './benchmarks/' + BENCHMARK + '/'
+        MRR, Hit_10 = lp.test(test_file_path, Pt, pre_facts)
         MRR_total += MRR
         Hit_10_total += Hit_10
         mid2 = time.time()
-        print("Test time: %f" % mid2 - mid)
+        print("Test time: %f" % (mid2 - mid))
         lp_time = time.time() - time_lp_start
         print("\nLink prediction time: %f" % lp_time)
         hour = int(lp_time / 3600)
