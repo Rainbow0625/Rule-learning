@@ -31,7 +31,7 @@ def get_onehot_matrix(p, fact_dic, ent_size, pre_sample):
     # sparse matrix
     re_flag = False if p % 2 == 0 else True
     new_p = np.array([pre[0] for pre in pre_sample], dtype=np.int32)
-    pfacts = fact_dic.get(pre_sample[np.where(new_p == p)[0][0]][2])
+    pfacts = fact_dic.get(int(pre_sample[np.where(new_p == p)[0][0]][2]))
     pmatrix = sparse.dok_matrix((ent_size, ent_size), dtype=np.int32)
     if re_flag:
         for f in pfacts:
