@@ -191,7 +191,7 @@ if __name__ == '__main__':
                                                                                            E, P, F, Pt, predicate_name,
                                                                                            P_i_list, P_count_old)
                 # The predicates in "pre_sample" is the total number written in file.
-                pre_sample = s.get_pre(BENCHMARK, "./sampled/")
+                pre_sample = s.get_pre('./sampled/' + BENCHMARK + '/')
                 ent_size_sample = len(E)
                 print("\n##End to sample##\n")
                 print("\nGet SAMPLE PREDICATE dictionary. (First evaluate on small sample KG.)")
