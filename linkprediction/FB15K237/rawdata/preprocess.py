@@ -35,16 +35,22 @@ train_fact = np.array(train_fact_list, dtype=np.int32)
 test_fact = np.array(test_fact_list, dtype=np.int32)
 
 # Save in files.
+with open('./train/Fact.txt', 'w') as f:
+    f.write(str(len(train_fact)) + '\n')
+    for fact in train_fact:
+        f.write(str(fact[0]) + ' ' + str(fact[1]) + ' ' + str(fact[2]) + '\n')
 with open('./test/Fact.txt', 'w') as f:
     f.write(str(len(test_fact)) + '\n')
     for fact in test_fact:
         f.write(str(fact[0]) + ' ' + str(fact[1]) + ' ' + str(fact[2]) + '\n')
 
-with open('./train/Fact.txt', 'w') as f:
-    f.write(str(len(train_fact)) + '\n')
-    for fact in train_fact:
-        f.write(str(fact[0]) + ' ' + str(fact[1]) + ' ' + str(fact[2]) + '\n')
-
+# test: 224 relations' id.
+test_pre = np.unique(test_fact[:, 2])
+print('test predicate num: '+str(len(test_pre)))
+with open('./test/target_pre.txt', 'w') as f:
+    f.write(str(len(test_pre)) + '\n')
+    for p in test_pre:
+        f.write(str(p) + '\n')
 print("Over!")
 
 # print(len(fact_list))
