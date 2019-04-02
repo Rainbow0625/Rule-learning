@@ -68,7 +68,8 @@ def save_rules(Pt, rule_length, new_index_Pt, candidate, pre_sample):
                 title = "Qualify Rule " + str(i) + ": "
             line = title + " " + str(index) + " :[SC, HC] " + degree + " "
             for j in range(rule_length):
-                line = line + str(index[j]) + " " + pre_sample[index[j]][1] + "; "
+                # line = line + str(index[j]) + " " + pre_sample[index[j]][1] + "; "
+                line = line + " " + pre_sample[index[j]][1] + "; "
             line = line + "\n"
             # print(line)
             f.write(line)
@@ -99,7 +100,8 @@ def save_rules(Pt, rule_length, new_index_Pt, candidate, pre_sample):
                 title = "Qualify Rule " + str(i) + ": "
             line = title + " " + str(index) + " :[SC, HC] " + degree + " "
             for j in range(rule_length):
-                line = line + str(index[j]) + " " + pre_sample[index[j]][1] + "; "
+                # line = line + str(index[j]) + " " + pre_sample[index[j]][1] + "; "
+                line = line + " " + pre_sample[index[j]][1] + "; "
             line = line + "\n"
             # print(line)
             fp.write(line)
@@ -114,13 +116,11 @@ def save_rules(Pt, rule_length, new_index_Pt, candidate, pre_sample):
 if __name__ == '__main__':
     begin = time.time()
     print("\nThe benchmark is " + BENCHMARK + ".")
-    predicate_all = s.get_pre(BENCHMARK, filename='./benchmarks/')
+    predicate_all = s.get_pre(filename='./benchmarks/' + BENCHMARK + '/')
     predicate_name = [p[0] for p in predicate_all]
-    facts_all, ent_size_all = s.read_data(BENCHMARK, filename="./benchmarks/")
+    facts_all, ent_size_all = s.read_data(filename="./benchmarks/" + BENCHMARK + '/')
     # facts_all: has a flag to identify its usage.
     print("Total predicates:%d" % len(predicate_all))
-    print("Total entities:%d" % ent_size_all)
-    print("Total facts:%d" % len(facts_all))
     total_time = 0
     # test_Pre_list = np.random.randint(0, predicateSize-1, size=5)
     # test_Pre_list = [0, 3, 52, 102, 163, 12, 27, 47]

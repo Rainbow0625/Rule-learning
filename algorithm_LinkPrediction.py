@@ -8,7 +8,7 @@ import gc
 import time
 import send_process_report_email
 import csv
-import pickle
+import link_prediction as lp
 '''
 import sys
 sys.stdout.write('\r'+str())
@@ -41,7 +41,7 @@ def save_rules(Pt, rule_length, new_index_Pt, candidate, pre_sample):
     # str(model)[15:21]
     R_num = 0
     QR_num = 0
-    with open('./rule/' + BENCHMARK + '/rule_' + str(Pt) + '.txt', 'a+') as f:
+    with open('./linkprediction/' + BENCHMARK + '/rule_' + str(Pt) + '.txt', 'a+') as f:
         f.write(str(new_index_Pt[1]) + "\n")
         f.write("length: %d, num: %d\n" % (rule_length, len(candidate)))
         i = 1
@@ -64,7 +64,8 @@ def save_rules(Pt, rule_length, new_index_Pt, candidate, pre_sample):
                 title = "Qualify Rule " + str(i) + ": "
             line = title + " " + str(index) + " :[SC, HC] " + degree + " "
             for j in range(rule_length):
-                line = line + str(index[j]) + " " + pre_sample[index[j]][1] + "; "
+                # line = line + str(index[j]) + " " + pre_sample[index[j]][1] + "; "
+                line = line + pre_sample[index[j]][1] + "; "
             line = line + "\n"
             # print(line)
             f.write(line)
@@ -78,7 +79,7 @@ def save_rules(Pt, rule_length, new_index_Pt, candidate, pre_sample):
 
     R_num = 0
     QR_num = 0
-    with open('./rule/' + BENCHMARK + '/rule_ade_' + str(Pt) + '.txt', 'a+') as fp:
+    with open('./linkprediction/' + BENCHMARK + '/rule_ade_' + str(Pt) + '.txt', 'a+') as fp:
         fp.write(str(new_index_Pt[1]) + "\n")
         fp.write("length: %d, num: %d\n" % (rule_length, len(rule_ade_list)))
         i = 0
@@ -95,7 +96,8 @@ def save_rules(Pt, rule_length, new_index_Pt, candidate, pre_sample):
                 title = "Qualify Rule " + str(i) + ": "
             line = title + " " + str(index) + " :[SC, HC] " + degree + " "
             for j in range(rule_length):
-                line = line + str(index[j]) + " " + pre_sample[index[j]][1] + "; "
+                # line = line + str(index[j]) + " " + pre_sample[index[j]][1] + "; "
+                line = line + " " + pre_sample[index[j]][1] + "; "
             line = line + "\n"
             # print(line)
             fp.write(line)
@@ -110,13 +112,9 @@ def save_rules(Pt, rule_length, new_index_Pt, candidate, pre_sample):
 if __name__ == '__main__':
     begin = time.time()
     print("\nLink Prediction.\nThe benchmark is " + BENCHMARK + ".")
-    predicate_all = s.get_pre(BENCHMARK, filename='./benchmarks/')
+    predicate_all = s.get_pre(filename='./benchmarks/' + BENCHMARK + '/')
     predicate_name = [p[0] for p in predicate_all]
-    facts_all, ent_size_all = s.read_data(BENCHMARK, filename="./benchmarks/")
-    # facts_all: has a flag to identify its usage.
-    print("Total predicates:%d" % len(predicate_all))
-    print("Total entities:%d" % ent_size_all)
-    print("Total facts:%d" % len(facts_all))
+
     total_time = 0
     # test_Pre_list = np.random.randint(0, predicateSize-1, size=5)
     # test_Pre_list = [0, 3, 52, 102, 163, 12, 27, 47]
@@ -124,11 +122,20 @@ if __name__ == '__main__':
     # test_Pre_list = [16, 32, 98, 314, 500, 480, 160, 45, 90, 121, 531, 285, 580, 613, 380, 289, 485, 282, 1]  # DB 19?
     # test_Pre_list = [6, 8, 13, 24, 35, 29, 32, 22, 18, 34, 16, 1, 25, 11, 0, 4, 27, 28, 30, 3]  # yago
     # test_Pre_list = [15, 49, 58, 84, 135, 177, 31, 22, 220, 325, 99, 56, 187, 364, 146, 345, 180, 151, 42, 114] # wiki
+    predict_fact_num_total = 0
+    predict_Qfact_num_total = 0
+    MRR_total = float(0)
+    Hit_10_total = float(0)
     with open(BENCHMARK + ".csv", "w") as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(
             ["Pt", "len=2", "len=3", "len=4", "Total R num", "Total QR num", "time=2", "time=3", "time=4", "Total time"])
     for Pt in test_Pre_list:
+        # Get different train facts for every pt!
+        facts_all, ent_size_all = s.read_data(filename="./benchmarks/" + BENCHMARK + '/', file_type="train", pt=Pt)
+        # facts_all: has a flag to identify its usage.
+        print("Total predicates:%d" % len(predicate_all))
+
         Pt_start = time.time()
         Pt_i_1 = Pt_start
 
@@ -146,6 +153,7 @@ if __name__ == '__main__':
         P_i_list_new = None
         P_count_new = None
         candidate_of_Pt = []
+        pre_sample_of_Pt = []
         num_li = []
         time_li = []
 
@@ -187,7 +195,8 @@ if __name__ == '__main__':
                                                                                            E, P, F, Pt, predicate_name,
                                                                                            P_i_list, P_count_old)
                 # The predicates in "pre_sample" is the total number written in file.
-                pre_sample = s.get_pre(BENCHMARK, "./sampled/")
+                pre_sample = s.get_pre(filename='./sampled/'+BENCHMARK+'/')
+                pre_sample_of_Pt.append(pre_sample)
                 ent_size_sample = len(E)
                 print("\n##End to sample##\n")
                 print("\nGet SAMPLE PREDICATE dictionary. (First evaluate on small sample KG.)")
@@ -288,12 +297,44 @@ if __name__ == '__main__':
             # ["Pt", "len=2", "len=3", "len=4", "Total num", "time=2", "time=3", "time=4", "Total time"]
 
         # Link prediction.
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        # candidate_of_Pt
+        # pre_sample_of_Pt
+        time_lp_start = time.time()
+        print("Begin to predict %d." % Pt)
+        lp_save_path = './linkprediction/' + BENCHMARK + '/'
+        pre_facts, predict_fact_num, predict_Qfact_num = lp.predict(lp_save_path, Pt, pre_sample_of_Pt, candidate_of_Pt,
+                                                                    facts_all, ent_size_all)
+        predict_fact_num_total += predict_fact_num
+        predict_Qfact_num_total += predict_Qfact_num
+        mid = time.time()
+        print("Predict time: %f" % mid - time_lp_start)
+        print('\n')
+        print("Begin to test %d." % Pt)
+        MRR, Hit_10 = lp.test(lp_save_path, Pt, pre_facts)
+        MRR_total += MRR
+        Hit_10_total += Hit_10
+        mid2 = time.time()
+        print("Test time: %f" % mid2 - mid)
+        lp_time = time.time() - time_lp_start
+        print("\nLink prediction time: %f" % lp_time)
+        hour = int(lp_time / 3600)
+        minute = int((lp_time - hour * 3600) / 60)
+        second = lp_time - hour * 3600 - minute * 60
+        print(str(hour) + " : " + str(minute) + " : " + str(second))
 
-        # After the mining of Pt, facts_all's usage need to be set 0.
-        facts_all = np.delete(facts_all, -1, axis=1)
-        fl = np.zeros(facts_all.shape[0], dtype='int32')
-        facts_all = np.c_[facts_all, fl]
+    # Save predict_fact_num, predict_Qfact_num.
+    predict_fact_num_total /= len(test_Pre_list)
+    predict_Qfact_num_total /= len(test_Pre_list)
+    with open('./linkprediction/' + BENCHMARK + '/' + 'predict' + '.txt', 'a') as f:
+        f.write("predict_fact_avg: "+str(predict_fact_num_total) + '\n')
+        f.write("predict_Qfact_avg: " + str(predict_Qfact_num_total) + '\n')
+
+    # Save MRR, Hit_10 in file.
+    MRR_total /= len(test_Pre_list)
+    Hit_10_total /= len(test_Pre_list)
+    with open('./linkprediction/' + BENCHMARK + '/' + 'test' + '.txt', 'a') as f:
+        f.write("predict_fact_avg: "+str(MRR_total) + '\n')
+        f.write("predict_Qfact_avg: " + str(Hit_10_total) + '\n')
 
     with open('./rule/'+BENCHMARK+'/rule_top' + str(_coocc) + '_maxlen' + str(Max_rule_length) + '.txt', 'a+') as f:
         f.write("\nEmbedding parameter:\n")

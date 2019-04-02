@@ -6,24 +6,32 @@ For the sampling process, RLvLR picked at most 50 neighbours of an entity
 '''
 
 
-def read_data(BENCHMARK, filename):  # index from 0
+def read_data(filename, file_type="", pt=-1):  # index from 0
     # read the Fact.txt: h t r
-    with open(filename + BENCHMARK + '/Fact.txt', 'r') as f:
-        factSize = int(f.readline())
-        facts = np.array([line.strip('\n').split(' ') for line in f.readlines()], dtype='int32')
-        f.close()
-        print("(Before sample, total facts:%d)" % factSize)
-    with open(filename + BENCHMARK + '/entity2id.txt', 'r') as f:
+    if file_type == "":
+        with open(filename + 'Fact.txt', 'r') as f:
+            factSize = int(f.readline())
+            facts = np.array([line.strip('\n').split(' ') for line in f.readlines()], dtype='int32')
+    elif file_type == "train":
+        with open(filename + str(pt) + "/train/" + "Fact.txt", 'r') as f:
+            factSize = int(f.readline())
+            facts = np.array([line.strip('\n').split(' ') for line in f.readlines()], dtype='int32')
+    else:  # file_type == "test"
+        with open(filename + str(pt) + "/test/" + "Fact.txt", 'r') as f:
+            factSize = int(f.readline())
+            facts = np.array([line.strip('\n').split(' ') for line in f.readlines()], dtype='int32')
+    print("Total %s facts:%d" % (file_type, factSize))
+    with open(filename + 'entity2id.txt', 'r') as f:
         entity_size = int(f.readline())
-        f.close()
-        print("(Before sample, total entities:%d)" % entity_size)
+        print("Total %s entities:%d" % (file_type, entity_size))
+    # Add a column to identify usage flag.
     fl = np.zeros(factSize, dtype='int32')
     facts = np.c_[facts, fl]
     return facts, entity_size
 
 
-def get_pre(BENCHMARK, filename):
-    with open(filename + BENCHMARK + "/relation2id.txt") as f:
+def get_pre(filename):
+    with open(filename + "relation2id.txt") as f:
         preSize = int(f.readline())
         pre = []
         for line in f.readlines():
