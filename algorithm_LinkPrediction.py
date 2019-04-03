@@ -302,7 +302,7 @@ if __name__ == '__main__':
         time_lp_start = time.time()
         print("Begin to predict %d." % Pt)
         lp_save_path = './linkprediction/' + BENCHMARK + '/'
-        pre_facts, predict_fact_num, predict_Qfact_num = lp.predict(lp_save_path, Pt, pre_sample_of_Pt, candidate_of_Pt,
+        predict_matrix, predict_fact_num, predict_Qfact_num = lp.predict(lp_save_path, Pt, pre_sample_of_Pt, candidate_of_Pt,
                                                                     facts_all, ent_size_all)
         predict_fact_num_total += predict_fact_num
         predict_Qfact_num_total += predict_Qfact_num
@@ -311,7 +311,7 @@ if __name__ == '__main__':
         print('\n')
         print("Begin to test %d." % Pt)
         test_file_path = './benchmarks/' + BENCHMARK + '/'
-        MRR, Hit_10 = lp.test(test_file_path, Pt, pre_facts)
+        MRR, Hit_10 = lp.test(test_file_path, Pt, predict_matrix)
         MRR_total += MRR
         Hit_10_total += Hit_10
         mid2 = time.time()

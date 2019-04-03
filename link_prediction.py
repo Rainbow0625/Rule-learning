@@ -52,7 +52,7 @@ def predict(lp_save_path, pt, pre_sample_of_Pt, rules, facts, ent_size):
     # fact_dic: key: P_index_old , value: all_fact_list
     # So NOTE that fact_dic ONLY save once for the pre.
     fact_dic = get_fact_dic(pre_sample_of_Pt, facts)
-    print(len(fact_dic))
+    # print(len(fact_dic))
     predict_matrix = sparse.dok_matrix((ent_size, ent_size), dtype=np.int32)
 
     predict_key_by_rule = []
@@ -84,23 +84,28 @@ def predict(lp_save_path, pt, pre_sample_of_Pt, rules, facts, ent_size):
         gc.disable()
     if len(rules) == len(predict_key_by_rule):
         print("Ok, Next step！")
+    '''
+    # We don't timing this step of calculation the CD of predict facts.
     i = 1
-    print("Calculate the CD.")
+    print("Calculate the CD of predict facts.")
+    # Statistic the number of FACT and QFACT.
     for key in predict_matrix.keys():
         sys.stdout.write('\rProgress: %d - %d ' % (i, len(predict_matrix.keys())))
         sys.stdout.flush()
         i += 1
         fact = list(key)
         mid_SC = 1
+        count = 0
         for i_rule in range(len(predict_key_by_rule)):
             if fact in predict_key_by_rule[i_rule]:
                 mid_SC *= (1 - rules[i_rule][2][0])
+                count += 1
         CD = 1 - mid_SC
         if CD >= 0.9:
             predict_Qfact_num += 1
-            pre_facts_list.append([fact, CD, 1])
+            pre_facts_list.append([fact, count, CD, 1])
         else:
-            pre_facts_list.append([fact, CD, 0])
+            pre_facts_list.append([fact, count, CD, 0])
     # Save the fact and CD in file.
     with open(lp_save_path + 'predict_Pt_' + str(pt) + '.txt', 'w') as f:
         for item in pre_facts_list:
@@ -109,29 +114,53 @@ def predict(lp_save_path, pt, pre_sample_of_Pt, rules, facts, ent_size):
         f.write("For Pt: %d, predict Qfact num: %d\n\n" % (pt, predict_Qfact_num))
     print("For Pt: %d, predict fact num: %d" % (pt, predict_fact_num))
     print("For Pt: %d, predict Qfact num: %d" % (pt, predict_Qfact_num))
-    return pre_facts_list, predict_fact_num, predict_Qfact_num
+    '''
+    return predict_matrix, predict_fact_num, predict_Qfact_num
 
 
-def test(lp_save_path, pt, pre_facts_list):
+def test(lp_save_path, pt, predict_matrix):
     mid_Hits_10 = 0
     mid_MRR = 0
     test_facts, _ = s.read_data(filename=lp_save_path, file_type="test", pt=pt)
-    # Rank the predicted facts by CD.
-    pre_facts_list.sort(key=lambda x: x[1], reverse=True)
-    predicted_facts = [item[0] for item in pre_facts_list]
+    # Filter the test head entity for 'predict_matrix'.
+    test_head_entity = test_facts[:, 0]
+    test_entity_dic = {}
+    for key in predict_matrix.keys():
+        if list(key)[0] in test_head_entity:
+            # test_entity_dic -- key: test_head_entity  value:[[tail_entity, count], ...]
+            if list(key)[0] in test_entity_dic.keys():
+                temp_list = test_entity_dic.get(list(key)[0])
+            else:
+                temp_list = []
+            temp_list.append([list(key)[1], predict_matrix[key]])
+            test_entity_dic[list(key)[0]] = temp_list
+    if len(test_entity_dic) == len(test_head_entity):
+        print("Filter successfully.")
+    else:
+        print("NOT equally.")
+
+    # Rank the predicted facts by rule number! Not CD!
+    for head in test_entity_dic.keys():
+        test_entity_dic.get(head).sort(key=lambda x: x[1], reverse=True)
+
+    # Calculate the MRR and Hit@10.
     test_result = []
     for test_fact in test_facts:
         t = [test_fact[0], test_fact[1]]
-        if t in predicted_facts:
-            top = predicted_facts.index(t) + 1
-            mid_MRR += 1 / top
-            Hit = 0
-            if top <= 10:
-                Hit = 1
-                mid_Hits_10 += 1
-            test_result.append([t, top, Hit, 1/top])
-    Hit_10 = mid_Hits_10/len(test_facts)
-    MRR = mid_MRR/len(test_facts)
+        tail_list = [row[0] for row in test_entity_dic.get(test_fact[0])]
+        if tail_list.index(test_fact[1]) is not None:
+            top = tail_list.index([test_fact[1]])+1
+            mid_MRR += 1 / float(top)
+        else:
+            top = -1
+        Hit = 0
+        if top <= 10:
+            Hit = 1
+            mid_Hits_10 += 1
+        test_result.append([t, top, Hit, 1 / float(top)])
+    Hit_10 = mid_Hits_10 / float(len(test_facts))
+    MRR = mid_MRR / len(test_facts)
+
     # Save the results in file.
     with open(lp_save_path + 'test_Pt_' + str(pt) + '.txt', 'w') as f:
         for item in test_result:

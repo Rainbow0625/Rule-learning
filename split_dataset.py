@@ -34,9 +34,12 @@ def get_fact_dic(facts_all, Pts):
 
 
 if __name__ == '__main__':
-    BENCHMARK = "FB15K237"
+    BENCHMARK = "FB75K"
     FILENAME = "./benchmarks/" + BENCHMARK + '/'
-    Pt_list = [0]  # Need to create the file to save samples.
+    # Pt_list = [i for i in range(13)]  # Need to create the file to save samples.
+    Pt_list = [1]
+    print("Split index of predicate:")
+    print(Pt_list)
     facts, ent_size, pre_size = read_data(FILENAME)
     fact_dic = get_fact_dic(facts, Pt_list)
     for pt in fact_dic.keys():
@@ -83,6 +86,6 @@ if __name__ == '__main__':
             # f.write(str(len(rest_ent))+'\n')
         if len(rest_ent) == ent_size:
             print("Entity size is equal.")
-            print("Split data for %d successfully!!! " % pt)
+            print("Split data for %d successfully." % pt)
         else:
-            print("Sorry! Please split %d again!!!" % pt)
+            print("Sorry! Split data for %d, entity size is NOT equal!!!" % pt)
