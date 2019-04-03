@@ -137,7 +137,9 @@ def test(lp_save_path, pt, predict_matrix):
     if len(test_entity_dic) == len(test_head_entity):
         print("Filter successfully.")
     else:
-        print("NOT equally.")
+        print("NOT equally. If dic <= head entity, it's right.")
+        print("dic: %d" % len(test_entity_dic))
+        print("head entity: %d" % len(test_head_entity))
 
     # Rank the predicted facts by rule number! Not CD!
     for head in test_entity_dic.keys():
@@ -146,9 +148,13 @@ def test(lp_save_path, pt, predict_matrix):
     # Calculate the MRR and Hit@10.
     test_result = []
     for test_fact in test_facts:
+        # print(test_fact)
         t = [test_fact[0], test_fact[1]]
-        tail_list = [row[0] for row in test_entity_dic.get(test_fact[0])]
-        if tail_list.index(test_fact[1]) is not None:
+        if test_entity_dic.get(test_fact[0]) is not None:
+            tail_list = [row[0] for row in test_entity_dic.get(test_fact[0])]
+        else:
+            tail_list = []
+        if test_fact[1] in tail_list:
             top = tail_list.index([test_fact[1]])+1
             mid_MRR += 1 / float(top)
         else:
