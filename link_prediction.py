@@ -118,10 +118,19 @@ def predict(lp_save_path, pt, pre_sample_of_Pt, rules, facts, ent_size):
     return predict_matrix, predict_fact_num, predict_Qfact_num
 
 
-def test(lp_save_path, pt, predict_matrix):
+def filter_fb15k237(test_facts, pt):
+    # Delete the other pre in test case.
+    fetch_list = list(np.where(test_facts[:, 2] == pt)[0])
+    test_facts = test_facts[fetch_list]
+    return test_facts
+
+
+def test(BENCHMARK, test_file_path, lp_save_path, pt, predict_matrix):
     mid_Hits_10 = 0
     mid_MRR = 0
-    test_facts, _ = s.read_data(filename=lp_save_path, file_type="test", pt=pt)
+    test_facts, _ = s.read_data(filename=test_file_path, file_type="test", pt=pt)
+    if BENCHMARK == "FB15K237":
+        test_facts = filter_fb15k237(test_facts, pt)
     # Filter the test head entity for 'predict_matrix'.
     test_head_entity = test_facts[:, 0]
     test_entity_dic = {}
@@ -160,7 +169,7 @@ def test(lp_save_path, pt, predict_matrix):
         else:
             top = -1
         Hit = 0
-        if top <= 10:
+        if 0 < top <= 10:
             Hit = 1
             mid_Hits_10 += 1
         test_result.append([t, top, Hit, 1 / float(top)])

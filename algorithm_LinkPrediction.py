@@ -15,11 +15,11 @@ sys.stdout.write('\r'+str())
 sys.stdout.flush()
 '''
 IsUncertain = False
-BENCHMARK = "DB"
-R_minSC = 0.1
-R_minHC = 0.01
-QR_minSC = 0.7
-QR_minHC = 0.01
+BENCHMARK = "FB75K"
+R_minSC = 0.005
+R_minHC = 0.001
+QR_minSC = 0.5
+QR_minHC = 0.001
 DEGREE = [R_minSC, R_minHC, QR_minSC, QR_minHC]
 Max_rule_length = 4  # not include head atom
 _syn = 800
@@ -116,12 +116,21 @@ if __name__ == '__main__':
     predicate_name = [p[0] for p in predicate_all]
 
     total_time = 0
+
     # test_Pre_list = np.random.randint(0, predicateSize-1, size=5)
+    test_Pre_list = []
+    if BENCHMARK == "FB15K237":
+        with open("./benchmarks/" + BENCHMARK + '/237/train/target_pre.txt', 'r') as f:
+            test_pre_num = f.readline()
+            test_Pre_list = [int(line.strip('\n')) for line in f.readlines()]
     # test_Pre_list = [0, 3, 52, 102, 163, 12, 27, 47]
-    test_Pre_list = [0]  # FB15k
+    # test_Pre_list = [0]  # FB15k
+    # test_pre_list = [i for i in range(13)]  # FB75K
     # test_Pre_list = [16, 32, 98, 314, 500, 480, 160, 45, 90, 121, 531, 285, 580, 613, 380, 289, 485, 282, 1]  # DB 19?
     # test_Pre_list = [6, 8, 13, 24, 35, 29, 32, 22, 18, 34, 16, 1, 25, 11, 0, 4, 27, 28, 30, 3]  # yago
     # test_Pre_list = [15, 49, 58, 84, 135, 177, 31, 22, 220, 325, 99, 56, 187, 364, 146, 345, 180, 151, 42, 114] # wiki
+
+
     predict_fact_num_total = 0
     predict_Qfact_num_total = 0
     MRR_total = float(0)
@@ -132,7 +141,10 @@ if __name__ == '__main__':
             ["Pt", "len=2", "len=3", "len=4", "Total R num", "Total QR num", "time=2", "time=3", "time=4", "Total time"])
     for Pt in test_Pre_list:
         # Get different train facts for every pt!
-        facts_all, ent_size_all = s.read_data(filename="./benchmarks/" + BENCHMARK + '/', file_type="train", pt=Pt)
+        if BENCHMARK == "FB15K237":
+            facts_all, ent_size_all = s.read_data(filename="./benchmarks/" + BENCHMARK + '/', file_type="train", pt=237)
+        else:
+            facts_all, ent_size_all = s.read_data(filename="./benchmarks/" + BENCHMARK + '/', file_type="train", pt=Pt)
         # facts_all: has a flag to identify its usage.
         print("Total predicates:%d" % len(predicate_all))
 
@@ -302,8 +314,8 @@ if __name__ == '__main__':
         time_lp_start = time.time()
         print("Begin to predict %d." % Pt)
         lp_save_path = './linkprediction/' + BENCHMARK + '/'
-        predict_matrix, predict_fact_num, predict_Qfact_num = lp.predict(lp_save_path, Pt, pre_sample_of_Pt, candidate_of_Pt,
-                                                                    facts_all, ent_size_all)
+        predict_matrix, predict_fact_num, predict_Qfact_num = lp.predict(lp_save_path, Pt, pre_sample_of_Pt,
+                                                                         candidate_of_Pt, facts_all, ent_size_all)
         predict_fact_num_total += predict_fact_num
         predict_Qfact_num_total += predict_Qfact_num
         mid = time.time()
@@ -311,7 +323,7 @@ if __name__ == '__main__':
         print('\n')
         print("Begin to test %d." % Pt)
         test_file_path = './benchmarks/' + BENCHMARK + '/'
-        MRR, Hit_10 = lp.test(test_file_path, Pt, predict_matrix)
+        MRR, Hit_10 = lp.test(BENCHMARK, test_file_path, lp_save_path, Pt, predict_matrix)
         MRR_total += MRR
         Hit_10_total += Hit_10
         mid2 = time.time()
