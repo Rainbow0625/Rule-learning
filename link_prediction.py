@@ -128,9 +128,11 @@ def filter_fb15k237(test_facts, pt):
 def test(BENCHMARK, test_file_path, lp_save_path, pt, predict_matrix):
     mid_Hits_10 = 0
     mid_MRR = 0
-    test_facts, _ = s.read_data(filename=test_file_path, file_type="test", pt=pt)
     if BENCHMARK == "FB15K237":
+        test_facts, _ = s.read_data(filename=test_file_path, file_type="test", pt=237)
         test_facts = filter_fb15k237(test_facts, pt)
+    else:
+        test_facts, _ = s.read_data(filename=test_file_path, file_type="test", pt=pt)
     # Filter the test head entity for 'predict_matrix'.
     test_head_entity = test_facts[:, 0]
     test_entity_dic = {}

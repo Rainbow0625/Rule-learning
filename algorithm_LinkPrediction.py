@@ -346,8 +346,8 @@ if __name__ == '__main__':
     MRR_total /= len(test_Pre_list)
     Hit_10_total /= len(test_Pre_list)
     with open('./linkprediction/' + BENCHMARK + '/' + 'test' + '.txt', 'a') as f:
-        f.write("predict_fact_avg: "+str(MRR_total) + '\n')
-        f.write("predict_Qfact_avg: " + str(Hit_10_total) + '\n')
+        f.write("MRR_total: "+str(MRR_total) + '\n')
+        f.write("Hit_10_total: " + str(Hit_10_total) + '\n')
 
     with open('./rule/'+BENCHMARK+'/rule_top' + str(_coocc) + '_maxlen' + str(Max_rule_length) + '.txt', 'a+') as f:
         f.write("\nEmbedding parameter:\n")
