@@ -1,5 +1,7 @@
+import shutil
 import numpy as np
 import random
+import os
 # split the Pt's facts to 30%(up to 5K facts) and 70%.
 # It is necessary to ensure that each training set contains all the entities, otherwise it is not easy to calculate.
 
@@ -84,8 +86,9 @@ if __name__ == '__main__':
             f.write(str(train_num) + '\n' + content)
         # with open("./benchmarks/" + BENCHMARK + '/' + str(pt) + "/train/entity2id.txt", 'w') as f:
             # f.write(str(len(rest_ent))+'\n')
-        if len(rest_ent) == ent_size:
-            print("Entity size is equal.")
-            print("Split data for %d successfully." % pt)
+        if test_num > 100:
+            print("Split data for %d, test_num: %d" % (pt, test_num))
+            Pt_list.append(pt)
         else:
-            print("Sorry! Split data for %d, entity size is NOT equal!!!" % pt)
+            print("Split data for %d, test_num: %d, too small!" % (pt, test_num))
+            shutil.rmtree("./benchmarks/" + BENCHMARK + '/' + str(pt))  # Delete all the file tree.
