@@ -133,8 +133,8 @@ if __name__ == '__main__':
 
     predict_fact_num_total = 0
     predict_Qfact_num_total = 0
-    MRR_total = float(0)
-    Hit_10_total = float(0)
+    MRR_total = []
+    Hit_10_total = []
     with open(BENCHMARK + ".csv", "w") as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(
@@ -324,8 +324,8 @@ if __name__ == '__main__':
         print("Begin to test %d." % Pt)
         test_file_path = './benchmarks/' + BENCHMARK + '/'
         MRR, Hit_10 = lp.test(BENCHMARK, test_file_path, lp_save_path, Pt, predict_matrix)
-        MRR_total += MRR
-        Hit_10_total += Hit_10
+        MRR_total.append([Pt, MRR]) 
+        Hit_10_total.append([Pt, Hit_10]) 
         mid2 = time.time()
         print("Test time: %f" % (mid2 - mid))
         lp_time = time.time() - time_lp_start
@@ -343,11 +343,16 @@ if __name__ == '__main__':
         f.write("predict_Qfact_avg: " + str(predict_Qfact_num_total) + '\n')
 
     # Save MRR, Hit_10 in file.
-    MRR_total /= len(test_Pre_list)
-    Hit_10_total /= len(test_Pre_list)
     with open('./linkprediction/' + BENCHMARK + '/' + 'test' + '.txt', 'a') as f:
-        f.write("MRR_total: "+str(MRR_total) + '\n')
-        f.write("Hit_10_total: " + str(Hit_10_total) + '\n')
+        f.write("MRR_total: %d\n" % len(MRR_total))
+        for mrr in MRR_total:
+            f.write("%d, %f\n" % (mrr[0], mrr[1]))
+        f.write("AVG: %f\n" % np.mean([mrr[1] for mrr in MRR_total]))
+        f.write("\n")
+        f.write("Hit_10_total: %d\n" % len(Hit_10_total))
+        for hit10 in Hit_10_total:
+            f.write("%d, %f\n" % (hit10[0], hit10[1]))
+        f.write("AVG: %f\n" % np.mean([hit10[1] for hit10 in Hit_10_total]))
 
     with open('./rule/'+BENCHMARK+'/rule_top' + str(_coocc) + '_maxlen' + str(Max_rule_length) + '.txt', 'a+') as f:
         f.write("\nEmbedding parameter:\n")
